@@ -6,7 +6,7 @@ export function Card({ className, ...props }: React.ComponentProps<"section">) {
 
 export function CardHeader({ title, meta, action, className, id }: { title: React.ReactNode; meta?: React.ReactNode; action?: React.ReactNode; className?: string; id?: string }) {
   return (
-    <header className={cn("flex min-h-12 items-center justify-between gap-3 px-5 pt-4 pb-3", className)}>
+    <header className={cn("flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-5 pt-4 pb-3", className)}>
       <div className="min-w-0">
         <h2 id={id} className="text-sm font-semibold text-fg">{title}</h2>
         {meta && <p className="mt-0.5 text-small text-fg-3">{meta}</p>}

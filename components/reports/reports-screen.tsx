@@ -81,11 +81,12 @@ function Reports() {
         {hostel.months.map((m) => <button key={m} role="tab" aria-selected={month === m} onClick={() => setMonth(m)} className={cn("h-8 shrink-0 rounded-md px-3 text-small font-medium", month === m ? "bg-surface text-fg shadow-sm ring-1 ring-line" : "text-fg-2 hover:bg-surface-2 hover:text-fg")}>{f.month(m)}</button>)}
       </div>
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
-        <div className="grid gap-4 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
           <Card className="print-area xl:col-span-3">
             <CardHeader title={t("pnlTitle", { month: f.month(month) })} meta={month === demo.currentMonth ? t("pnlMetaMtd") : t("pnlMeta")} />
             {loading ? <div className="space-y-2 px-5 pb-5">{Array.from({ length: 12 }).map((_, i) => <Sk key={i} className="h-6" />)}</div> : (
-              <table className="w-full text-sm">
+              <div className="scrollbar-thin relative overflow-x-auto">
+              <table className="w-full min-w-[520px] text-sm">
                 <thead><tr className="border-y border-line text-xs text-fg-2"><th className="py-2 pl-5 text-left font-medium" /><th className="px-3 text-right font-medium">{f.monthShort(month)}</th><th className="px-3 text-right font-medium">{hasPrev ? f.monthShort(prevMonth(month)) : "—"}</th><th className="py-2 pr-5 pl-3 text-right font-medium">{t("change")}</th></tr></thead>
                 <tbody>
                   {rows.map((r) => {
@@ -104,6 +105,7 @@ function Reports() {
                   <tr><td colSpan={4} className="px-5 pt-3 pb-4 text-xs text-fg-3">{t("margin", { margin: f.pct(cur.margin), pending: f.inr(sum.pending), brand: brand.name })}</td></tr>
                 </tbody>
               </table>
+              </div>
             )}
           </Card>
           <div className="space-y-4 xl:col-span-2">

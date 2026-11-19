@@ -42,7 +42,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </Sheet>
       <div className={cn("flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-[cubic-bezier(.2,0,0,1)]", waOpen && "2xl:pr-[396px]")}>
         <TopBar onMenu={() => setMenu(true)} />
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:pt-8">
           {children}
         </main>
       </div>

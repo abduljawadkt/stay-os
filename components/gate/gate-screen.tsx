@@ -131,7 +131,7 @@ export function GateScreen() {
               <Card>
                 <CardHeader title={t("leaves.title")} meta={t("leaves.meta")} />
                 {leaves.length === 0 ? <EmptyState icon={CalendarClock} title={t("leaves.empty")} /> : (
-                  <div className="scrollbar-thin overflow-x-auto">
+                  <div className="scrollbar-thin relative overflow-x-auto">
                     <table className="w-full min-w-[860px] text-sm">
                       <thead><tr className="border-y border-line text-left text-xs text-fg-2">
                         <th className="py-2.5 pr-3 pl-5 font-medium">{t("leaves.resident")}</th><th className="px-3 font-medium">{t("leaves.when")}</th>
@@ -185,7 +185,7 @@ export function GateScreen() {
               <Card>
                 <CardHeader title={t("visitors.title")} meta={t("visitors.meta", { count: visitors.filter((v) => !v.outAt).length })} />
                 {visitors.length === 0 ? <EmptyState icon={Users} title={t("visitors.empty")} /> : (
-                  <div className="scrollbar-thin overflow-x-auto">
+                  <div className="scrollbar-thin relative overflow-x-auto">
                     <table className="w-full min-w-[860px] text-sm">
                       <thead><tr className="border-y border-line text-left text-xs text-fg-2">
                         <th className="py-2.5 pr-3 pl-5 font-medium">{t("visitors.visitor")}</th><th className="px-3 font-medium">{t("visitors.visiting")}</th>
@@ -246,7 +246,7 @@ function VisitorDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>{t("title")}</DialogTitle><DialogDescription>{t("body")}</DialogDescription></DialogHeader>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="v-name">{t("name")}</Label><Input id="v-name" value={name} onChange={(e) => { setName(e.target.value); setErr(null); }} /></div>
           <div className="grid gap-1.5"><Label htmlFor="v-phone">{t("phone")}</Label><Input id="v-phone" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="+91 98470 12345" /></div>
           <div className="grid gap-1.5"><Label>{t("relation")}</Label>

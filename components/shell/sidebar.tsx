@@ -48,12 +48,12 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
                         aria-current={active ? "page" : undefined}
                         data-tour={`nav-${i.key}`}
                         className={cn(
-                          "flex h-8 items-center gap-2.5 rounded-sm border px-2 text-sm font-medium transition-colors duration-[120ms]",
+                          "flex min-h-8 items-center gap-2.5 rounded-sm border px-2 py-1 text-sm leading-tight font-medium transition-colors duration-[120ms]",
                           active ? "border-line bg-surface text-fg shadow-sm" : "border-transparent text-fg-2 hover:bg-surface-2 hover:text-fg"
                         )}
                       >
                         <i.icon className={cn("size-4", active ? "text-brand-text" : "text-fg-3")} aria-hidden />
-                        <span className="flex-1 truncate">{t(i.key)}</span>
+                        <span className="flex-1">{t(i.key)}</span>
                         {counts[i.key] ? (
                           <span className={cn("rounded-full px-1.5 text-xs leading-5 tnum", i.key === "rent" ? "bg-danger-tint text-danger-fg" : "bg-surface-3 text-fg-2")}>{counts[i.key]}</span>
                         ) : null}
@@ -71,7 +71,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
           <span className="grid size-8 place-items-center rounded-md bg-brand-tint text-xs font-semibold text-brand-tint-fg">AN</span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-fg">{hostel.name}</p>
-            <p className="truncate text-xs text-fg-3 tnum">{t("hostelMeta", { beds: 300, occupied: hydrated ? occupied : 260 })}</p>
+            <p className="text-xs text-fg-3 tnum">{t("hostelMeta", { beds: 300, occupied: hydrated ? occupied : 260 })}</p>
           </div>
         </div>
         <div className="mt-1 flex items-center gap-2.5 rounded-md px-2 py-1.5">

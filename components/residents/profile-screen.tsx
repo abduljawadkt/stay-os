@@ -106,7 +106,7 @@ export function ProfileScreen() {
             </TabsList>
 
             <TabsContent value="overview">
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                   <CardHeader title={t("details")} />
                   <dl className="grid gap-x-8 px-5 pb-5 sm:grid-cols-2">
@@ -164,7 +164,7 @@ export function ProfileScreen() {
             </TabsContent>
 
             <TabsContent value="kyc">
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-1">
                   <div className="p-5">
                     <div className="flex items-center gap-3">
@@ -218,7 +218,7 @@ export function ProfileScreen() {
                 <Stat label={t("pay.monthly")} value={f.inr(room.rent + (r.messPlan ? hostel.messFee : 0))} />
               </div>
               <Card>
-                <div className="scrollbar-thin overflow-x-auto">
+                <div className="scrollbar-thin relative overflow-x-auto">
                   <table className="w-full min-w-[720px] text-sm">
                     <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                       <th className="py-2.5 pr-3 pl-5 font-medium">{t("pay.month")}</th><th className="px-3 font-medium">{t("pay.invoice")}</th>
@@ -247,7 +247,7 @@ export function ProfileScreen() {
             </TabsContent>
 
             <TabsContent value="inout">
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                   <CardHeader title={t("gate.title")} meta={t("gate.meta")} />
                   {myGate.length === 0 ? <EmptyState icon={LogIn} title={t("gate.empty")} /> : (

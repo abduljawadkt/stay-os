@@ -67,7 +67,7 @@ export function MessScreen() {
       />
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <>
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
             <Card className="xl:col-span-2" data-tour="headcount">
               <CardHeader title={t("headcount.title", { date: f.weekday(today) })} meta={t("headcount.meta")} />
               <div className="grid grid-cols-2 gap-px overflow-hidden border-t border-line bg-line md:grid-cols-4">
@@ -145,7 +145,7 @@ export function MessScreen() {
             </TabsContent>
 
             <TabsContent value="calendar">
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                   <CardHeader title={f.month(month)} meta={t("cal.meta")} />
                   <MonthGrid month={month} today={today} selected={date} onSelect={setDate} optOuts={optOuts} />
@@ -162,7 +162,7 @@ export function MessScreen() {
               <Card>
                 <CardHeader title={t("rebates.title")} meta={t("rebates.rule", { amount: f.inr(messMenu.rebatePerDay), days: messMenu.rebateMinDays })} />
                 {rb.length === 0 ? <EmptyState icon={PiggyBank} title={t("rebates.empty")} /> : (
-                  <div className="scrollbar-thin overflow-x-auto">
+                  <div className="scrollbar-thin relative overflow-x-auto">
                     <table className="w-full min-w-[640px] text-sm">
                       <thead><tr className="border-y border-line text-left text-xs text-fg-2">
                         <th className="py-2.5 pr-3 pl-5 font-medium">{t("rebates.resident")}</th><th className="px-3 font-medium">{t("rebates.away")}</th>

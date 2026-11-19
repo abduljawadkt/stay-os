@@ -67,7 +67,7 @@ function Expenses() {
       </div>
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <>
-          <div className="grid gap-4 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
             <Card className="xl:col-span-2">
               <CardHeader title={t("byCategory")} meta={t("byCategoryMeta")} />
               <div className="flex flex-col items-center gap-4 px-5 pb-5 sm:flex-row">
@@ -127,7 +127,7 @@ function Expenses() {
               </Select>
             </div>
             {loading ? <TableSkeleton rows={8} cols={5} /> : list.length === 0 ? <EmptyState icon={ReceiptText} title={t("empty")} body={t("emptyBody")} action={<Button variant="secondary" onClick={() => setAddOpen(true)}><Plus /> {t("add")}</Button>} /> : (
-              <div className="scrollbar-thin overflow-x-auto">
+              <div className="scrollbar-thin relative overflow-x-auto">
                 <table className="w-full min-w-[820px] text-sm">
                   <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                     <th className="py-2.5 pr-3 pl-5 font-medium">{t("col.date")}</th><th className="px-3 font-medium">{t("col.vendor")}</th><th className="px-3 font-medium">{t("col.category")}</th>

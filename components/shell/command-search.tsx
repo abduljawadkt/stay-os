@@ -10,8 +10,9 @@ import { useDemo } from "@/lib/store";
 import { rooms } from "@/data";
 import { NAV } from "./nav";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-export function CommandSearch({ className }: { className?: string }) {
+export function CommandSearch({ className, compact = false }: { className?: string; compact?: boolean }) {
   const t = useTranslations("shell");
   const tn = useTranslations("nav");
   const tr = useTranslations("roomType");
@@ -52,6 +53,9 @@ export function CommandSearch({ className }: { className?: string }) {
 
   return (
     <>
+      {compact ? (
+        <Button variant="quiet" size="icon" onClick={() => setOpen(true)} aria-label={t("search")} className={className}><Search /></Button>
+      ) : (
       <button
         onClick={() => setOpen(true)}
         className={cn("flex h-8 w-full max-w-72 items-center gap-2 rounded-md border border-line bg-surface px-2.5 text-small text-fg-3 transition-colors hover:border-line-strong", className)}
@@ -61,6 +65,7 @@ export function CommandSearch({ className }: { className?: string }) {
         <span className="flex-1 truncate text-left">{t("searchPlaceholder")}</span>
         <kbd className="hidden rounded-xs border border-line bg-surface-2 px-1.5 font-mono text-[11px] text-fg-3 sm:inline">⌘K</kbd>
       </button>
+      )}
       <CommandDialog open={open} onOpenChange={setOpen} title={t("search")} description={t("searchPlaceholder")}>
         <CommandInput placeholder={t("searchPlaceholder")} value={q} onValueChange={setQ} />
         <CommandList className="max-h-[420px]">

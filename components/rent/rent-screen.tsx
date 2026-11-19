@@ -183,7 +183,7 @@ export function RentScreen() {
               <EmptyState icon={filter === "overdue" ? CheckCircle2 : SearchX} title={filter === "overdue" ? t("empty.overdueTitle", { month: f.month(month) }) : t("empty.title")} body={filter === "overdue" ? t("empty.overdueBody") : t("empty.body")} />
             ) : (
               <>
-                <div className="scrollbar-thin overflow-x-auto">
+                <div className="scrollbar-thin relative overflow-x-auto">
                   <table className="w-full min-w-[900px] text-sm">
                     <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                       <th className="py-2.5 pr-3 pl-5 font-medium">{t("col.resident")}</th>

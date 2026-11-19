@@ -127,7 +127,7 @@ export function ResidentsScreen() {
           <EmptyState icon={SearchX} title={q ? t("emptyTitle", { q }) : t("emptyFilter")} body={t("emptyBody")} action={<Button variant="secondary" onClick={() => { setQ(""); setFilter("all"); setBlock("all"); }}>{t("clear")}</Button>} />
         ) : (
           <>
-            <div className="scrollbar-thin overflow-x-auto">
+            <div className="scrollbar-thin relative overflow-x-auto">
               <table className="w-full min-w-[860px] text-sm">
                 <thead className="sticky top-0 bg-surface">
                   <tr className="border-b border-line text-left text-xs font-medium text-fg-2">

@@ -8,12 +8,22 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 const notoMl = Noto_Sans_Malayalam({ subsets: ["malayalam"], variable: "--font-ml", display: "swap" });
 
+const site = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(site),
   title: { default: `${brand.name} · Al Noor Residency`, template: `%s · ${brand.name}` },
   description: `${brand.name} runs rent, rooms, mess, complaints and gate passes for Al Noor Residency, Calicut.`,
   applicationName: brand.name,
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "default" },
   icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
+  openGraph: {
+    title: `${brand.name} · Hostel operations, on WhatsApp`,
+    description: "Rent by UPI, WhatsApp reminders, rooms, mess, complaints and gate passes, in English and Malayalam. Live demo for Al Noor Residency, Calicut.",
+    images: [{ url: "/og.jpg", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", images: ["/og.jpg"] },
 };
 
 export const viewport: Viewport = {

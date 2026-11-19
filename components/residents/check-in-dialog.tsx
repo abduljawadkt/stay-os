@@ -126,7 +126,7 @@ export function CheckInDialog() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={step} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}>
               {step === 0 && (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Badge variant="brand" className="sm:col-span-2">{t("prefilled")}</Badge>
                   <Field id="ci-name" label={t("fields.name")} error={errors.name} className="sm:col-span-2">
                     <Input id="ci-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-invalid={!!errors.name} autoComplete="off" />

@@ -81,7 +81,7 @@ export function HomeScreen() {
         <Card><ErrorState what={t("what")} onRetry={retry} /></Card>
       ) : (
         <>
-          <div data-tour="kpis" className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div data-tour="kpis" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => <KpiSkeleton key={i} />)
             ) : owner ? (

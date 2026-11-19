@@ -96,9 +96,9 @@ export function ComplaintsScreen() {
             {CATS.map((c) => <SelectItem key={c} value={c}>{tc(c)}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div role="tablist" aria-label={t("channel")} className="flex gap-1 rounded-md bg-surface-2 p-0.5">
+        <div role="tablist" aria-label={t("channel")} className="no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-md bg-surface-2 p-0.5">
           {(["all", "whatsapp", "app", "walk_in"] as const).map((k) => (
-            <button key={k} role="tab" aria-selected={channel === k} onClick={() => setChannel(k)} className={cn("h-7 rounded-sm px-2.5 text-small font-medium transition-colors", channel === k ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2 hover:text-fg")}>
+            <button key={k} role="tab" aria-selected={channel === k} onClick={() => setChannel(k)} className={cn("h-7 shrink-0 rounded-sm px-2.5 text-small font-medium whitespace-nowrap transition-colors", channel === k ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2 hover:text-fg")}>
               {k === "all" ? t("allChannels") : tch(k)}
             </button>
           ))}
@@ -107,7 +107,7 @@ export function ComplaintsScreen() {
 
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <DndContext sensors={sensors} onDragStart={(e) => setDragId(String(e.active.id))} onDragEnd={onDragEnd} onDragCancel={() => setDragId(null)}>
-          <div className="grid gap-4 lg:grid-cols-3" data-tour="kanban">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3" data-tour="kanban">
             {COLUMNS.map((col) => {
               const items = visible.filter((c) => c.status === col).sort((a, b) => (col === "resolved" ? (b.resolvedAt ?? "").localeCompare(a.resolvedAt ?? "") : sla(b, now).ratio - sla(a, now).ratio));
               return <Column key={col} status={col} items={items} loading={loading} />;

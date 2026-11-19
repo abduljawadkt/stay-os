@@ -21,19 +21,19 @@ export function KpiCard({
 }) {
   const good = delta === undefined ? true : goodWhen === "up" ? delta >= 0 : delta <= 0;
   return (
-    <div data-tour={`kpi-${id}`} className={cn("flex min-w-0 flex-col rounded-lg border border-line bg-surface p-5", className)}>
+    <div data-tour={`kpi-${id}`} className={cn("flex min-w-0 flex-col rounded-lg border border-line bg-surface p-4 sm:p-5", className)}>
       <div className="flex items-center gap-1.5 text-small font-medium text-fg-2">
         <Icon className="size-4 text-fg-3" aria-hidden />
-        <span className="truncate">{label}</span>
+        <span className="leading-tight">{label}</span>
       </div>
       <div className="mt-2 flex items-end justify-between gap-2">
-        <CountUp id={`kpi-${id}`} value={value} format={format} className="text-kpi font-semibold tracking-[-0.02em] text-fg tnum" />
-        {spark && <Sparkline data={spark} />}
+        <CountUp id={`kpi-${id}`} value={value} format={format} className="text-[24px] leading-8 font-semibold tracking-[-0.02em] text-fg tnum sm:text-kpi" />
+        {spark && <span className="hidden sm:block"><Sparkline data={spark} /></span>}
       </div>
       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
         {sub && <span className="text-xs text-fg-3 tnum">{sub}</span>}
         {delta !== undefined && deltaLabel && (
-          <span className={cn("inline-flex h-5 items-center gap-0.5 rounded-full px-1.5 text-xs font-medium tnum", good ? "bg-success-tint text-success-fg" : "bg-danger-tint text-danger-fg")}>
+          <span className={cn("inline-flex min-h-5 items-center gap-0.5 rounded-full px-1.5 py-px text-xs leading-tight font-medium tnum", good ? "bg-success-tint text-success-fg" : "bg-danger-tint text-danger-fg")}>
             {delta >= 0 ? <ArrowUpRight className="size-3" aria-hidden /> : <ArrowDownRight className="size-3" aria-hidden />}
             {deltaLabel}
           </span>

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Clock, CloudOff, FlaskConical, IndianRupee, MessageCircle, Play, QrCode, RotateCcw } from "lucide-react";
+import { Clock, CloudOff, FlaskConical, IndianRupee, MessageCircle, Moon, Play, QrCode, RotateCcw, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -26,6 +27,7 @@ export function DemoMenu() {
   const reset = useDemo((s) => s.reset);
   const openWhatsApp = useDemo((s) => s.openWhatsApp);
   const start = useTour((s) => s.start);
+  const { resolvedTheme, setTheme } = useTheme();
   return (
     <>
       <DropdownMenu>
@@ -40,6 +42,9 @@ export function DemoMenu() {
           </DropdownMenuLabel>
           <DropdownMenuItem onSelect={() => start()}>
             <Play /> {t("guidedDemo")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="sm:hidden">
+            {resolvedTheme === "dark" ? <Sun /> : <Moon />} {resolvedTheme === "dark" ? t("lightMode") : t("darkMode")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => simulatePayment()}>
@@ -82,12 +87,12 @@ export function DemoMenu() {
   );
 }
 
-export function GuidedDemoButton({ className }: { className?: string }) {
+export function GuidedDemoButton({ className, iconOnly = false }: { className?: string; iconOnly?: boolean }) {
   const t = useTranslations("shell");
   const start = useTour((s) => s.start);
   return (
-    <Button variant="secondary" onClick={start} className={className} data-tour="guided-demo">
-      <Play className="fill-current !size-3" /> {t("guidedDemo")}
+    <Button variant="secondary" size={iconOnly ? "icon" : "default"} onClick={start} className={className} data-tour={iconOnly ? undefined : "guided-demo"} aria-label={iconOnly ? t("guidedDemo") : undefined}>
+      <Play className="fill-current !size-3" /> {!iconOnly && t("guidedDemo")}
     </Button>
   );
 }
