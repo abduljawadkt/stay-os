@@ -1,0 +1,44 @@
+{
+  "roles": { "label": "കാഴ്ച", "owner": "ഉടമ", "warden": "വാർഡൻ", "resident": "റസിഡന്റ്", "parent": "രക്ഷിതാവ്" },
+  "shell": {
+    "home": "ഡാഷ്ബോർഡിലേക്ക്", "search": "തിരയുക", "searchPlaceholder": "താമസക്കാർ, മുറികൾ, പേജുകൾ തിരയുക…",
+    "noResults": "ഒന്നും കണ്ടെത്തിയില്ല. പേര്, B-204 പോലുള്ള മുറി നമ്പർ, അല്ലെങ്കിൽ ഫോൺ നമ്പർ നൽകി നോക്കൂ.", "residents": "താമസക്കാർ", "rooms": "മുറികൾ", "pages": "പേജുകൾ",
+    "language": "ഭാഷ", "darkMode": "ഡാർക്ക് മോഡിലേക്ക് മാറുക", "lightMode": "ലൈറ്റ് മോഡിലേക്ക് മാറുക", "whatsapp": "വാട്സ്ആപ്പ്",
+    "demoMenu": "ഡെമോ നിയന്ത്രണങ്ങൾ", "demoClock": "ഡെമോ സമയം", "guidedDemo": "ഗൈഡഡ് ഡെമോ",
+    "simulatePayment": "UPI പേയ്‌മെന്റ് സിമുലേറ്റ് ചെയ്യുക", "simulateComplaint": "വാട്സ്ആപ്പ് പരാതി സിമുലേറ്റ് ചെയ്യുക", "simulateScan": "ഗേറ്റ് QR സ്കാൻ സിമുലേറ്റ് ചെയ്യുക", "simulateOffline": "ഓഫ്‌ലൈൻ സിമുലേറ്റ് ചെയ്യുക",
+    "resetDemo": "ഡെമോ ഡാറ്റ പുനഃസജ്ജമാക്കുക", "resetTitle": "ഡെമോ പുനഃസജ്ജമാക്കണോ?", "resetBody": "ഈ സെഷനിലെ എല്ലാ മാറ്റങ്ങളും മായും. ഹോസ്റ്റൽ നവംബർ 27 വെള്ളിയാഴ്ച രാവിലെ 10:24-ലേക്ക് തിരികെ പോകും.",
+    "resetConfirm": "പുനഃസജ്ജമാക്കുക", "cancel": "റദ്ദാക്കുക", "openMenu": "മെനു തുറക്കുക", "menu": "നാവിഗേഷൻ", "skip": "ഉള്ളടക്കത്തിലേക്ക് പോകുക"
+  },
+  "nav": {
+    "label": "പ്രധാനം", "home": "ഹോം", "rooms": "മുറികളും കിടക്കകളും", "residents": "താമസക്കാർ", "rent": "വാടകയും ബില്ലുകളും", "mess": "മെസ്സ്", "complaints": "പരാതികൾ",
+    "gate": "ഗേറ്റ് പാസും ഹാജരും", "expenses": "ചെലവുകൾ", "staff": "ജീവനക്കാർ", "reports": "റിപ്പോർട്ടുകൾ",
+    "groups": { "operations": "പ്രവർത്തനം", "money": "പണം", "team": "ടീം" },
+    "hostelMeta": "{beds} കിടക്കകളിൽ {occupied} എണ്ണത്തിൽ താമസം", "ownerTitle": "ഉടമ", "wardenTitle": "ചീഫ് വാർഡൻ"
+  },
+  "states": { "errorTitle": "{what} ലോഡ് ചെയ്യാനായില്ല", "errorBody": "കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.", "retry": "വീണ്ടും ശ്രമിക്കുക", "loading": "ലോഡ് ചെയ്യുന്നു" },
+  "invoiceState": { "paid": "അടച്ചു", "overdue": "{days} ദിവസം വൈകി", "due_today": "ഇന്ന് അടയ്ക്കണം", "due": "{days} ദിവസം ബാക്കി" },
+  "kyc": { "verified": "സ്ഥിരീകരിച്ചു", "pending": "KYC ബാക്കി", "manual": "ഓഫ്‌ലൈൻ KYC" },
+  "police": { "approved": "അംഗീകരിച്ചു", "submitted": "സമർപ്പിച്ചു", "pending": "സമർപ്പിച്ചിട്ടില്ല" },
+  "channel": { "whatsapp": "വാട്സ്ആപ്പ്", "app": "ആപ്പ്", "walk_in": "നേരിട്ട്" },
+  "leaveStatus": { "awaiting_parent": "രക്ഷിതാവിന്റെ മറുപടി കാത്ത്", "approved": "അംഗീകരിച്ചു", "rejected": "നിരസിച്ചു", "cancelled": "റദ്ദാക്കി" },
+  "roomType": { "single": "സിംഗിൾ", "double": "ഡബിൾ", "triple": "ട്രിപ്പിൾ", "six": "6 കിടക്ക" },
+  "meals": { "breakfast": "പ്രഭാതഭക്ഷണം", "lunch": "ഉച്ചഭക്ഷണം", "snacks": "ചായ, പലഹാരം", "dinner": "അത്താഴം" },
+  "bedStatus": { "occupied": "താമസമുണ്ട്", "vacant": "ഒഴിവ്", "reserved": "ബുക്ക് ചെയ്തത്", "maintenance": "അറ്റകുറ്റപ്പണി" },
+  "blockGender": { "M": "പുരുഷന്മാർ", "F": "സ്ത്രീകൾ" },
+  "category": { "electrical": "ഇലക്ട്രിക്കൽ", "plumbing": "പ്ലംബിംഗ്", "wifi": "വൈ-ഫൈ", "housekeeping": "ശുചീകരണം", "mess": "മെസ്സ്", "furniture": "ഫർണിച്ചർ", "other": "മറ്റുള്ളവ" },
+  "expenseCategory": { "food": "ഭക്ഷണം, പലവ്യഞ്ജനം", "electricity": "വൈദ്യുതി", "water": "വെള്ളം", "salaries": "ശമ്പളം", "maintenance": "അറ്റകുറ്റപ്പണി", "internet": "ഇന്റർനെറ്റ്" },
+  "method": { "upi": "UPI", "bank": "ബാങ്ക് ട്രാൻസ്ഫർ", "cash": "കാഷ്" },
+  "relation": { "Father": "പിതാവ്", "Mother": "മാതാവ്", "Guardian": "രക്ഷാകർത്താവ്" },
+  "occupation": { "student": "വിദ്യാർത്ഥി", "professional": "ജോലി ചെയ്യുന്നവർ" },
+  "toasts": {
+    "payment": "{name}-ൽ നിന്ന് {amount} ലഭിച്ചു", "paymentSub": "{method} · {invoice}-മായി സ്വയം ഒത്തുനോക്കി", "view": "കാണുക",
+    "invoicesRaised": "{month}-ലെ {count} ബില്ലുകൾ തയ്യാറാക്കി", "invoicesRaisedSub": "{amount} · UPI ലിങ്കുകളോടെ വാട്സ്ആപ്പിൽ അയച്ചു",
+    "remindersSent": "{count} ഓർമ്മപ്പെടുത്തലുകൾ വാട്സ്ആപ്പിൽ അയച്ചു", "remindersSentSub": "ഓരോന്നിലും UPI ലിങ്കുണ്ട്. പണം വരുമ്പോൾ സ്വയം രേഖപ്പെടുത്തും.",
+    "bedMoved": "{name} {bed}-ലേക്ക് മാറി", "checkin": "{name} {bed}-ൽ ചെക്ക്-ഇൻ ചെയ്തു",
+    "complaintWhatsApp": "വാട്സ്ആപ്പിൽ പുതിയ പരാതി · {id}", "complaintLogged": "പരാതി {id} രേഖപ്പെടുത്തി", "complaintResolved": "{id} പരിഹരിച്ചു", "complaintStarted": "{id} പണി തുടങ്ങി",
+    "residentUpdated": "താമസക്കാരെ വാട്സ്ആപ്പിൽ അറിയിച്ചു", "mealSkipped": "{date}-ലെ {meal} ഒഴിവാക്കി", "mealRestored": "{date}-ലെ {meal} വീണ്ടും ചേർത്തു", "headcountUpdated": "അടുക്കളയിലെ എണ്ണം പുതുക്കി",
+    "leaveApproved": "രക്ഷിതാവ് ലീവ് അംഗീകരിച്ചു", "leaveRejected": "രക്ഷിതാവ് ലീവ് നിരസിച്ചു", "leaveSub": "താമസക്കാരെയും വാർഡനെയും അറിയിച്ചു",
+    "leaveRequested": "ലീവ് അപേക്ഷ രക്ഷിതാവിന് അയച്ചു", "leaveRequestedSub": "വാട്സ്ആപ്പിലോ ആപ്പിലോ അംഗീകരിക്കാം",
+    "expenseSaved": "ചെലവ് സേവ് ചെയ്തു", "gateIn": "{name} അകത്ത് വന്നു", "gateOut": "{name} പുറത്ത് പോയി", "reset": "ഡെമോ ഡാറ്റ പുനഃസജ്ജമാക്കി"
+  }
+}

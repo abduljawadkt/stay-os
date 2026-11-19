@@ -1,0 +1,44 @@
+{
+  "roles": { "label": "View as", "owner": "Owner", "warden": "Warden", "resident": "Resident", "parent": "Parent" },
+  "shell": {
+    "home": "Go to dashboard", "search": "Search", "searchPlaceholder": "Search residents, rooms, pages…",
+    "noResults": "No matches. Try a name, a room like B-204, or a phone number.", "residents": "Residents", "rooms": "Rooms", "pages": "Pages",
+    "language": "Language", "darkMode": "Switch to dark mode", "lightMode": "Switch to light mode", "whatsapp": "WhatsApp",
+    "demoMenu": "Demo controls", "demoClock": "Demo clock", "guidedDemo": "Guided demo",
+    "simulatePayment": "Simulate a UPI payment", "simulateComplaint": "Simulate a WhatsApp complaint", "simulateScan": "Simulate a gate QR scan", "simulateOffline": "Simulate offline",
+    "resetDemo": "Reset demo data", "resetTitle": "Reset the demo?", "resetBody": "Everything changed in this session is cleared. The hostel goes back to Friday 27 November, 10:24 AM.",
+    "resetConfirm": "Reset demo", "cancel": "Cancel", "openMenu": "Open menu", "menu": "Navigation", "skip": "Skip to content"
+  },
+  "nav": {
+    "label": "Main", "home": "Home", "rooms": "Rooms & beds", "residents": "Residents", "rent": "Rent & invoices", "mess": "Mess", "complaints": "Complaints",
+    "gate": "Gate pass & attendance", "expenses": "Expenses", "staff": "Staff", "reports": "Reports",
+    "groups": { "operations": "Operations", "money": "Money", "team": "Team" },
+    "hostelMeta": "{occupied} of {beds} beds occupied", "ownerTitle": "Owner", "wardenTitle": "Chief warden"
+  },
+  "states": { "errorTitle": "Couldn't load {what}", "errorBody": "Check your connection and try again.", "retry": "Try again", "loading": "Loading" },
+  "invoiceState": { "paid": "Paid", "overdue": "Overdue {days}d", "due_today": "Due today", "due": "Due in {days}d" },
+  "kyc": { "verified": "Verified", "pending": "KYC pending", "manual": "Offline KYC" },
+  "police": { "approved": "Approved", "submitted": "Submitted", "pending": "Not filed" },
+  "channel": { "whatsapp": "WhatsApp", "app": "App", "walk_in": "Walk-in" },
+  "leaveStatus": { "awaiting_parent": "Awaiting parent", "approved": "Approved", "rejected": "Rejected", "cancelled": "Cancelled" },
+  "roomType": { "single": "Single", "double": "Double", "triple": "Triple", "six": "6-bed" },
+  "meals": { "breakfast": "Breakfast", "lunch": "Lunch", "snacks": "Snacks", "dinner": "Dinner" },
+  "bedStatus": { "occupied": "Occupied", "vacant": "Vacant", "reserved": "Reserved", "maintenance": "Maintenance" },
+  "blockGender": { "M": "Men", "F": "Women" },
+  "category": { "electrical": "Electrical", "plumbing": "Plumbing", "wifi": "Wi-Fi", "housekeeping": "Housekeeping", "mess": "Mess", "furniture": "Furniture", "other": "Other" },
+  "expenseCategory": { "food": "Food & groceries", "electricity": "Electricity", "water": "Water", "salaries": "Salaries", "maintenance": "Maintenance", "internet": "Internet" },
+  "method": { "upi": "UPI", "bank": "Bank transfer", "cash": "Cash" },
+  "relation": { "Father": "Father", "Mother": "Mother", "Guardian": "Guardian" },
+  "occupation": { "student": "Student", "professional": "Working professional" },
+  "toasts": {
+    "payment": "{amount} received from {name}", "paymentSub": "{method} · auto-reconciled to {invoice}", "view": "View",
+    "invoicesRaised": "{count} invoices raised for {month}", "invoicesRaisedSub": "{amount} billed · sent on WhatsApp with UPI links",
+    "remindersSent": "{count, plural, one {# reminder} other {# reminders}} sent on WhatsApp", "remindersSentSub": "Each one has a UPI link. Payments reconcile on their own.",
+    "bedMoved": "{name} moved to {bed}", "checkin": "{name} checked in to {bed}",
+    "complaintWhatsApp": "New complaint on WhatsApp · {id}", "complaintLogged": "Complaint {id} logged", "complaintResolved": "{id} resolved", "complaintStarted": "{id} is in progress",
+    "residentUpdated": "Resident updated on WhatsApp", "mealSkipped": "{meal} skipped for {date}", "mealRestored": "{meal} back on for {date}", "headcountUpdated": "Kitchen headcount updated",
+    "leaveApproved": "Leave approved by parent", "leaveRejected": "Leave rejected by parent", "leaveSub": "Resident and warden notified",
+    "leaveRequested": "Leave request sent to parent", "leaveRequestedSub": "They can approve on WhatsApp or in the app",
+    "expenseSaved": "Expense saved", "gateIn": "{name} came in", "gateOut": "{name} went out", "reset": "Demo data reset"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "home": {
+    "what": "ഇന്നത്തെ സംഗ്രഹം",
+    "greeting": { "morning": "സുപ്രഭാതം, {name}", "afternoon": "നമസ്കാരം, {name}", "evening": "ശുഭസന്ധ്യ, {name}" },
+    "subtitle": "{date} · {hostel} ഇന്ന് ഇങ്ങനെ.",
+    "checkIn": "പുതിയ താമസക്കാരെ ചേർക്കുക",
+    "kpi": {
+      "occupancy": "താമസ നിരക്ക്", "occupancySub": "{total}-ൽ {occupied} കിടക്കകൾ", "billed": "{month} ബിൽ തുക", "billedSub": "{count} ബില്ലുകൾ",
+      "collected": "ലഭിച്ചത്", "collectedSub": "ബില്ലിന്റെ {rate}", "pending": "കുടിശ്ശിക", "pendingSub": "{count} പേർ അടയ്ക്കാനുണ്ട്",
+      "netProfit": "അറ്റാദായം", "netProfitSub": "ഈ മാസം ഇതുവരെ · {margin} മാർജിൻ", "openComplaints": "തീർപ്പാകാത്ത പരാതികൾ", "openComplaintsSub": "{count} എണ്ണം SLA കഴിഞ്ഞു",
+      "vs": "{month}-നേക്കാൾ {value}", "inside": "ഇപ്പോൾ അകത്ത്", "insideSub": "അവസാന QR സ്കാൻ: അകത്ത്", "out": "ഇപ്പോൾ പുറത്ത്", "outSub": "കോളേജ്, ജോലി, മറ്റ് ആവശ്യങ്ങൾ",
+      "onLeave": "ലീവിൽ", "onLeaveSub": "രക്ഷിതാക്കൾ അംഗീകരിച്ചത്", "lunch": "ഇന്നത്തെ ഉച്ചഭക്ഷണം", "lunchSub": "{count} പേർ ഒഴിവാക്കി"
+    },
+    "trend": { "title": "വാടക പിരിവ്, കഴിഞ്ഞ 6 മാസം", "meta": "ശരാശരി {rate} അതത് മാസം തന്നെ ലഭിച്ചു", "billed": "ബിൽ ചെയ്തത്", "collected": "ലഭിച്ചത്", "rate": "പിരിവ് നിരക്ക്", "summary": "{month}: ഇതുവരെ {rate} ലഭിച്ചു." },
+    "attention": {
+      "title": "ഇന്ന് ശ്രദ്ധിക്കേണ്ടവ", "meta": "{count, plural, =0 {ഒന്നുമില്ല} other {# കാര്യങ്ങൾ}}",
+      "emptyTitle": "ഇന്ന് എല്ലാം ശരിയാണ്", "emptyBody": "കുടിശ്ശികയോ വൈകിയ പരാതികളോ ഇല്ല.",
+      "items": {
+        "overdue30": "{count} പേർ 30+ ദിവസമായി അടച്ചിട്ടില്ല · {amount}",
+        "sla": "{count} പരാതികൾ SLA കഴിഞ്ഞു",
+        "overdue": "{count} വാടക ബില്ലുകൾ വൈകി",
+        "leaves": "{count} ലീവ് അപേക്ഷകൾ രക്ഷിതാക്കളുടെ മറുപടി കാത്ത്",
+        "late": "ഇന്നലെ രാത്രി മുതൽ {count} വൈകിയുള്ള പ്രവേശനം",
+        "kyc": "{count} പുതിയ താമസക്കാരുടെ KYC ബാക്കി",
+        "police": "{count} പോലീസ് വെരിഫിക്കേഷൻ സമർപ്പിച്ചിട്ടില്ല",
+        "arrivals": "ഈ ആഴ്ച ബുക്ക് ചെയ്ത {count} പേർ എത്തും",
+        "leaving": "ഈ മാസം {count} പേർ ഒഴിയുന്നു"
+      }
+    },
+    "feed": {
+      "title": "തത്സമയ വിവരങ്ങൾ", "live": "തത്സമയം", "emptyTitle": "ഇതുവരെ ശാന്തം", "emptyBody": "പേയ്‌മെന്റുകൾ, ഗേറ്റ് സ്കാനുകൾ, പരാതികൾ എല്ലാം ഇവിടെ കാണാം.",
+      "payment": "{name} {method} വഴി {amount} അടച്ചു", "gate_in": "{name} അകത്ത് വന്നു", "gate_out": "{name} പുറത്ത് പോയി",
+      "complaint": "{name} {channel} വഴി പരാതി നൽകി", "complaint_resolved": "{name}-ന്റെ പരാതി പരിഹരിച്ചു", "optout": "{name} {meals} ഒഴിവാക്കി",
+      "visitor": "{name}-നെ കാണാൻ {visitor} വന്നു", "leave_request": "{name} ലീവിന് അപേക്ഷിച്ചു", "leave_approved": "{name}-ന്റെ ലീവ് രക്ഷിതാവ് അംഗീകരിച്ചു",
+      "leave_rejected": "{name}-ന്റെ ലീവ് രക്ഷിതാവ് നിരസിച്ചു", "checkin": "{name} {bed}-ൽ ചെക്ക്-ഇൻ ചെയ്തു", "invoices_raised": "{month}-ലെ {count} ബില്ലുകൾ തയ്യാറാക്കി",
+      "reminders_sent": "{count} വാടക ഓർമ്മപ്പെടുത്തലുകൾ വാട്സ്ആപ്പിൽ അയച്ചു", "bed_moved": "{name} {from}-ൽ നിന്ന് {to}-ലേക്ക് മാറി"
+    },
+    "blocks": { "title": "ബ്ലോക്ക് തിരിച്ചുള്ള താമസം", "open": "ഫ്ലോർ പ്ലാൻ", "block": "ബ്ലോക്ക് {block}" },
+    "today": { "title": "ഇപ്പോൾ", "meta": "ഗേറ്റ് QR സ്കാനുകളും മെസ്സ് ഒഴിവാക്കലുകളും അടിസ്ഥാനമാക്കി", "open": "ഗേറ്റ് രേഖ", "presence": "താമസക്കാർ", "presenceAria": "{inside} അകത്ത്, {out} പുറത്ത്, {leave} ലീവിൽ", "kitchen": "ഇന്നത്തെ അടുക്കള എണ്ണം" }
+  }
+}

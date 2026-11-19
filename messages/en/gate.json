@@ -1,0 +1,27 @@
+{
+  "gate": {
+    "title": "Gate pass & attendance", "what": "the gate log", "subtitle": "Gate closes at {curfew} (Block C at {curfewC}) · QR scanner at the main gate",
+    "scan": "Simulate QR scan", "logVisitor": "Log visitor",
+    "stat": { "inside": "Inside now", "out": "Out now", "leave": "On leave", "late": "Late last night" },
+    "tabs": { "log": "In/out log", "leaves": "Leave requests", "late": "Late entries", "visitors": "Visitors" },
+    "live": "Live", "direction": "Direction", "dir": { "all": "All", "in": "In", "out": "Out" }, "search": "Search resident or room",
+    "emptyLog": "No scans match", "onPass": "On gate pass", "lateBadge": "Late", "manual": "Manual", "today": "Today", "yesterday": "Yesterday",
+    "leaves": {
+      "title": "Leave requests", "meta": "Parents approve on WhatsApp or in the parent app. The QR gate pass works only after approval.", "empty": "No leave requests",
+      "resident": "Resident", "when": "When", "where": "Going to", "status": "Parent approval", "actions": "Actions", "parent": "Parent: {name}",
+      "decided": "Decided {time}", "nudge": "Remind parent", "nudged": "Reminder sent to {name} on WhatsApp"
+    },
+    "late": { "title": "Late entries", "meta": "Scans after curfew. Parents get a WhatsApp alert automatically.", "empty": "No late entries", "after": "+{mins} min after curfew", "notified": "Parent notified" },
+    "visitors": {
+      "title": "Visitor log", "meta": "{count} inside right now", "empty": "No visitors logged", "visitor": "Visitor", "visiting": "Visiting", "id": "ID checked",
+      "in": "In", "out": "Out", "inside": "Inside", "checkout": "Check out"
+    },
+    "visitorDialog": {
+      "title": "Log a visitor", "body": "The resident is notified on WhatsApp. Visitors stay in the lobby unless the warden allows otherwise.",
+      "name": "Visitor's name", "phone": "Phone", "relation": "Relation", "visiting": "Visiting", "visitingPlaceholder": "Type a name or room", "change": "Change",
+      "idType": "ID proof", "last4": "Last 4 digits of ID", "cancel": "Cancel", "submit": "Log visitor", "visit": "Visit",
+      "errName": "Enter the visitor's name.", "errResident": "Choose who they're visiting.", "errId": "Enter the last 4 digits of the ID.",
+      "logged": "{name} logged in", "loggedSub": "Resident notified on WhatsApp"
+    }
+  }
+}

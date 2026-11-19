@@ -39,12 +39,12 @@
   --danger-text: #a3291a;
   --whatsapp: #25d366;
 
-  --chart-1: #0c7366;
-  --chart-2: #a8720f;
-  --chart-3: #3577b8;
-  --chart-4: #7a5bb5;
-  --chart-5: #c2593a;
-  --chart-6: #7c8794;
+  --chart-1: #0f8a78;
+  --chart-2: #b67c0c;
+  --chart-3: #2f6fc4;
+  --chart-4: #d2603a;
+  --chart-5: #7a5bc9;
+  --chart-6: #c85a94;
 
   --elev-sm: 0 1px 2px rgb(25 25 23 / 0.06);
   --elev-lg: 0 16px 40px -12px rgb(25 25 23 / 0.22), 0 4px 12px -4px rgb(25 25 23 / 0.08);
@@ -111,12 +111,12 @@
   --danger-tint: #331712;
   --danger-text: #f48170;
 
-  --chart-1: #2fa894;
-  --chart-2: #e0a93a;
-  --chart-3: #5c9ddb;
-  --chart-4: #a28bdb;
-  --chart-5: #e07a5a;
-  --chart-6: #98a2ae;
+  --chart-1: #17917f;
+  --chart-2: #c08a1e;
+  --chart-3: #3f82d6;
+  --chart-4: #cf6542;
+  --chart-5: #7e6be0;
+  --chart-6: #d2669a;
 
   --elev-sm: 0 0 #0000;
   --elev-lg: 0 16px 48px -12px rgb(0 0 0 / 0.7), inset 0 0 0 1px rgb(255 255 255 / 0.06);
@@ -340,4 +340,49 @@ html[lang="ml"] {
     size: A4;
     margin: 14mm;
   }
+}
+
+/* a payment just landed: the row glows success and settles */
+@keyframes flash-paid {
+  0% { background-color: transparent; }
+  15% { background-color: var(--success-tint); }
+  100% { background-color: transparent; }
+}
+.flash-paid > td {
+  animation: flash-paid 1.8s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* WhatsApp simulation palette — scoped to the panel, never used by StayOS's own UI */
+.wa-scope {
+  --wa-bg: #efeae2;
+  --wa-out: #d9fdd3;
+  --wa-in: #ffffff;
+  --wa-header: #f0f2f5;
+  --wa-text: #111b21;
+  --wa-meta: #667781;
+  --wa-tick: #53bdeb;
+  --wa-link: #027eb5;
+  --wa-green: #008069;
+  --wa-chip: #ffffff;
+  --wa-divider: #e9edef;
+  --wa-doodle: rgb(0 0 0 / 0.035);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, var(--font-ml), Helvetica, Arial, sans-serif;
+}
+.dark .wa-scope {
+  --wa-bg: #0b141a;
+  --wa-out: #005c4b;
+  --wa-in: #202c33;
+  --wa-header: #202c33;
+  --wa-text: #e9edef;
+  --wa-meta: #8696a0;
+  --wa-link: #53bdeb;
+  --wa-green: #00a884;
+  --wa-chip: #182229;
+  --wa-divider: #222d34;
+  --wa-doodle: rgb(255 255 255 / 0.025);
+}
+.wa-wallpaper {
+  background-color: var(--wa-bg);
+  background-image: radial-gradient(var(--wa-doodle) 1.2px, transparent 1.3px);
+  background-size: 18px 18px;
 }

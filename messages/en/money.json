@@ -1,0 +1,39 @@
+{
+  "ownerOnly": { "title": "Only the owner sees this page", "body": "Expenses, salaries and profit are hidden from the warden's view.", "switch": "Switch to owner view" },
+  "expenses": {
+    "title": "Expenses", "what": "expenses", "subtitle": "{amount} spent in {month} · {delta} vs {prev}", "export": "Export CSV", "add": "Add expense", "month": "Month",
+    "byCategory": "Where the money went", "byCategoryMeta": "Share of this month's spending", "total": "Total", "compare": "{month} vs {prev}, by category",
+    "entries": "Entries", "missing": "{count} without a receipt", "category": "Category", "allCategories": "All categories",
+    "empty": "No expenses in this view", "emptyBody": "Add one with a photo of the bill. We'll read the amount for you.",
+    "col": { "date": "Date", "vendor": "Vendor", "category": "Category", "amount": "Amount", "mode": "Paid by", "receipt": "Receipt" },
+    "scheduled": "Scheduled · {date}", "view": "View", "payroll": "Payroll", "noReceipt": "No receipt", "receiptMeta": "Uploaded {date}", "downloadReceipt": "Download",
+    "addDialog": {
+      "title": "Add an expense", "body": "Snap or upload the bill. Vendor, amount and category are read from it.", "upload": "Upload a receipt", "uploadHint": "Photo or PDF, up to 10 MB. Drag it here or click.",
+      "preview": "Receipt preview", "scanning": "Reading the receipt…", "filled": "Details filled from the receipt", "replace": "Replace",
+      "vendor": "Vendor", "amount": "Amount", "date": "Date", "category": "Category", "mode": "Paid by", "bank": "Bank transfer", "cash": "Cash", "description": "Description",
+      "checkHint": "Filled from the receipt. Check before saving.", "cancel": "Cancel", "save": "Save expense",
+      "errVendor": "Enter who was paid.", "errAmount": "Enter the amount.", "tooBig": "That file is over 10 MB. Try a smaller photo."
+    }
+  },
+  "staff": {
+    "title": "Staff", "what": "staff", "subtitle": "{present} of {total} at work today · {late} late · {leave} away", "process": "Process {month} salaries",
+    "sum": { "gross": "Gross salaries", "ded": "Unpaid leave deductions", "adv": "Advances recovered", "net": "Net payable" },
+    "col": { "name": "Staff", "shift": "Shift", "today": "Today", "month": "{month} attendance", "present": "Present", "salary": "Salary", "deductions": "Deductions", "net": "Net pay" },
+    "role": { "warden": "Warden", "office": "Office", "cook": "Kitchen", "cleaner": "Housekeeping", "security": "Security", "maintenance": "Maintenance" },
+    "mark": { "P": "Present", "late": "Late", "H": "Half day", "L": "On leave", "A": "Absent" },
+    "markFor": "Mark today for {name}", "stripAria": "{present} present, {absent} absent, {leave} on leave this month",
+    "policy": "2 paid leave days a month. Absences and extra leave are deducted at salary ÷ 30.",
+    "payDialog": {
+      "title": "Process {month} salaries", "body": "{count} staff · {amount} by bank transfer on 30 November. Payslips go out on WhatsApp.",
+      "cancel": "Cancel", "confirm": "Schedule transfers", "done": "{amount} scheduled for 30 Nov", "doneSub": "Payslips will be sent on WhatsApp"
+    }
+  },
+  "reports": {
+    "title": "Reports", "what": "reports", "subtitle": "{hostel} · numbers update as payments and expenses come in", "excel": "Export Excel", "pdf": "Export PDF", "month": "Month",
+    "pnlTitle": "Profit & loss · {month}", "pnlMeta": "Cash basis: rent and mess actually collected", "pnlMetaMtd": "Month to date, cash basis. Salaries are accrued.",
+    "change": "Change", "revenue": "Revenue", "rent": "Rent", "mess": "Mess", "rebates": "Mess rebates", "totalRevenue": "Total revenue", "expenses": "Expenses",
+    "totalExpenses": "Total expenses", "net": "Net profit", "margin": "Margin {margin}. Another {pending} is still to be collected for this month. Prepared with {brand}.",
+    "occupancy": "Occupancy", "occupancyMeta": "{now} now, up from {from} in June", "beds": "Beds occupied", "collection": "Collection rate", "collectionMeta": "Rent collected within the month",
+    "collected": "Collected", "exported": "P&L exported", "exportedSub": "Opens in Excel or Google Sheets"
+  }
+}

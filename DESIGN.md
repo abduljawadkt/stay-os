@@ -129,8 +129,8 @@ The app UI uses 14px body text, like Stripe and Linear, because it is a dense de
 | Radius | Value | Used on |
 |---|---|---|
 | `sm` | 6px | Bed tiles, small buttons, tooltips, checkboxes (4px) |
-| `md` | 8px | Buttons, inputs, segmented controls, popovers |
-| `lg` | 12px | Cards, dialogs, kanban cards, room cards, toasts |
+| `md` | 8px | Buttons, inputs, segmented controls, menu items |
+| `lg` | 12px | Cards, dialogs, popovers and menus, kanban cards, room cards, toasts |
 | `xl` | 16px | Floating drawers and panels, mobile cards, mobile primary buttons (12px) |
 | `full` | 9999px | Chips, avatars, the tab-bar pill |
 
@@ -241,10 +241,18 @@ A legend with live counts sits above the grid. Block tabs (A/B/C) sit next to a 
 - **Tooltip:** popover style (`--surface`, border, `shadow-lg`), with values right-aligned.
 - **Legends** sit inline next to the chart. Color is always paired with a label.
 
-Expense categories (light / dark):
+Expense categories (light / dark). Ordered so neighbors stay distinct, and checked with the data-viz palette validator (lightness band, chroma floor, colorblind separation ≥ 8 ΔE, normal-vision ≥ 15 ΔE, 3:1 against the surface) in both modes:
 
-| Category | Light | Dark |
-|---|---|---|
+| # | Category | Light | Dark |
+|---|---|---|---|
+| 1 | Food and groceries | `#0F8A78` | `#17917F` |
+| 2 | Electricity | `#B67C0C` | `#C08A1E` |
+| 3 | Water | `#2F6FC4` | `#3F82D6` |
+| 4 | Salaries | `#D2603A` | `#CF6542` |
+| 5 | Maintenance | `#7A5BC9` | `#7E6BE0` |
+| 6 | Internet | `#C85A94` | `#D2669A` |
+
+---|---|---|
 | Food and groceries | `#0C7366` | `#2FA894` |
 | Electricity | `#A8720F` | `#E0A93A` |
 | Water | `#3577B8` | `#5C9DDB` |
@@ -312,7 +320,7 @@ Gradients on buttons, headers or text · glassmorphism or backdrop blur · purpl
   --warning:#B05A06; --warning-tint:#FCF1DF; --warning-text:#8A4605;
   --danger:#C2331F;  --danger-tint:#FCEBE8;  --danger-text:#A3291A;
   --whatsapp:#25D366;
-  --chart-1:#0C7366; --chart-2:#A8720F; --chart-3:#3577B8; --chart-4:#7A5BB5; --chart-5:#C2593A; --chart-6:#7C8794;
+  --chart-1:#0F8A78; --chart-2:#B67C0C; --chart-3:#2F6FC4; --chart-4:#D2603A; --chart-5:#7A5BC9; --chart-6:#C85A94;
   --radius-sm:6px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
   --shadow-sm:0 1px 2px rgb(25 25 23 / .06);
   --shadow-lg:0 16px 40px -12px rgb(25 25 23 / .22), 0 4px 12px -4px rgb(25 25 23 / .08);
@@ -337,7 +345,7 @@ Gradients on buttons, headers or text · glassmorphism or backdrop blur · purpl
   --success:#3FB765; --success-tint:#12291A; --success-text:#5FCB7E;
   --warning:#E0962E; --warning-tint:#2E2210; --warning-text:#F0A957;
   --danger:#E5604C;  --danger-tint:#331712;  --danger-text:#F48170;
-  --chart-1:#2FA894; --chart-2:#E0A93A; --chart-3:#5C9DDB; --chart-4:#A28BDB; --chart-5:#E07A5A; --chart-6:#98A2AE;
+  --chart-1:#17917F; --chart-2:#C08A1E; --chart-3:#3F82D6; --chart-4:#CF6542; --chart-5:#7E6BE0; --chart-6:#D2669A;
   --shadow-sm:none;
   --shadow-lg:0 16px 48px -12px rgb(0 0 0 / .7), inset 0 0 0 1px rgb(255 255 255 / .06);
 }

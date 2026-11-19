@@ -1,0 +1,23 @@
+{
+  "complaints": {
+    "title": "Complaints & requests", "what": "complaints",
+    "subtitle": "Avg. resolution {avg} · {met}% within SLA · rated {rating}/5 · {wa}% came in on WhatsApp",
+    "log": "Log a complaint", "search": "Search title, room or resident", "category": "Category", "allCategories": "All categories", "channel": "Channel", "allChannels": "All",
+    "col": { "new": "New", "in_progress": "In progress", "resolved": "Resolved" }, "lastWeek": "Last 7 days",
+    "empty": { "new": "No new complaints", "in_progress": "Nothing in progress", "resolved": "Nothing resolved this week" },
+    "emptyBody": { "new": "New ones from WhatsApp, the app and the front desk land here.", "in_progress": "Drag a card here when someone starts on it.", "resolved": "Resolved complaints from the last 7 days show here." },
+    "slaLeft": "{time} left", "slaBreached": "Past SLA by {time}", "slaMet": "Fixed in {time}", "slaMissed": "Took {time}",
+    "priority": { "high": "High priority", "medium": "Medium priority", "low": "Low priority" },
+    "unassigned": "Unassigned", "moveTo": "Move to", "moveToCol": "Move to {col}",
+    "message": "Message on WhatsApp", "description": "Description", "photo": "Photo from the resident", "timeline": "Timeline",
+    "event": { "created": "Raised via {channel}", "assigned": "Assigned to {name}", "on_the_way": "{name} is on the way", "resolved": "Resolved by {name}", "note": "Note from {name}" },
+    "rated": "Resident rated it {rating}/5", "autoUpdates": "Every status change is sent to the resident on WhatsApp automatically.",
+    "start": "Start work", "resolve": "Mark resolved", "reopen": "Reopen", "openChat": "Open chat",
+    "logDialog": {
+      "title": "Log a complaint", "body": "For complaints made at the front desk. WhatsApp and app complaints arrive on their own.",
+      "resident": "Resident", "residentPlaceholder": "Type a name or room", "change": "Change", "category": "Category", "what": "What's wrong",
+      "whatPlaceholder": "Tap leaking in bathroom", "details": "Details (optional)", "cancel": "Cancel", "submit": "Log complaint",
+      "errResident": "Choose the resident first.", "errTitle": "Say briefly what's wrong."
+    }
+  }
+}

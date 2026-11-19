@@ -1,0 +1,17 @@
+{
+  "mess": {
+    "title": "Mess", "what": "the mess plan", "subtitle": "{count} residents on the mess plan · head cook Kunhimoideen P.",
+    "sendKitchen": "Send today's count to kitchen", "sentToKitchen": "Headcount sent to {name} on WhatsApp",
+    "headcount": { "title": "Kitchen headcount · {date}", "meta": "Updates live as residents skip meals", "locked": "Locked", "open": "Open till {time}", "of": "{enrolled} enrolled · {skipped} skipped" },
+    "waste": { "title": "Food waste saved in {month}", "meals": "{count} meals not cooked because residents skipped in advance", "year": "≈ {amount} a year at this rate", "how": "Plate cost used: breakfast {b}, lunch {l}, dinner {d}." },
+    "tabs": { "week": "Weekly menu", "calendar": "Calendar", "optouts": "Opt-outs", "rebates": "Rebates" },
+    "week": { "title": "Weekly menu template", "meta": "Repeats every week. Click a dish to change it.", "today": "today", "edit": "Edit dish", "dish": "Dish", "save": "Save", "cancel": "Cancel", "saved": "Menu template updated" },
+    "cal": { "meta": "Meals skipped each day, and special menus", "dayAria": "{date}: {count} meals skipped", "legendSkips": "Meals skipped", "legendSpecial": "Special menu", "regular": "Regular menu" },
+    "optouts": { "day": "Day", "today": "Today", "count": "{count} residents · {meals} meals", "emptyTitle": "Nobody skipped a meal", "emptyBody": "Skips from the app and WhatsApp appear here." },
+    "rebates": {
+      "title": "Automatic mess rebates", "rule": "{amount} a day when a resident is away {days} or more days in a row. Added to the next invoice automatically.",
+      "empty": "No rebates this month", "resident": "Resident", "away": "Away", "amount": "Rebate", "status": "Status", "days": "{count} days",
+      "applied": "Applied to December invoice", "willApply": "Applies on {date}", "total": "{count} residents this month"
+    }
+  }
+}

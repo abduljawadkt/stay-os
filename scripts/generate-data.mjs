@@ -648,7 +648,7 @@ function makeComplaint({ category, status, createdAt, residentId, channel, idx, 
   };
   if (status !== "new") c.updates.push({ at: minutesBefore(createdAt, -ri(5, 25)), kind: "assigned", by: ASSIGNEE[category] });
   if (status === "resolved") {
-    const hours = resolvedAfterH ?? Math.max(0.5, t.sla * (0.25 + rand() * 0.8));
+    const hours = resolvedAfterH ?? Math.max(0.5, t.sla * (0.25 + rand() * 0.98));
     c.resolvedAt = minutesBefore(createdAt, -Math.round(hours * 60));
     c.updates.push({ at: c.resolvedAt, kind: "resolved", by: ASSIGNEE[category] });
     c.rating = chance(0.7) ? weighted([[5, 60], [4, 30], [3, 10]]) : null;

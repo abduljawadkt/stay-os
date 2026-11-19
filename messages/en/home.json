@@ -1,0 +1,41 @@
+{
+  "home": {
+    "what": "today's summary",
+    "greeting": { "morning": "Good morning, {name}", "afternoon": "Good afternoon, {name}", "evening": "Good evening, {name}" },
+    "subtitle": "{date} · Here's {hostel} today.",
+    "checkIn": "Check in resident",
+    "kpi": {
+      "occupancy": "Occupancy", "occupancySub": "{occupied} of {total} beds", "billed": "Billed in {month}", "billedSub": "{count} invoices",
+      "collected": "Collected", "collectedSub": "{rate} of billed", "pending": "Pending", "pendingSub": "{count} residents unpaid",
+      "netProfit": "Net profit", "netProfitSub": "{margin} margin, month to date", "openComplaints": "Open complaints", "openComplaintsSub": "{count} past SLA",
+      "vs": "{value} vs {month}", "inside": "Inside now", "insideSub": "Last QR scan was in", "out": "Out now", "outSub": "College, work, errands",
+      "onLeave": "On leave", "onLeaveSub": "Approved by parents", "lunch": "Lunch today", "lunchSub": "{count} opted out"
+    },
+    "trend": { "title": "Rent collection, last 6 months", "meta": "Average {rate} collected within the month", "billed": "Billed", "collected": "Collected", "rate": "Collection rate", "summary": "{month}: {rate} collected so far." },
+    "attention": {
+      "title": "Needs attention today", "meta": "{count, plural, =0 {Nothing pending} one {# item} other {# items}}",
+      "emptyTitle": "All clear for today", "emptyBody": "Nothing overdue, breached or waiting on you.",
+      "items": {
+        "overdue30": "{count, plural, one {# resident} other {# residents}} overdue 30+ days · {amount}",
+        "sla": "{count, plural, one {# complaint} other {# complaints}} past SLA",
+        "overdue": "{count} rent invoices overdue",
+        "leaves": "{count, plural, one {# leave request} other {# leave requests}} waiting for parents",
+        "late": "{count, plural, one {# late entry} other {# late entries}} since last night",
+        "kyc": "{count, plural, one {# new resident needs} other {# new residents need}} KYC",
+        "police": "{count, plural, one {# police verification} other {# police verifications}} not filed",
+        "arrivals": "{count, plural, one {# reserved resident} other {# reserved residents}} arriving this week",
+        "leaving": "{count, plural, one {# resident} other {# residents}} leaving this month"
+      }
+    },
+    "feed": {
+      "title": "Live activity", "live": "Live", "emptyTitle": "Quiet so far", "emptyBody": "Payments, gate scans and complaints show up here as they happen.",
+      "payment": "{name} paid {amount} by {method}", "gate_in": "{name} came in", "gate_out": "{name} went out",
+      "complaint": "{name} raised a complaint via {channel}", "complaint_resolved": "{name}'s complaint was resolved", "optout": "{name} skipped {meals}",
+      "visitor": "{visitor} is visiting {name}", "leave_request": "{name} asked for leave", "leave_approved": "Parent approved {name}'s leave",
+      "leave_rejected": "Parent rejected {name}'s leave", "checkin": "{name} checked in to {bed}", "invoices_raised": "{count} invoices raised for {month}",
+      "reminders_sent": "{count} rent reminders sent on WhatsApp", "bed_moved": "{name} moved from {from} to {to}"
+    },
+    "blocks": { "title": "Occupancy by block", "open": "Floor plan", "block": "Block {block}" },
+    "today": { "title": "Right now", "meta": "From gate QR scans and mess opt-outs", "open": "Gate log", "presence": "Residents", "presenceAria": "{inside} inside, {out} out, {leave} on leave", "kitchen": "Kitchen headcount today" }
+  }
+}
