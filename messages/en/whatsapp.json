@@ -1,0 +1,12 @@
+{
+  "whatsapp": {
+    "panel": "WhatsApp", "verified": "Verified business", "business": "WhatsApp Business · {number}", "close": "Close WhatsApp", "search": "Search chats",
+    "filter": "Filter chats", "filters": { "all": "All", "unread": "Unread", "parents": "Parents" }, "chats": "Chats", "noChats": "No chats here", "parent": "Parent",
+    "footer": "Sent by StayOS through the official WhatsApp Business API", "back": "Back to chats", "typing": "typing…", "parentOf": "Parent of {name}", "residentAt": "Resident · {bed}",
+    "more": "More options", "encryption": "Business chat with {hostel}. Messages are sent by StayOS.", "today": "Today", "yesterday": "Yesterday",
+    "payingUpi": "{name} is paying by UPI…", "sendAs": "Send as", "as": "As {name}", "asHostel": "As hostel",
+    "asHint": "Tap a reply or type. The StayOS bot answers.", "asHostelHint": "Reply from the hostel's number", "message": "Message", "send": "Send",
+    "quick": { "fan": "Fan not working in my room 😓", "skip": "Skip dinner today", "link": "Send payment link", "paid": "PAID", "approve": "1", "reject": "2", "thanks": "Thank you 🙏" },
+    "linkOpened": "Opens {link} on {name}'s phone", "appOpened": "Opens the StayOS app on {name}'s phone"
+  }
+}

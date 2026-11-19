@@ -129,13 +129,13 @@ const ASSIGNEE_NAME: Record<string, string> = { "S-20": "Biju (electrician)", "S
 /** Reads a WhatsApp message the way the StayOS bot would: complaint, meal skip, leave reply, or payment link. */
 export function classifyWhatsApp(text: string): { kind: "complaint"; category: ComplaintCategory; title: string } | { kind: "skip"; meal: Meal } | { kind: "approve" } | { kind: "reject" } | { kind: "pay" } | null {
   const t = text.toLowerCase();
-  if (/^\s*(1|approve|yes|ok|അനുവദി|ശരി)\b/.test(t)) return { kind: "approve" };
-  if (/^\s*(2|reject|no|വേണ്ട)\b/.test(t)) return { kind: "reject" };
+  if (/^\s*(1|approve|yes|ok|അനുവദി\S*|ശരി)(\s|$|[.!,])/.test(t)) return { kind: "approve" };
+  if (/^\s*(2|reject|no|വേണ്ട|നിരസി\S*)(\s|$|[.!,])/.test(t)) return { kind: "reject" };
   if (/(skip|cancel|venda|വേണ്ട|ഒഴിവാക്ക)/.test(t)) {
     const meal: Meal = /(breakfast|രാവിലെ|prathal)/.test(t) ? "breakfast" : /(lunch|ഉച്ച|uchakk)/.test(t) ? "lunch" : /(snack|tea|ചായ)/.test(t) ? "snacks" : "dinner";
     return { kind: "skip", meal };
   }
-  if (/(pay|link|fee|rent|ഫീസ്|വാടക)/.test(t)) return { kind: "pay" };
+  if (/(pay|link|fee|rent|ഫീസ്|വാടക|ലിങ്ക്)/.test(t)) return { kind: "pay" };
   const rules: [RegExp, ComplaintCategory, string][] = [
     [/(fan|ഫാൻ|light|tubelight|bulb|switch|socket|plug|heater|geyser|current|power)/, "electrical", "Fan not working"],
     [/(tap|leak|flush|drain|water|shower|pipe|വെള്ളം|ടാപ്പ്|ചോർ)/, "plumbing", "Water leak in bathroom"],
