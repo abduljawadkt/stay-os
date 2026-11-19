@@ -533,7 +533,9 @@ begin
     perform app.copy_template(new_id);
   else
     perform app.build_layout(new_id, p_blocks, p_floors);
-    update public.orgs set settings = settings || jsonb_build_object('blocks', (
+    update public.orgs set settings = settings
+      || jsonb_build_object('mess', (select t.settings -> 'mess' from public.orgs t where t.is_template limit 1))
+      || jsonb_build_object('blocks', (
       select coalesce(jsonb_agg(jsonb_build_object('id', b, 'name', 'Block ' || b, 'gender', 'M', 'floors', p_floors, 'curfew', '22:00') order by b), '[]'::jsonb)
       from (select distinct block as b from public.rooms where org_id = new_id) x))
     where id = new_id;

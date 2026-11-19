@@ -1,12 +1,11 @@
 "use client";
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import {
-  createSeed, hostel, type Seed, type Activity, type Bed, type Channel, type Complaint, type ComplaintCategory, type ComplaintStatus,
+  emptySeed, hostel, type Seed, type Activity, type Bed, type Channel, type Complaint, type ComplaintCategory, type ComplaintStatus,
   type Expense, type Invoice, type LeaveRequest, type Meal, type Resident, type Visitor, type WAMessage, type WAThread,
 } from "@/data";
-import { nowISO, nowMs, todayISO, resetClock } from "./clock";
+import { nowISO, nowMs, todayISO } from "./clock";
 import { roomById, rebates, daysInMonth, addDays, MEALS } from "./selectors";
 import { demo } from "@/config/demo";
 
@@ -85,7 +84,8 @@ interface Actions {
   checkoutVisitor: (id: string) => void;
   waSend: (threadId: string, text: string, from: "hostel" | "contact") => void;
   waRead: (threadId: string) => void;
-  reset: () => void;
+  /** Owner: reload the sample data (resolves when the fresh data is in). */
+  reset: () => Promise<void>;
 }
 
 export type DemoState = Seed & UIState & Actions;
@@ -154,10 +154,12 @@ export function classifyWhatsApp(text: string): { kind: "complaint"; category: C
   return null;
 }
 
+/** Next number for ids like R-1043 or CMP-1044, starting at `start` in an empty hostel. */
+const nextNum = (ids: string[], prefix: number, start: number) => ids.reduce((m, id) => Math.max(m, Number(id.slice(prefix)) || 0), start - 1) + 1;
+
 export const useDemo = create<DemoState>()(
-  persist(
     (set, get) => ({
-      ...createSeed(),
+      ...emptySeed(),
       ...initialUI(),
 
       setHydrated: () => set({ hydrated: true }),
@@ -284,8 +286,7 @@ export const useDemo = create<DemoState>()(
 
       checkIn: (input) => {
         const s = get();
-        const maxId = Math.max(...s.residents.map((r) => Number(r.id.slice(2))));
-        const id = `R-${maxId + 1}`;
+        const id = `R-${nextNum(s.residents.map((r) => r.id), 2, 1001)}`;
         const today = todayISO();
         const r: Resident = {
           id, name: input.name, gender: input.gender, phone: input.phone, dob: input.dob, bloodGroup: input.bloodGroup, hometown: input.hometown,
@@ -324,8 +325,7 @@ export const useDemo = create<DemoState>()(
       addComplaint: ({ residentId, category, title, description, channel, photo, text }) => {
         const s = get();
         const r = s.residents.find((x) => x.id === residentId)!;
-        const maxNum = Math.max(...s.complaints.map((c) => Number(c.id.slice(4))));
-        const id = `CMP-${maxNum + 1}`;
+        const id = `CMP-${nextNum(s.complaints.map((c) => c.id), 4, 1001)}`;
         const at = nowISO();
         const c: Complaint = {
           id, residentId, roomId: s.beds.find((b) => b.id === r.bedId)!.roomId, category, title, description, channel, status: "new",
@@ -380,7 +380,7 @@ export const useDemo = create<DemoState>()(
         if (existing) {
           on = !existing.meals.includes(meal);
           const meals = on ? MEALS.filter((m) => existing.meals.includes(m) || m === meal) : existing.meals.filter((m) => m !== meal);
-          optOuts = meals.length ? s.optOuts.map((o) => (o === existing ? { ...o, meals } : o)) : s.optOuts.filter((o) => o !== existing);
+          optOuts = s.optOuts.map((o) => (o === existing ? { ...o, meals } : o));
         } else {
           on = true;
           optOuts = [...s.optOuts, { id: uid("OO"), residentId, date, meals: [meal], reason: source === "whatsapp" ? "Skipped on WhatsApp" : "Skipped in app", source, createdAt: nowISO() }];
@@ -395,7 +395,7 @@ export const useDemo = create<DemoState>()(
 
       requestLeave: (residentId, input) => {
         const s = get();
-        const id = `LV-${Math.max(...s.leaves.map((l) => Number(l.id.slice(3)))) + 1}`;
+        const id = `LV-${nextNum(s.leaves.map((l) => l.id), 3, 101)}`;
         const at = nowISO();
         const r = s.residents.find((x) => x.id === residentId)!;
         const lv: LeaveRequest = { id, residentId, ...input, status: "awaiting_parent", requestedAt: at, parentDecisionAt: null };
@@ -439,8 +439,11 @@ export const useDemo = create<DemoState>()(
                 return h >= fromH && h < toH;
               });
               if (meals.length) {
-                optOuts = optOuts.filter((o) => !(o.residentId === r.id && o.date === d));
-                optOuts = [...optOuts, { id: uid("OO"), residentId: r.id, date: d, meals, reason: lv.reason, source: "app", createdAt: at }];
+                const day = d;
+                const prev = optOuts.find((o) => o.residentId === r.id && o.date === day);
+                optOuts = prev
+                  ? optOuts.map((o) => (o === prev ? { ...o, meals, reason: lv.reason } : o))
+                  : [...optOuts, { id: uid("OO"), residentId: r.id, date: day, meals, reason: lv.reason, source: "app" as const, createdAt: at }];
               }
               d = addDays(d, 1);
             }
@@ -455,7 +458,7 @@ export const useDemo = create<DemoState>()(
 
       addExpense: (e) => {
         const s = get();
-        const id = `EXP-${String(s.expenses.length + 1).padStart(4, "0")}`;
+        const id = `EXP-${String(nextNum(s.expenses.map((e) => e.id), 4, 1)).padStart(4, "0")}`;
         set({ expenses: [...s.expenses, { ...e, id, status: "paid" }], lastEvent: { id: ++evId, type: "expense", expenseId: id } });
         return id;
       },
@@ -464,8 +467,9 @@ export const useDemo = create<DemoState>()(
         const s = get();
         const at = nowISO();
         const r = s.residents.find((x) => x.id === residentId)!;
-        const block = s.beds.find((b) => b.id === r.bedId)!.block;
-        const curfewMin = block === "C" ? 21 * 60 + 30 : 22 * 60;
+        const block = s.beds.find((b) => b.id === r.bedId)?.block;
+        const [ch, cm] = (hostel.blocks.find((b) => b.id === block)?.curfew ?? "22:00").split(":").map(Number);
+        const curfewMin = ch * 60 + cm;
         const mins = Number(at.slice(11, 13)) * 60 + Number(at.slice(14, 16));
         set({
           gate: [{ id: uid("G"), residentId, type: direction, at, method: "qr", late: direction === "in" && mins > curfewMin, passId: null }, ...s.gate],
@@ -517,24 +521,12 @@ export const useDemo = create<DemoState>()(
 
       waRead: (threadId) => set((s) => ({ whatsapp: s.whatsapp.map((t) => (t.id === threadId ? { ...t, unread: 0 } : t)) })),
 
-      reset: () => {
-        resetClock();
-        const role = get().role;
-        set({ ...createSeed(), ...initialUI(), hydrated: true, role, lastEvent: { id: ++evId, type: "reset" } });
+      reset: async () => {
+        const { resetDemoData } = await import("./sync");
+        await resetDemoData();
+        set({ waOpen: false, aiOpen: false, offline: false, lastEvent: { id: ++evId, type: "reset" } });
       },
-    }),
-    {
-      name: "stayos-demo-v1",
-      version: 1,
-      storage: createJSONStorage(() => localStorage),
-      skipHydration: true,
-      partialize: (s) => ({
-        beds: s.beds, residents: s.residents, invoices: s.invoices, expenses: s.expenses, complaints: s.complaints, gate: s.gate, leaves: s.leaves,
-        visitors: s.visitors, optOuts: s.optOuts, notices: s.notices, activity: s.activity, whatsapp: s.whatsapp, staffAttendance: s.staffAttendance,
-        role: s.role, raisedMonths: s.raisedMonths, offline: s.offline,
-      }),
-    }
-  )
+    })
 );
 
 export const now = nowMs;

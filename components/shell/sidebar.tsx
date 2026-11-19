@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/brand/logo";
-import { Avatar } from "@/components/common/avatar";
 import { useDemo } from "@/lib/store";
-import { hostel, staff } from "@/data";
+import { useSession } from "@/lib/session";
+import { AccountMenu } from "./account-menu";
 import { overdueInvoices } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { NAV } from "./nav";
@@ -19,9 +19,8 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
   const hydrated = useDemo((s) => s.hydrated);
   const openComplaints = useDemo((s) => s.complaints.filter((c) => c.status !== "resolved").length);
   const overdue = useDemo((s) => overdueInvoices(s.invoices, todayISO()).length);
-  const occupied = useDemo((s) => s.beds.filter((b) => b.status === "occupied").length);
+  const saving = useSession((s) => s.saving);
   const counts: Partial<Record<string, number>> = hydrated ? { complaints: openComplaints, rent: overdue } : {};
-  const person = role === "warden" ? { name: staff[0].name, title: t("wardenTitle") } : { name: hostel.owner.name, title: t("ownerTitle") };
 
   return (
     <nav aria-label={t("label")} className={cn("flex h-full flex-col bg-canvas", className)}>
@@ -67,20 +66,13 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
         })}
       </div>
       <div className="border-t border-line p-3">
-        <div className="flex items-center gap-2.5 rounded-md px-2 py-1.5">
-          <span className="grid size-8 place-items-center rounded-md bg-brand-tint text-xs font-semibold text-brand-tint-fg">AN</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-fg">{hostel.name}</p>
-            <p className="text-xs text-fg-3 tnum">{t("hostelMeta", { beds: 300, occupied: hydrated ? occupied : 260 })}</p>
-          </div>
-        </div>
-        <div className="mt-1 flex items-center gap-2.5 rounded-md px-2 py-1.5">
-          <Avatar name={person.name} size={32} />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-fg">{person.name}</p>
-            <p className="truncate text-xs text-fg-3">{person.title}</p>
-          </div>
-        </div>
+        {saving !== "idle" && (
+          <p className={cn("mb-1.5 flex items-center gap-1.5 px-2 text-xs", saving === "error" ? "text-danger-fg" : "text-fg-3")} role="status">
+            <span className={cn("size-1.5 rounded-full", saving === "saving" ? "animate-pulse bg-warning" : saving === "error" ? "bg-danger" : "bg-success")} aria-hidden />
+            {t(`saving.${saving}`)}
+          </p>
+        )}
+        <AccountMenu onNavigate={onNavigate} />
       </div>
     </nav>
   );

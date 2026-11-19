@@ -7,10 +7,20 @@ import {
 
 export const MEALS: Meal[] = ["breakfast", "lunch", "snacks", "dinner"];
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = ["food", "electricity", "water", "salaries", "maintenance", "internet"];
-export const TOTAL_BEDS = 300;
+/** Beds in the signed-in hostel. A live binding: refreshed by refreshIndexes() when a hostel loads. */
+export let TOTAL_BEDS = 0;
 
-export const roomById: Record<string, Room> = Object.fromEntries(rooms.map((r) => [r.id, r]));
-export const staffById: Record<string, Staff> = Object.fromEntries(staffList.map((s) => [s.id, s]));
+export const roomById: Record<string, Room> = {};
+export const staffById: Record<string, Staff> = {};
+
+/** Rebuild the lookups after the reference data changes (see setReferenceData). */
+export function refreshIndexes(bedCount: number) {
+  TOTAL_BEDS = bedCount;
+  for (const k of Object.keys(roomById)) delete roomById[k];
+  for (const k of Object.keys(staffById)) delete staffById[k];
+  for (const r of rooms) roomById[r.id] = r;
+  for (const s of staffList) staffById[s.id] = s;
+}
 
 export function indexBy<T extends { id: string }>(list: T[]) {
   const m: Record<string, T> = {};
@@ -41,11 +51,11 @@ export const isCurrent = (r: Resident) => r.status !== "checked_out";
 export function occupancy(beds: Bed[]) {
   const c = { occupied: 0, vacant: 0, reserved: 0, maintenance: 0 };
   for (const b of beds) c[b.status]++;
-  return { ...c, total: beds.length, rate: c.occupied / beds.length };
+  return { ...c, total: beds.length, rate: beds.length ? c.occupied / beds.length : 0 };
 }
 
 export function occupancyByBlock(beds: Bed[]) {
-  return (["A", "B", "C"] as const).map((block) => ({ block, ...occupancy(beds.filter((b) => b.block === block)) }));
+  return hostel.blocks.map(({ id: block }) => ({ block, ...occupancy(beds.filter((b) => b.block === block)) }));
 }
 
 export function bedLabel(bedId: string) {
@@ -144,6 +154,7 @@ export function pnl(invoices: Invoice[], expenses: Expense[], month: string) {
 export function occupancyTrend(residents: Resident[], months: string[], current: number) {
   return months.map((m, i) => {
     if (i === months.length - 1) return { month: m, rate: current, count: Math.round(current * TOTAL_BEDS) };
+    if (!TOTAL_BEDS) return { month: m, rate: 0, count: 0 };
     const mid = `${m}-15`;
     const count = residents.filter((r) => r.checkInDate <= mid && (!r.checkOutDate || r.status !== "checked_out" || r.checkOutDate >= mid)).length;
     return { month: m, rate: count / TOTAL_BEDS, count };
@@ -209,9 +220,11 @@ export function rebates(optOuts: MealOptOut[], month: string) {
   return out.sort((a, b) => b.amount - a.amount);
 }
 
+const NO_ITEM = { en: "Not set", ml: "നിശ്ചയിച്ചിട്ടില്ല", veg: true };
+const EMPTY_DAY = { day: 0, breakfast: NO_ITEM, lunch: NO_ITEM, snacks: NO_ITEM, dinner: NO_ITEM };
 export function menuFor(date: string) {
   const day = new Date(`${date}T12:00:00+05:30`).getDay();
-  return messMenu.menu.find((m) => m.day === day)!;
+  return messMenu.menu.find((m) => m.day === day) ?? EMPTY_DAY;
 }
 
 // ---------- complaints ----------

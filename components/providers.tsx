@@ -7,15 +7,16 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/lib/i18n";
 import { useDemo } from "@/lib/store";
+import { boot, useSession } from "@/lib/session";
+import { neon } from "@/lib/neon";
 import { EventToaster } from "@/components/shell/event-toaster";
 import { WhatsAppPanel } from "@/components/whatsapp/whatsapp-panel";
 import { TourOverlay } from "@/components/tour/tour-overlay";
 
-function StoreHydrator() {
+function SessionBoot() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __demo: typeof useDemo }).__demo = useDemo;
-    const p = useDemo.persist.rehydrate();
-    Promise.resolve(p).finally(() => useDemo.getState().setHydrated());
+    if (process.env.NODE_ENV !== "production") Object.assign(window, { __demo: useDemo, __session: useSession, __neon: neon });
+    boot();
   }, []);
   return null;
 }
@@ -26,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <I18nProvider>
         <MotionConfig reducedMotion="user" transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}>
           <TooltipProvider delayDuration={300}>
-            <StoreHydrator />
+            <SessionBoot />
             {children}
             <EventToaster />
             <WhatsAppPanel />

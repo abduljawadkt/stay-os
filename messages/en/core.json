@@ -6,14 +6,15 @@
     "language": "Language", "darkMode": "Switch to dark mode", "lightMode": "Switch to light mode", "whatsapp": "WhatsApp",
     "demoMenu": "Demo controls", "demoClock": "Demo clock", "guidedDemo": "Guided demo",
     "simulatePayment": "Simulate a UPI payment", "simulateComplaint": "Simulate a WhatsApp complaint", "simulateScan": "Simulate a gate QR scan", "simulateOffline": "Simulate offline",
-    "resetDemo": "Reset demo data", "resetTitle": "Reset the demo?", "resetBody": "Everything changed in this session is cleared. The hostel goes back to Friday 27 November, 10:24 AM.",
-    "resetConfirm": "Reset demo", "cancel": "Cancel", "openMenu": "Open menu", "menu": "Navigation", "skip": "Skip to content"
+    "resetDemo": "Reset demo data", "resetTitle": "Reset the demo?", "resetBody": "Every change made in this hostel is cleared for everyone using it, and the sample data is loaded again. The clock goes back to Friday 27 November, 10:24 AM.",
+    "resetConfirm": "Reset demo", "resetting": "Resetting…", "cancel": "Cancel", "openMenu": "Open menu", "menu": "Navigation", "skip": "Skip to content"
   },
   "nav": {
     "label": "Main", "home": "Home", "rooms": "Rooms & beds", "residents": "Residents", "rent": "Rent & invoices", "mess": "Mess", "complaints": "Complaints",
     "gate": "Gate pass & attendance", "expenses": "Expenses", "staff": "Staff", "reports": "Reports",
     "groups": { "operations": "Operations", "money": "Money", "team": "Team" },
-    "hostelMeta": "{occupied} of {beds} beds occupied", "ownerTitle": "Owner", "wardenTitle": "Chief warden"
+    "hostelMeta": "{occupied} of {beds} beds occupied", "ownerTitle": "Owner", "wardenTitle": "Chief warden",
+    "saving": { "saving": "Saving…", "saved": "All changes saved", "error": "Not saved yet. Retrying…" }
   },
   "states": { "errorTitle": "Couldn't load {what}", "errorBody": "Check your connection and try again.", "retry": "Try again", "loading": "Loading" },
   "invoiceState": { "paid": "Paid", "overdue": "Overdue {days}d", "due_today": "Due today", "due": "Due in {days}d" },

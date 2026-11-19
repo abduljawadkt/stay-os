@@ -12,7 +12,7 @@ import { ChartTooltip, axisProps } from "@/components/dashboard/chart-bits";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/lib/store";
 import { useFormat, useScreenState } from "@/lib/hooks";
-import { EXPENSE_CATEGORIES, collectionTrend, occupancy, occupancyTrend, pnl, prevMonth, monthSummary } from "@/lib/selectors";
+import { EXPENSE_CATEGORIES, TOTAL_BEDS, collectionTrend, occupancy, occupancyTrend, pnl, prevMonth, monthSummary } from "@/lib/selectors";
 import { downloadCsv } from "@/lib/export";
 import { demo } from "@/config/demo";
 import { hostel } from "@/data";
@@ -119,7 +119,7 @@ function Reports() {
                       <CartesianGrid vertical={false} stroke="var(--line)" />
                       <XAxis dataKey="label" {...axisProps} />
                       <YAxis {...axisProps} width={40} domain={[70, 100]} tickFormatter={(v) => `${v}%`} />
-                      <Tooltip cursor={{ stroke: "var(--line-strong)" }} content={(p) => <ChartTooltip {...(p as object)} rows={[{ key: "pct", name: t("occupancy"), color: "var(--brand)", format: (v) => `${v}%` }, { key: "count", name: t("beds"), color: "transparent", format: (v) => `${v} / 300` }]} />} />
+                      <Tooltip cursor={{ stroke: "var(--line-strong)" }} content={(p) => <ChartTooltip {...(p as object)} rows={[{ key: "pct", name: t("occupancy"), color: "var(--brand)", format: (v) => `${v}%` }, { key: "count", name: t("beds"), color: "transparent", format: (v) => `${v} / ${TOTAL_BEDS}` }]} />} />
                       <Area type="monotone" dataKey="pct" stroke="var(--brand)" strokeWidth={2} fill="url(#occFill)" dot={{ r: 3, fill: "var(--brand)", strokeWidth: 0 }} activeDot={{ r: 5, stroke: "var(--surface)", strokeWidth: 2 }} isAnimationActive={false} />
                     </AreaChart>
                   </ResponsiveContainer>

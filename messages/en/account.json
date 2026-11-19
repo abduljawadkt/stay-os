@@ -1,0 +1,38 @@
+{
+  "account": {
+    "gate": {
+      "loading": "Signing you in…", "loadingHostel": "Opening {name}…", "errorTitle": "Couldn't open this hostel", "errorBody": "Check your connection and try again.",
+      "retry": "Try again", "signOut": "Sign out", "unconfiguredTitle": "Database not connected",
+      "unconfiguredBody": "Set NEXT_PUBLIC_NEON_AUTH_URL and NEXT_PUBLIC_NEON_DATA_API_URL, then rebuild."
+    },
+    "menu": { "hostels": "Hostels", "liveDemo": "Shared live demo", "current": "Current hostel", "newHostel": "Add a hostel", "settings": "Settings & billing", "signOut": "Sign out" },
+    "login": {
+      "title": "Sign in to {brand}", "subtitle": "Owners, wardens, residents and parents all sign in here.",
+      "email": "Email", "password": "Password", "submit": "Sign in", "noAccount": "New to {brand}?", "createAccount": "Start a free trial",
+      "demoTitle": "Try the live demo", "demoBody": "One click signs you in to Al Noor Residency, a 300-bed sample hostel shared by everyone trying {brand}.",
+      "demoOwner": "Owner", "demoOwnerMeta": "Rasheed · full dashboard, rent, reports",
+      "demoWarden": "Warden", "demoWardenMeta": "Ashraf · rooms, complaints, gate",
+      "demoResident": "Resident", "demoResidentMeta": "Anjali · pay rent, skip meals, raise a complaint",
+      "demoParent": "Parent", "demoParentMeta": "Rajesh · approve leave, fees, alerts",
+      "demoNote": "Use two devices: pay as Anjali on a phone and watch the owner's dashboard update.",
+      "errorRequired": "Enter your email and password.", "signingIn": "Signing in…"
+    },
+    "signup": {
+      "title": "Start your 14-day free trial", "subtitle": "No card needed. Set up your hostel in two minutes, with sample data to explore first.",
+      "name": "Your name", "email": "Work email", "password": "Password", "passwordHint": "At least 8 characters.",
+      "submit": "Create account", "haveAccount": "Already have an account?", "signIn": "Sign in",
+      "errorName": "Enter your name.", "errorEmail": "Enter a valid email address.", "errorPassword": "Use at least 8 characters.",
+      "terms": "By creating an account you agree to the terms of service and privacy policy."
+    },
+    "onboarding": {
+      "title": "Set up your hostel", "subtitle": "You can change all of this later in Settings.",
+      "name": "Hostel name", "namePlaceholder": "e.g. Green Valley Hostel", "city": "City", "cityPlaceholder": "e.g. Kochi",
+      "startWith": "Start with", "sampleTitle": "Sample data", "sampleBody": "A full 300-bed hostel with six months of rent, mess, complaints and gate history. Best for exploring.",
+      "emptyTitle": "An empty hostel", "emptyBody": "Rooms and beds only. Add your own residents.",
+      "blocks": "Blocks", "floors": "Floors per block", "layoutHint": "{rooms} rooms, {beds} beds (10 rooms per floor). Rename or edit rooms later.",
+      "submit": "Create hostel", "creating": "Creating your hostel…", "errorName": "Enter the hostel name.",
+      "inviteTitle": "Joining someone's hostel?", "inviteBody": "Enter the invite code from the owner or warden.", "inviteCode": "Invite code", "inviteSubmit": "Join",
+      "orDemo": "Or open the shared live demo", "back": "Back to dashboard", "signedInAs": "Signed in as {email}", "signOut": "Sign out"
+    }
+  }
+}

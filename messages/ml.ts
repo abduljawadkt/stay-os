@@ -11,6 +11,7 @@ import mobile from "./ml/mobile.json";
 import whatsapp from "./ml/whatsapp.json";
 import ai from "./ml/ai.json";
 import tour from "./ml/tour.json";
+import account from "./ml/account.json";
 
-const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money, ...mobile, ...whatsapp, ...ai, ...tour };
+const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money, ...mobile, ...whatsapp, ...ai, ...tour, ...account };
 export default messages;

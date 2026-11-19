@@ -1,31 +1,42 @@
-// Single entry point for the demo's mock data. Everything the app shows starts here.
+// The signed-in hostel's reference data. It is loaded from the database (lib/sync.ts) before any
+// screen renders, then shared as plain objects so screens can read it without prop drilling.
+// The JSON files next to this one are the sample hostel that `npm run db:setup` loads into Neon.
 import type {
   Activity, Bed, Complaint, Expense, GateEvent, Hostel, Invoice, LeaveRequest, Mess, Notice, Resident, Room, Staff, Visitor, WAThread,
 } from "./types";
-import hostelJson from "./hostel.json";
-import roomsJson from "./rooms.json";
-import bedsJson from "./beds.json";
-import residentsJson from "./residents.json";
-import invoicesJson from "./invoices.json";
-import expensesJson from "./expenses.json";
-import staffJson from "./staff.json";
-import complaintsJson from "./complaints.json";
-import gateJson from "./gate.json";
-import leavesJson from "./leaves.json";
-import visitorsJson from "./visitors.json";
-import messJson from "./mess.json";
-import noticesJson from "./notices.json";
-import activityJson from "./activity.json";
-import whatsappJson from "./whatsapp.json";
 
 export * from "./types";
 
-export const hostel = hostelJson as unknown as Hostel;
-export const rooms = roomsJson as unknown as Room[];
-export const staff = staffJson as unknown as Staff[];
-export const messMenu = messJson as unknown as Mess;
+const EMPTY_MESS: Mess = {
+  menu: [],
+  plateCost: { breakfast: 0, lunch: 0, snacks: 0, dinner: 0 },
+  rebatePerDay: 0,
+  rebateMinDays: 3,
+  cutoffs: { breakfast: "21:00", lunch: "09:00", snacks: "13:00", dinner: "15:00" },
+  servingTimes: { breakfast: "07:30–09:00", lunch: "12:30–14:00", snacks: "16:30–17:30", dinner: "19:30–21:00" },
+  specials: [],
+  optOuts: [],
+};
 
-/** The mutable part of the demo. The store starts from this and "Reset demo data" returns to it. */
+export const hostel: Hostel = {
+  id: "", name: "", city: "", address: "", phone: "", whatsapp: "", upiId: "", bank: "",
+  owner: { name: "", phone: "" }, wardenId: "", blocks: [],
+  rentByType: { single: 0, double: 0, triple: 0, six: 0 }, messFee: 0, deposit: 0, dueDay: 7,
+  now: "", today: "", months: [],
+};
+export const rooms: Room[] = [];
+export const staff: Staff[] = [];
+export const messMenu: Mess = structuredClone(EMPTY_MESS);
+
+/** Replace the shared reference data with another hostel's. */
+export function setReferenceData(next: { hostel: Hostel; rooms: Room[]; staff: Staff[]; mess: Partial<Mess> }) {
+  Object.assign(hostel, next.hostel);
+  rooms.splice(0, rooms.length, ...next.rooms);
+  staff.splice(0, staff.length, ...next.staff);
+  Object.assign(messMenu, structuredClone(EMPTY_MESS), next.mess, { optOuts: [] });
+}
+
+/** The part of a hostel that changes while people use it. Lives in the store and syncs to the database. */
 export interface Seed {
   beds: Bed[];
   residents: Resident[];
@@ -42,20 +53,6 @@ export interface Seed {
   staffAttendance: Record<string, Staff["attendance"]>;
 }
 
-export function createSeed(): Seed {
-  return structuredClone({
-    beds: bedsJson as unknown as Bed[],
-    residents: residentsJson as unknown as Resident[],
-    invoices: invoicesJson as unknown as Invoice[],
-    expenses: expensesJson as unknown as Expense[],
-    complaints: complaintsJson as unknown as Complaint[],
-    gate: gateJson as unknown as GateEvent[],
-    leaves: leavesJson as unknown as LeaveRequest[],
-    visitors: visitorsJson as unknown as Visitor[],
-    optOuts: (messJson as unknown as Mess).optOuts,
-    notices: noticesJson as unknown as Notice[],
-    activity: activityJson as unknown as Activity[],
-    whatsapp: whatsappJson as unknown as WAThread[],
-    staffAttendance: Object.fromEntries((staffJson as unknown as Staff[]).map((s) => [s.id, s.attendance])),
-  });
+export function emptySeed(): Seed {
+  return { beds: [], residents: [], invoices: [], expenses: [], complaints: [], gate: [], leaves: [], visitors: [], optOuts: [], notices: [], activity: [], whatsapp: [], staffAttendance: {} };
 }

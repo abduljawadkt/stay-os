@@ -71,7 +71,8 @@ export function ParentHome() {
     const late = events.filter((e) => e.late && e.at >= since).length;
     return { meals: 28 - skipped, late, nights: 7 - leaves.filter((l) => l.residentId === child.id && l.status === "approved" && l.from >= since).length };
   }, [optOuts, events, leaves, child.id, today]);
-  const warden = child.bedId.startsWith("C") ? staff.find((s) => s.id === "S-02")! : staff[0];
+  const blockWarden = hostel.blocks.find((b) => b.id === child.bedId.split("-")[0])?.wardenId;
+  const warden = staff.find((s) => s.id === blockWarden) ?? staff.find((s) => s.role === "warden") ?? staff[0];
 
   return (
     <>
@@ -97,7 +98,7 @@ export function ParentHome() {
         )}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Button asChild variant="secondary" size="lg"><a href={`tel:${child.phone.replace(/\s/g, "")}`}><Phone /> {t("callChild", { name: child.name.split(" ")[0] })}</a></Button>
-          <Button asChild variant="secondary" size="lg"><a href={`tel:${warden.phone.replace(/\s/g, "")}`}><Phone /> {t("callWarden")}</a></Button>
+          {warden && <Button asChild variant="secondary" size="lg"><a href={`tel:${warden.phone.replace(/\s/g, "")}`}><Phone /> {t("callWarden")}</a></Button>}
         </div>
       </MCard>
 

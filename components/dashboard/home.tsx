@@ -16,6 +16,7 @@ import { Avatar } from "@/components/common/avatar";
 import { Button } from "@/components/ui/button";
 import { ChartTooltip, LegendItem, axisProps } from "./chart-bits";
 import { useDemo } from "@/lib/store";
+import { useSession } from "@/lib/session";
 import { useUI } from "@/components/shell/ui-store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import {
@@ -33,6 +34,7 @@ export function HomeScreen() {
   const now = useNow(30000);
   const { loading, error, retry } = useScreenState("home");
   const role = useDemo((s) => s.role);
+  const userName = useSession((s) => s.user?.name ?? "");
   const beds = useDemo((s) => s.beds);
   const invoices = useDemo((s) => s.invoices);
   const expenses = useDemo((s) => s.expenses);
@@ -61,7 +63,8 @@ export function HomeScreen() {
 
   const hour = Number(toIST(now).slice(11, 13));
   const greet = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
-  const name = role === "warden" ? staff[0].name.split(" ")[1] : hostel.owner.name.split(" ")[0];
+  const warden = staff.find((s) => s.id === hostel.wardenId) ?? staff.find((s) => s.role === "warden");
+  const name = (role === "warden" ? warden?.name.split(" ")[1] ?? warden?.name : hostel.owner.name.split(" ")[0]) || userName.split(" ")[0];
   const owner = role !== "warden";
 
   return (

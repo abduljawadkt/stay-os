@@ -4,9 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { useDemo, type Role } from "@/lib/store";
+import { allowedViews, useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export const ROLES: Role[] = ["owner", "warden", "resident", "parent"];
+/** The views this member may switch between (staff can preview the resident and parent apps). */
+export const useViews = () => allowedViews(useSession((s) => s.membership?.role));
 
 export function useRoleNavigation() {
   const router = useRouter();
@@ -25,9 +28,11 @@ export function RoleSwitcher({ className }: { className?: string }) {
   const role = useDemo((s) => s.role);
   const hydrated = useDemo((s) => s.hydrated);
   const go = useRoleNavigation();
+  const views = useViews();
+  if (views.length < 2) return null;
   return (
     <div role="radiogroup" aria-label={t("label")} data-tour="role-switcher" className={cn("relative flex rounded-md bg-surface-2 p-0.5", className)}>
-      {ROLES.map((r) => {
+      {views.map((r) => {
         const active = hydrated && role === r;
         return (
           <button
@@ -38,12 +43,12 @@ export function RoleSwitcher({ className }: { className?: string }) {
             onKeyDown={(e) => {
               if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
               e.preventDefault();
-              const i = ROLES.indexOf(role);
-              const next = ROLES[(i + (e.key === "ArrowRight" ? 1 : ROLES.length - 1)) % ROLES.length];
+              const i = views.indexOf(role);
+              const next = views[(i + (e.key === "ArrowRight" ? 1 : views.length - 1)) % views.length];
               go(next);
-              (e.currentTarget.parentElement?.querySelectorAll("button")[ROLES.indexOf(next)] as HTMLButtonElement | undefined)?.focus();
+              (e.currentTarget.parentElement?.querySelectorAll("button")[views.indexOf(next)] as HTMLButtonElement | undefined)?.focus();
             }}
-            tabIndex={active || (!hydrated && r === "owner") ? 0 : -1}
+            tabIndex={active || (!hydrated && r === views[0]) ? 0 : -1}
             className={cn(
               "relative z-0 h-7 rounded-sm px-3 text-small font-medium transition-colors duration-[120ms]",
               active ? "text-fg" : "text-fg-2 hover:text-fg"
