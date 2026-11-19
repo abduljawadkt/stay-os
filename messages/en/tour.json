@@ -1,0 +1,36 @@
+{
+  "tour": {
+    "progress": "{n} of {total}", "skip": "Skip tour", "reset": "Reset demo data", "again": "Play again", "explore": "Explore on my own",
+    "cta": { "next": "Next", "doIt": "Do it", "pay": "Pay by UPI", "send": "Send reminders", "approve": "Approve", "finish": "Finish" },
+    "steps": {
+      "welcome": { "title": "A morning at Al Noor Residency, with {brand}", "body": "One hostel, a few minutes: a new resident checks in, month-end billing goes out on WhatsApp, a complaint gets fixed, the kitchen cooks less, and the owner asks a question in Malayalam. Everything here is live." },
+      "kpis": { "title": "Everything the owner checks each morning", "body": "Occupancy, billing, collections, profit and complaints update on their own as payments and requests come in. No spreadsheets, no calls to the warden." },
+      "attention": { "title": "What needs you today", "body": "From overdue rent to leave requests waiting for parents, each line opens the right screen." },
+      "checkin": { "title": "A new resident walks in", "body": "Aiswarya, a software engineer at UL Cyberpark, is moving into Block C. Check-in starts from the floor plan." },
+      "details": { "title": "Details in seconds", "body": "Name, phone, job and parent contact. In real use the resident fills this on her phone before arriving." },
+      "digilocker": { "title": "Aadhaar KYC through DigiLocker", "body": "No photocopies. She approves on her phone and StayOS fetches the verified Aadhaar record. Only the last four digits are stored." },
+      "verified": { "title": "Verified", "body": "Name, date of birth and address now come straight from DigiLocker. The police verification form is filled in from this." },
+      "bed": { "title": "The best bed, suggested", "body": "Vacant beds in the right block come first, with roommates' colleges and companies, so the warden can place people sensibly." },
+      "confirm": { "title": "First invoice, done for you", "body": "Pro-rated rent and mess, plus the refundable deposit. A welcome message with the UPI link goes to her WhatsApp, and to her father's." },
+      "floor": { "title": "Her bed lights up on the floor plan", "body": "Occupancy, invoices and the police form update at the same moment. Drag any resident to another bed to move them." },
+      "raise": { "title": "Month-end in one click", "body": "It's the 27th. Instead of a day of WhatsApp messages and a notebook, the owner raises every December invoice at once." },
+      "raiseConfirm": { "title": "Mess rebates applied automatically", "body": "Residents who were away three or more days in a row get their rebate on the invoice. Nobody has to work it out." },
+      "raised": { "title": "December is billed", "body": "Every invoice is out with its own UPI link. Collections start the moment people pay." },
+      "remind": { "title": "Now, November's late payers", "body": "Reminders go to everyone overdue on WhatsApp in one go. No awkward phone calls." },
+      "remindPreview": { "title": "Personal, not spammy", "body": "Each resident gets their own amount, days overdue and UPI link, from the hostel's verified WhatsApp Business number." },
+      "waReminder": { "title": "It lands on her phone", "body": "This is Anjali's chat. She can pay from the link in seconds, or reply and the StayOS bot answers." },
+      "upi": { "title": "She pays. Watch the row.", "body": "Anjali taps Pay and enters her UPI PIN. The bank confirms and StayOS marks the invoice paid on its own. No screenshots, no manual entry." },
+      "receipt": { "title": "Receipt sent automatically", "body": "She and her father both get a receipt with the UPI reference. The owner's collection numbers have already moved." },
+      "complaintIn": { "title": "A complaint comes in on WhatsApp", "body": "Arjun in B-108 writes in Manglish with a photo. The StayOS bot understands it, logs an electrical complaint and replies with a 4-hour SLA." },
+      "complaintCard": { "title": "On the board, with a live SLA timer", "body": "No complaint lives only in someone's phone anymore. The warden sees it, with the clock counting down." },
+      "complaintStart": { "title": "Assign and start", "body": "Biju the electrician is assigned and Arjun is told on WhatsApp that help is on the way." },
+      "complaintResolve": { "title": "Fixed and closed", "body": "One tap marks it resolved, and the SLA result goes into the month's report." },
+      "complaintWa": { "title": "The resident stays in the loop", "body": "Every status change reached Arjun on WhatsApp automatically, ending with a request to rate the fix." },
+      "messSkip": { "title": "Anjali skips dinner from her phone", "body": "She'll be at the library late, so she switches dinner off in the resident app. It takes a second." },
+      "headcount": { "title": "The kitchen cooks less, right away", "body": "Tonight's dinner count drops instantly. The head cook sees the real number before the 4 PM cut-off." },
+      "waste": { "title": "Food waste saved, in rupees", "body": "Every skipped meal that wasn't cooked is money saved. Rebates for long absences are handled automatically." },
+      "ask": { "title": "Ask in Malayalam", "body": "Rasheed types “who still owes fees this month?” in Malayalam and gets the answer from live data, with a button to act on it." },
+      "done": { "title": "That's {brand}", "body": "Check-in with KYC, billing, UPI collection, WhatsApp, complaints, mess and an assistant that speaks Malayalam, for owners, wardens, residents and parents. On the web and on iPhone." }
+    }
+  }
+}

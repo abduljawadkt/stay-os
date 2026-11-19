@@ -176,7 +176,7 @@ export function RentScreen() {
               {bucket && <span className="text-small text-fg-2">{t("aging.showing", { bucket: t(`aging.${bucket}`) })}</span>}
               <div className="relative sm:ml-auto sm:w-72">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-3" aria-hidden />
-                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} aria-label={t("search")} className="pl-8" />
+                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} aria-label={t("search")} className="pl-8" data-tour="invoice-search" />
               </div>
             </div>
             {loading ? <TableSkeleton rows={10} cols={6} /> : order.length === 0 ? (
@@ -344,7 +344,7 @@ function RaiseDialog({ open, onOpenChange, preview, onRaise, onDone }: { open: b
         )}
         <DialogFooter>
           {phase === "confirm" && <><Button variant="quiet" onClick={() => onOpenChange(false)}>{t("cancel")}</Button><Button variant="primary" onClick={start} data-tour="raise-confirm"><Zap /> {t("confirm")}</Button></>}
-          {phase === "done" && <Button variant="primary" onClick={() => { onDone(); onOpenChange(false); }}>{t("view")}</Button>}
+          {phase === "done" && <Button variant="primary" onClick={() => { onDone(); onOpenChange(false); }} data-tour="raise-view">{t("view")}</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

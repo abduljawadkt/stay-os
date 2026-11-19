@@ -230,7 +230,7 @@ function ComplaintDrawer({ id, onClose }: { id: string | null; onClose: () => vo
                   {c.updates.map((u, i) => (
                     <li key={i} className="relative">
                       <span className={cn("absolute top-1 -left-[25px] grid size-2.5 place-items-center rounded-full ring-4 ring-surface", u.kind === "resolved" ? "bg-success" : u.kind === "created" ? "bg-brand" : "bg-fg-3")} aria-hidden />
-                      <p className="text-sm text-fg">{t(`event.${u.kind}`, { channel: tch(u.by as Channel), name: staffById[u.by]?.name ?? u.by })}</p>
+                      <p className="text-sm text-fg">{t(`event.${u.kind}`, { channel: u.kind === "created" ? tch(u.by as Channel) : "", name: staffById[u.by]?.name ?? u.by })}</p>
                       <p className="text-xs text-fg-3 tnum">{f.weekday(u.at)}, {f.time(u.at)}</p>
                     </li>
                   ))}

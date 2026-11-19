@@ -6,9 +6,7 @@ import { useTranslations } from "next-intl";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { WhatsAppPanel } from "@/components/whatsapp/whatsapp-panel";
 import { AskStayOS } from "@/components/assistant/ask-stayos";
-import { TourOverlay } from "@/components/tour/tour-overlay";
 import { ResidentDrawer, BedDrawer } from "@/components/residents/resident-drawer";
 import { CheckInDialog } from "@/components/residents/check-in-dialog";
 import { useDemo } from "@/lib/store";
@@ -51,9 +49,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <ResidentDrawer />
       <BedDrawer />
       <CheckInDialog />
-      <WhatsAppPanel />
       <AskStayOS />
-      <TourOverlay />
     </div>
   );
 }

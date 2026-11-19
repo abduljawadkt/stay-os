@@ -1,5 +1,6 @@
 "use client";
 import { create } from "zustand";
+import { useDemo } from "@/lib/store";
 
 interface TourState {
   active: boolean;
@@ -11,7 +12,14 @@ interface TourState {
 export const useTour = create<TourState>((set) => ({
   active: false,
   index: 0,
-  start: () => set({ active: true, index: 0 }),
+  // the story always starts from fresh data
+  start: () => {
+    const d = useDemo.getState();
+    d.reset();
+    d.closeWhatsApp();
+    d.setAiOpen(false);
+    set({ active: true, index: 0 });
+  },
   stop: () => set({ active: false, index: 0 }),
   goto: (index) => set({ index }),
 }));

@@ -34,7 +34,6 @@ export function CheckInDialog() {
   const beds = useDemo((s) => s.beds);
   const residents = useDemo((s) => s.residents);
   const checkIn = useDemo((s) => s.checkIn);
-  const tourActive = useDemo((s) => s.tourActive);
 
   const preset = demo.checkIn;
   const [step, setStep] = useState<Step>(0);
@@ -104,7 +103,7 @@ export function CheckInDialog() {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && close()}>
-      <DialogContent className="gap-0 p-0 sm:max-w-[620px]" data-tour="checkin-dialog" onInteractOutside={(e) => tourActive && e.preventDefault()}>
+      <DialogContent className="gap-0 p-0 sm:max-w-[620px]" data-tour="checkin-dialog">
         <div className="border-b border-line px-6 pt-5 pb-4">
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="mt-1 text-small text-fg-2">{t("subtitle")}</DialogDescription>
@@ -165,7 +164,7 @@ export function CheckInDialog() {
                         <p className="text-sm font-semibold text-fg">{t("kyc.title")}</p>
                         <p className="mt-0.5 text-small text-fg-2">{t("kyc.body", { phone: form.phone })}</p>
                       </div>
-                      {kyc === -1 && <Button variant="primary" onClick={runKyc}>{t("kyc.start")}</Button>}
+                      {kyc === -1 && <Button variant="primary" onClick={runKyc} data-tour="kyc-start">{t("kyc.start")}</Button>}
                       {kyc === 4 && <Badge variant="success"><ShieldCheck aria-hidden /> {t("kyc.verified")}</Badge>}
                     </div>
                     {kyc >= 0 && (
@@ -265,19 +264,19 @@ export function CheckInDialog() {
           {step === 4 ? (
             <>
               <Button variant="quiet" onClick={() => { close(); router.push(`/dashboard/residents/profile/?id=${createdId}&tab=police`); }}>{t("done.police")}</Button>
-              <Button variant="primary" onClick={() => { const b = created?.bedId ?? ""; close(); router.push(`/dashboard/rooms/?block=${b[0]}&floor=${b[2]}&room=${b.split("-").slice(0, 2).join("-")}`); }}>{t("done.floor")}</Button>
+              <Button variant="primary" data-tour="checkin-floor" onClick={() => { const b = created?.bedId ?? ""; close(); router.push(`/dashboard/rooms/?block=${b[0]}&floor=${b[2]}&room=${b.split("-").slice(0, 2).join("-")}`); }}>{t("done.floor")}</Button>
             </>
           ) : (
             <>
               <Button variant="quiet" onClick={() => (step === 0 ? close() : setStep((step - 1) as Step))}>{step === 0 ? t("cancel") : t("back")}</Button>
-              {step === 0 && <Button variant="primary" onClick={() => validate() && setStep(1)}>{t("next")}</Button>}
+              {step === 0 && <Button variant="primary" onClick={() => validate() && setStep(1)} data-tour="checkin-next0">{t("next")}</Button>}
               {step === 1 && (
                 <div className="flex gap-2">
                   {kyc < 4 && <Button variant="quiet" onClick={() => setStep(2)}>{t("kyc.later")}</Button>}
                   <Button variant="primary" disabled={kyc !== 4} onClick={() => setStep(2)} data-tour="checkin-next">{t("next")}</Button>
                 </div>
               )}
-              {step === 2 && <Button variant="primary" disabled={!bed} onClick={() => setStep(3)}>{t("next")}</Button>}
+              {step === 2 && <Button variant="primary" disabled={!bed} onClick={() => setStep(3)} data-tour="checkin-next2">{t("next")}</Button>}
               {step === 3 && <Button variant="primary" onClick={complete} data-tour="checkin-complete">{t("complete")}</Button>}
             </>
           )}

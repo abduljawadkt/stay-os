@@ -8,8 +8,6 @@ import { useTheme } from "next-themes";
 import { QRCodeSVG } from "qrcode.react";
 import { BatteryFull, Signal, Wifi, CheckCircle2 } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
-import { WhatsAppPanel } from "@/components/whatsapp/whatsapp-panel";
-import { TourOverlay } from "@/components/tour/tour-overlay";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo, type Role } from "@/lib/store";
 import { useFormat, useNow } from "@/lib/hooks";
@@ -56,8 +54,6 @@ export function MobileShell({ role, tabs, children }: { role: Extract<Role, "res
           <div aria-hidden className="pointer-events-none absolute bottom-2 left-1/2 hidden h-[5px] w-32 -translate-x-1/2 rounded-full bg-fg/80 md:block" />
         </div>
       </div>
-      <WhatsAppPanel />
-      <TourOverlay />
     </div>
   );
 }

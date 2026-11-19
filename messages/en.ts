@@ -8,6 +8,9 @@ import complaints from "./en/complaints.json";
 import gate from "./en/gate.json";
 import money from "./en/money.json";
 import mobile from "./en/mobile.json";
+import whatsapp from "./en/whatsapp.json";
+import ai from "./en/ai.json";
+import tour from "./en/tour.json";
 
-const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money, ...mobile };
+const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money, ...mobile, ...whatsapp, ...ai, ...tour };
 export default messages;
