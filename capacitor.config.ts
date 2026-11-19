@@ -13,6 +13,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     StatusBar: { overlaysWebView: true, style: "DEFAULT" },
+    // sign-in and data requests go through native HTTP so iOS keeps the Neon Auth session cookie
+    CapacitorHttp: { enabled: true },
+    CapacitorCookies: { enabled: true },
   },
 };
 
