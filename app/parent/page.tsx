@@ -1,2 +1,10 @@
 import { ParentHome } from "@/components/mobile/parent";
-export default function Page() { return <ParentHome />; }
+import { AccountFooter } from "@/components/auth/account-footer";
+export default function Page() {
+  return (
+    <>
+      <ParentHome />
+      <AccountFooter />
+    </>
+  );
+}

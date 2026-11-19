@@ -116,6 +116,7 @@ function Onboarding() {
                   type="button"
                   role="radio"
                   aria-checked={sample === o.v}
+                  aria-label={o.title}
                   onClick={() => setSample(o.v)}
                   className={cn(
                     "flex flex-col items-start gap-1 rounded-lg border bg-surface p-3.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-brand",

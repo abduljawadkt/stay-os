@@ -1,6 +1,6 @@
-import { BedDouble, ChartNoAxesColumn, DoorOpen, Home, IndianRupee, MessageSquareWarning, ReceiptText, Soup, UserCog, Users } from "lucide-react";
+import { BedDouble, ChartNoAxesColumn, DoorOpen, Home, IndianRupee, MessageSquareWarning, ReceiptText, Settings, Soup, UserCog, Users } from "lucide-react";
 
-export type NavKey = "home" | "rooms" | "residents" | "rent" | "mess" | "complaints" | "gate" | "expenses" | "staff" | "reports";
+export type NavKey = "home" | "rooms" | "residents" | "rent" | "mess" | "complaints" | "gate" | "expenses" | "staff" | "reports" | "settings";
 export const NAV: { group: "overview" | "operations" | "money" | "team"; items: { key: NavKey; href: string; icon: React.ElementType; ownerOnly?: boolean }[] }[] = [
   { group: "overview", items: [{ key: "home", href: "/dashboard/", icon: Home }] },
   {
@@ -21,5 +21,5 @@ export const NAV: { group: "overview" | "operations" | "money" | "team"; items: 
       { key: "reports", href: "/dashboard/reports/", icon: ChartNoAxesColumn, ownerOnly: true },
     ],
   },
-  { group: "team", items: [{ key: "staff", href: "/dashboard/staff/", icon: UserCog }] },
+  { group: "team", items: [{ key: "staff", href: "/dashboard/staff/", icon: UserCog }, { key: "settings", href: "/dashboard/settings/", icon: Settings, ownerOnly: true }] },
 ];

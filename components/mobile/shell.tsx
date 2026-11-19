@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { QRCodeSVG } from "qrcode.react";
-import { BatteryFull, Signal, Wifi, CheckCircle2 } from "lucide-react";
+import { BatteryFull, Signal, Wifi, CheckCircle2, Users } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
+import { EmptyState } from "@/components/common/states";
+import { isStaffRole, useSession } from "@/lib/session";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo, type Role } from "@/lib/store";
 import { useFormat, useNow } from "@/lib/hooks";
@@ -30,6 +32,15 @@ export function MobileShell({ role, tabs, children }: { role: Extract<Role, "res
   const current = useDemo((s) => s.role);
   const waOpen = useDemo((s) => s.waOpen);
   const { resolvedTheme } = useTheme();
+  const staffView = useSession((s) => isStaffRole(s.membership?.role));
+  const residents = useDemo((s) => s.residents);
+  const te = useTranslations("account.empty");
+  // the apps show one resident; in a new hostel that is the first one checked in
+  if (!residents.some((r) => r.id === demo.residentId)) {
+    const first = residents.find((r) => r.status !== "checked_out");
+    if (first) demo.residentId = first.id;
+  }
+  const hasResident = residents.some((r) => r.id === demo.residentId);
   useEffect(() => {
     if (hydrated && current !== role) setRole(role);
   }, [hydrated, current, role, setRole]);
@@ -44,11 +55,13 @@ export function MobileShell({ role, tabs, children }: { role: Extract<Role, "res
     <div className="flex min-h-dvh flex-col bg-canvas">
       <div className="demo-chrome"><TopBar variant="app" /></div>
       <div className={cn("flex flex-1 items-start justify-center gap-12 transition-[padding] duration-300 md:px-6 md:py-8 xl:py-10", waOpen && "2xl:pr-[396px]")}>
-        <Explainer role={role} />
+        {staffView && <Explainer role={role} />}
         <div className="phone-frame relative h-[calc(100dvh-56px)] w-full overflow-hidden bg-canvas md:h-[844px] md:max-h-[calc(100dvh-120px)] md:min-h-[640px] md:w-[390px] md:shrink-0 md:rounded-[52px] md:border-[10px] md:border-[#0b0b0a] md:shadow-[0_30px_80px_-20px_rgb(0_0_0/0.35),0_0_0_1px_rgb(255_255_255/0.06)_inset] dark:md:border-[#1d1d1b]">
           <StatusBar />
           <div ref={scroller} id="app-scroll" className="no-scrollbar h-full overflow-y-auto overscroll-contain pb-[calc(76px+env(safe-area-inset-bottom))] md:pt-11">
-            <div className="pt-safe">{children}</div>
+            <div className="pt-safe">
+              {hasResident ? children : <EmptyState icon={Users} title={te("noResidentTitle")} body={te("noResidentBody")} className="min-h-[60vh]" />}
+            </div>
           </div>
           <BottomTabs tabs={tabs} />
           <div aria-hidden className="pointer-events-none absolute bottom-2 left-1/2 hidden h-[5px] w-32 -translate-x-1/2 rounded-full bg-fg/80 md:block" />

@@ -63,12 +63,21 @@ function nextMonthOf(ym: string) {
 /** Read a hostel from the database and put it in the app. */
 export async function loadOrg(id: string, membership: Membership): Promise<OrgRow> {
   const staffRole = membership.role === "owner" || membership.role === "warden";
+  // The org row first, on its own: it also warms the token, and a waking database can answer the very
+  // first request before the user's identity is applied (it then sees no rows), so that one is retried.
+  let org: OrgRow | null = null;
+  for (let attempt = 0; attempt < 3 && !org; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 500 * attempt));
+    const res = await neon().from("orgs").select("*").eq("id", id).maybeSingle();
+    if (res.error) throw res.error;
+    org = (res.data as OrgRow | null) ?? null;
+  }
+  if (!org) throw new Error("This hostel could not be found, or you no longer have access to it.");
   const stamp = await neon().rpc("changes_since", { p_org: id, p_since: "infinity" });
   if (stamp.error) throw stamp.error;
   const serverNow = (stamp.data as { now: string }).now;
 
-  const [orgRes, roomsRows, staffRows, ...collRows] = await Promise.all([
-    neon().from("orgs").select("*").eq("id", id).single(),
+  const [roomsRows, staffRows, ...collRows] = await Promise.all([
     fetchAll("rooms", id),
     staffRole
       ? fetchAll("staff", id)
@@ -78,8 +87,6 @@ export async function loadOrg(id: string, membership: Membership): Promise<OrgRo
         }),
     ...COLLS.map((c) => fetchAll(TABLE[c], id)),
   ]);
-  if (orgRes.error) throw orgRes.error;
-  const org = orgRes.data as OrgRow;
 
   // clock: sample-data hostels run on the demo calendar
   const clock = org.settings.clock ?? { mode: "real" as const };

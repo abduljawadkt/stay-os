@@ -12,7 +12,7 @@ import { InvoiceChip, KycChip } from "@/components/common/chips";
 import { useUI } from "@/components/shell/ui-store";
 import { useDemo } from "@/lib/store";
 import { useFormat } from "@/lib/hooks";
-import { roomById } from "@/lib/selectors";
+import { roomById, genderFits } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 
 function Row({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
@@ -46,7 +46,7 @@ export function ResidentDrawer() {
   const room = r ? roomById[r.bedId.split("-").slice(0, 2).join("-")] : null;
   const roommates = useMemo(() => (r ? residents.filter((x) => x.id !== r.id && x.status !== "checked_out" && x.bedId.startsWith(`${room?.id}-`)) : []), [r, residents, room]);
   const latest = r ? invoices.filter((i) => i.residentId === r.id).sort((a, b) => b.month.localeCompare(a.month))[0] : undefined;
-  const vacant = useMemo(() => (r ? beds.filter((b) => b.status === "vacant" && (b.block === "C") === (r.gender === "F")) : []), [beds, r]);
+  const vacant = useMemo(() => (r ? beds.filter((b) => b.status === "vacant" && genderFits(b.block, r.gender)) : []), [beds, r]);
   const thread = r ? whatsapp.find((w) => w.residentId === r.id && w.role === "resident") : undefined;
 
   return (

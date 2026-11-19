@@ -15,7 +15,7 @@ function merge(base: Messages, over: Messages): Messages {
   return out;
 }
 // Malayalam falls back to English key by key, so a missing translation never shows a raw key.
-const CATALOG: Record<Locale, AbstractIntlMessages> = { en: en as AbstractIntlMessages, ml: merge(en, ml) as AbstractIntlMessages };
+const CATALOG: Record<Locale, AbstractIntlMessages> = { en: en as unknown as AbstractIntlMessages, ml: merge(en as Messages, ml as Messages) as unknown as AbstractIntlMessages };
 const KEY = "stayos-locale";
 
 const LocaleContext = createContext<{ locale: Locale; setLocale: (l: Locale) => void }>({ locale: "en", setLocale: () => {} });

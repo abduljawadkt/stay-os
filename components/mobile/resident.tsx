@@ -24,7 +24,7 @@ import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useNowISO } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
 import { haptic } from "@/lib/native";
-import { MEALS, invoiceState, menuFor, rebates, roomById, sla, addDays as addDaysSel } from "@/lib/selectors";
+import { MEALS, invoiceState, menuFor, rebates, roomById, sla, addDays as addDaysSel, curfewLabel } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { hostel, messMenu, type ComplaintCategory, type Meal } from "@/data";
@@ -192,7 +192,7 @@ export function ResidentRoom() {
       <SectionTitle>{t("rules")}</SectionTitle>
       <MCard>
         <ul className="space-y-2 text-sm text-fg-2">
-          <li className="flex gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-fg-3" aria-hidden />{t("rule1", { time: block === "C" ? "9:30 PM" : "10:00 PM" })}</li>
+          <li className="flex gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-fg-3" aria-hidden />{t("rule1", { time: curfewLabel(block) })}</li>
           <li className="flex gap-2"><BookOpen className="mt-0.5 size-4 shrink-0 text-fg-3" aria-hidden />{t("rule2")}</li>
           <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-fg-3" aria-hidden />{t("rule3")}</li>
         </ul>
@@ -310,7 +310,7 @@ export function ResidentGate() {
   const qr = active ? `STAYOS-GATEPASS|${active.id}|${r.id}|${active.from}|${active.to}` : "";
   return (
     <>
-      <AppHeader title={t("title")} subtitle={t("subtitle", { time: r.bedId.startsWith("C") ? "9:30 PM" : "10:00 PM" })} />
+      <AppHeader title={t("title")} subtitle={t("subtitle", { time: curfewLabel(r.bedId.split("-")[0]) })} />
       {active ? (
         <MCard className="flex flex-col items-center text-center" data-tour="resident-qr">
           <Badge variant="success"><CheckCircle2 aria-hidden />{t("approved", { parent: t(`rel.${r.parent.relation}`) })}</Badge>

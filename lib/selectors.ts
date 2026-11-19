@@ -54,6 +54,22 @@ export function occupancy(beds: Bed[]) {
   return { ...c, total: beds.length, rate: beds.length ? c.occupied / beds.length : 0 };
 }
 
+// ---------- blocks ----------
+export const blockIds = () => hostel.blocks.map((b) => b.id);
+export const blockGender = (block: string): "M" | "F" => hostel.blocks.find((b) => b.id === block)?.gender ?? "M";
+/** Whether a resident of this gender may take a bed in this block (any block, if none is set aside for them). */
+export const genderFits = (block: string, gender: "M" | "F") => !hostel.blocks.some((b) => b.gender === gender) || blockGender(block) === gender;
+const curfewOf = (block: string) => hostel.blocks.find((b) => b.id === block)?.curfew ?? "22:00";
+export const curfewMinutes = (block: string) => {
+  const [h, m] = curfewOf(block).split(":").map(Number);
+  return h * 60 + m;
+};
+/** "9:30 PM" */
+export const curfewLabel = (block: string) => {
+  const [h, m] = curfewOf(block).split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+};
+
 export function occupancyByBlock(beds: Bed[]) {
   return hostel.blocks.map(({ id: block }) => ({ block, ...occupancy(beds.filter((b) => b.block === block)) }));
 }

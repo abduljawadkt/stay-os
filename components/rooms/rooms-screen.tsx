@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDemo } from "@/lib/store";
 import { useUI } from "@/components/shell/ui-store";
 import { useFormat, useScreenState } from "@/lib/hooks";
-import { invoiceState, occupancy, roomById } from "@/lib/selectors";
+import { invoiceState, occupancy, roomById, genderFits, blockIds, blockGender } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { initials } from "@/lib/format";
 import { rooms, type Bed, type BlockId, type Resident } from "@/data";
@@ -74,7 +74,7 @@ export function RoomsScreen() {
   const pr = pending ? resById[pending.residentId] : null;
   const fromRent = pending ? roomById[pending.from.split("-").slice(0, 2).join("-")].rent : 0;
   const toRent = pending ? roomById[pending.to.split("-").slice(0, 2).join("-")].rent : 0;
-  const genderBlock = (b: string, r: Resident | null) => !r || (b === "C") === (r.gender === "F");
+  const genderBlock = (b: string, r: Resident | null) => !r || genderFits(b, r.gender);
 
   return (
     <>
@@ -86,9 +86,9 @@ export function RoomsScreen() {
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div role="tablist" aria-label={t("blocks")} className="flex gap-1 rounded-md bg-surface-2 p-0.5">
-          {(["A", "B", "C"] as BlockId[]).map((b) => (
+          {(blockIds() as BlockId[]).map((b) => (
             <button key={b} role="tab" aria-selected={block === b} onClick={() => setBlock(b)} className={cn("h-8 rounded-sm px-3 text-sm font-medium transition-colors", block === b ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2 hover:text-fg")}>
-              {t("block", { block: b })} <span className="text-xs font-normal text-fg-3">· {tg(b === "C" ? "F" : "M")}</span>
+              {t("block", { block: b })} <span className="text-xs font-normal text-fg-3">· {tg(blockGender(b))}</span>
             </button>
           ))}
         </div>

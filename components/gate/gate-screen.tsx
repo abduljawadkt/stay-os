@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
-import { presence } from "@/lib/selectors";
+import { presence, curfewMinutes } from "@/lib/selectors";
 import { toIST, todayISO } from "@/lib/clock";
 import { simulateGateScan } from "@/lib/demo-actions";
 import { hostel } from "@/data";
@@ -164,7 +164,7 @@ export function GateScreen() {
                   <ul>
                     {late.slice(0, 30).map((g) => {
                       const r = resById[g.residentId];
-                      const curfew = blockOf(g.residentId) === "C" ? 21 * 60 + 30 : 22 * 60;
+                      const curfew = curfewMinutes(blockOf(g.residentId) ?? "");
                       const mins = Number(g.at.slice(11, 13)) * 60 + Number(g.at.slice(14, 16)) - curfew;
                       return (
                         <li key={g.id} className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3 text-sm last:border-0">

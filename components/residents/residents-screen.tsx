@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDemo } from "@/lib/store";
 import { useUI } from "@/components/shell/ui-store";
 import { useFormat, useScreenState } from "@/lib/hooks";
-import { invoiceState } from "@/lib/selectors";
+import { invoiceState, blockIds } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { downloadCsv } from "@/lib/export";
 import type { Invoice } from "@/data";
@@ -119,7 +119,7 @@ export function ResidentsScreen() {
             <SelectTrigger className="w-36 shrink-0 lg:ml-auto" aria-label={t("block")}><SelectValue>{block === "all" ? t("allBlocks") : t("blockN", { block })}</SelectValue></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allBlocks")}</SelectItem>
-              {["A", "B", "C"].map((b) => <SelectItem key={b} value={b}>{t("blockN", { block: b })}</SelectItem>)}
+              {blockIds().map((b) => <SelectItem key={b} value={b}>{t("blockN", { block: b })}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

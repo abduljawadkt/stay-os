@@ -12,6 +12,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { DemoMenu, GuidedDemoButton } from "./demo-menu";
 import { WhatsAppToggle } from "./whatsapp-toggle";
 import { CommandSearch } from "./command-search";
+import { isStaffRole, useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 export function TopBar({ onMenu, variant = "dashboard" }: { onMenu?: () => void; variant?: "dashboard" | "app" }) {
   const t = useTranslations("shell");
   const dash = variant === "dashboard";
+  const staff = useSession((s) => isStaffRole(s.membership?.role));
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1.5 border-b border-line bg-canvas/95 px-3 sm:gap-2 sm:px-4 lg:gap-3 lg:px-6">
       {dash && onMenu && (
@@ -29,7 +31,7 @@ export function TopBar({ onMenu, variant = "dashboard" }: { onMenu?: () => void;
           <Menu />
         </Button>
       )}
-      <Link href="/dashboard/" className={cn("shrink-0 rounded-md", dash && "lg:hidden")} aria-label={t("home")}>
+      <Link href={staff ? "/dashboard/" : "/start/"} className={cn("shrink-0 rounded-md", dash && "lg:hidden")} aria-label={t("home")}>
         <LogoMark className="sm:hidden" size={26} />
         <Logo className="hidden sm:inline-flex" />
       </Link>
@@ -41,11 +43,11 @@ export function TopBar({ onMenu, variant = "dashboard" }: { onMenu?: () => void;
       </div>
       <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
         <LocaleToggle />
-        <WhatsAppToggle />
-        <span className="hidden sm:inline-flex"><ThemeToggle /></span>
-        <DemoMenu />
-        <GuidedDemoButton className="hidden lg:inline-flex" />
-        <GuidedDemoButton iconOnly className="hidden sm:inline-flex lg:hidden" />
+        {staff && <WhatsAppToggle />}
+        <span className={staff ? "hidden sm:inline-flex" : "inline-flex"}><ThemeToggle /></span>
+        {staff && <DemoMenu />}
+        {staff && <GuidedDemoButton className="hidden lg:inline-flex" />}
+        {staff && <GuidedDemoButton iconOnly className="hidden sm:inline-flex lg:hidden" />}
       </div>
     </header>
   );

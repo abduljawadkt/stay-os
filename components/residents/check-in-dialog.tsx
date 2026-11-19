@@ -24,6 +24,13 @@ import { cn } from "@/lib/utils";
 type Step = 0 | 1 | 2 | 3 | 4;
 const KYC_STEPS = ["connect", "otp", "consent", "fetch"] as const;
 
+const blockGender = (block: string) => hostel.blocks.find((b) => b.id === block)?.gender;
+/** "C" or "A, B": the blocks for a gender, or every block when none is set aside for it. */
+function blocksFor(gender: "M" | "F") {
+  const ids = hostel.blocks.filter((b) => b.gender === gender).map((b) => b.id);
+  return (ids.length ? ids : hostel.blocks.map((b) => b.id)).join(", ");
+}
+
 export function CheckInDialog() {
   const t = useTranslations("checkin");
   const tr = useTranslations("roomType");
@@ -51,14 +58,17 @@ export function CheckInDialog() {
     if (!open) return;
     setStep(0); setKyc(-1); setErrors({}); setCreatedId(null);
     const preBed = bedId ? beds.find((b) => b.id === bedId) : null;
-    setForm({ name: preBed?.reservation?.name ?? preset.name, phone: preBed?.reservation?.phone ?? preset.phone, institution: preset.institution, occupation: preset.occupation, parentName: preset.parent.name, parentPhone: preset.parent.phone, gender: preBed ? (preBed.block === "C" ? "F" : "M") : preset.gender });
+    setForm({ name: preBed?.reservation?.name ?? preset.name, phone: preBed?.reservation?.phone ?? preset.phone, institution: preset.institution, occupation: preset.occupation, parentName: preset.parent.name, parentPhone: preset.parent.phone, gender: preBed ? blockGender(preBed.block) ?? preset.gender : preset.gender });
     setBed(bedId ?? "");
     return () => timers.current.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bedId]);
 
   const options = useMemo(() => {
-    const list = beds.filter((b) => (b.status === "vacant" || b.id === bedId) && (b.block === "C") === (form.gender === "F"));
+    // blocks for this gender (a hostel with no women's block offers every vacant bed)
+    const open = beds.filter((b) => b.status === "vacant" || b.id === bedId);
+    const matching = open.filter((b) => blockGender(b.block) === form.gender);
+    const list = matching.length ? matching : open;
     const score = (id: string) => (id === bedId ? -2 : id === preset.suggestedBed ? -1 : 0);
     return list.sort((a, b) => score(a.id) - score(b.id) || a.id.localeCompare(b.id)).slice(0, 6);
   }, [beds, form.gender, bedId, preset.suggestedBed]);
@@ -199,7 +209,7 @@ export function CheckInDialog() {
 
               {step === 2 && (
                 <fieldset data-tour="bed-pick">
-                  <legend className="mb-3 text-small text-fg-2">{t("bed.legend", { block: form.gender === "F" ? "C" : "A, B" })}</legend>
+                  <legend className="mb-3 text-small text-fg-2">{t("bed.legend", { block: blocksFor(form.gender) })}</legend>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {options.map((b, i) => {
                       const rm = roomById[b.roomId];

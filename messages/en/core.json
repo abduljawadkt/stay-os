@@ -11,7 +11,7 @@
   },
   "nav": {
     "label": "Main", "home": "Home", "rooms": "Rooms & beds", "residents": "Residents", "rent": "Rent & invoices", "mess": "Mess", "complaints": "Complaints",
-    "gate": "Gate pass & attendance", "expenses": "Expenses", "staff": "Staff", "reports": "Reports",
+    "gate": "Gate pass & attendance", "expenses": "Expenses", "staff": "Staff", "settings": "Settings & billing", "reports": "Reports",
     "groups": { "operations": "Operations", "money": "Money", "team": "Team" },
     "hostelMeta": "{occupied} of {beds} beds occupied", "ownerTitle": "Owner", "wardenTitle": "Chief warden",
     "saving": { "saving": "Saving…", "saved": "All changes saved", "error": "Not saved yet. Retrying…" }

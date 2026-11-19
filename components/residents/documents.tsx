@@ -9,7 +9,7 @@ import { useFormat } from "@/lib/hooks";
 import { hostel, type Resident } from "@/data";
 import { brand } from "@/config/brand";
 import { initials } from "@/lib/format";
-import { roomById } from "@/lib/selectors";
+import { roomById, curfewLabel } from "@/lib/selectors";
 
 export type DocKind = "police" | "aadhaar" | "agreement" | "id";
 
@@ -159,7 +159,7 @@ function Agreement({ r }: { r: Resident }) {
         <li>Rent is due by the {hostel.dueDay}th of every month. Invoices and UPI payment links are sent on WhatsApp.</li>
         <li>A refundable deposit of {f.inr(hostel.deposit)} is held and returned within 15 days of check-out, less any dues.</li>
         <li>Mess meals can be skipped in the app before the cut-off time. A rebate of ₹70 a day applies when away three or more days in a row.</li>
-        <li>The gate closes at {r.bedId.startsWith("C") ? "9:30 PM" : "10:00 PM"}. Late entry needs a gate pass approved by the parent or guardian.</li>
+        <li>The gate closes at {curfewLabel(r.bedId.split("-")[0])}. Late entry needs a gate pass approved by the parent or guardian.</li>
         <li>Either side may end this agreement with 30 days&apos; notice.</li>
       </ol>
       <div className="mt-16 grid grid-cols-2 gap-16 text-[12px]">

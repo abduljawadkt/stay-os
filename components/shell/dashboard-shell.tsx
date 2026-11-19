@@ -10,6 +10,8 @@ import { AskStayOS } from "@/components/assistant/ask-stayos";
 import { ResidentDrawer, BedDrawer } from "@/components/residents/resident-drawer";
 import { CheckInDialog } from "@/components/residents/check-in-dialog";
 import { useDemo } from "@/lib/store";
+import { useSession } from "@/lib/session";
+import { TrialBanner } from "./trial-banner";
 import { cn } from "@/lib/utils";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -21,10 +23,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const hydrated = useDemo((s) => s.hydrated);
   const setRole = useDemo((s) => s.setRole);
   useEffect(() => setMenu(false), [pathname]);
-  // landing on the dashboard while a mobile role is selected switches back to owner
+  const memberRole = useSession((s) => s.membership?.role);
+  // landing on the dashboard while a mobile role is selected switches back to the member's own view
   useEffect(() => {
-    if (hydrated && (role === "resident" || role === "parent")) setRole("owner");
-  }, [hydrated, role, setRole]);
+    if (hydrated && (role === "resident" || role === "parent")) setRole(memberRole === "warden" ? "warden" : "owner");
+  }, [hydrated, role, setRole, memberRole]);
 
   return (
     <div className="flex min-h-dvh">
@@ -42,6 +45,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </Sheet>
       <div className={cn("flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-[cubic-bezier(.2,0,0,1)]", waOpen && "2xl:pr-[396px]")}>
         <TopBar onMenu={() => setMenu(true)} />
+        <TrialBanner />
         <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:pt-8">
           {children}
         </main>
