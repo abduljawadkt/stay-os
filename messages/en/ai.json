@@ -1,0 +1,119 @@
+{
+ "ai": {
+  "open": "Ask StayOS",
+  "launcher": "Ask StayOS",
+  "title": "Ask StayOS",
+  "subtitle": "Answers from your hostel's live data, in English or Malayalam",
+  "close": "Close",
+  "hello": "Ask me anything about Al Noor Residency",
+  "intro": "Type or speak in English or Malayalam. I look up the live numbers and suggest the next step.",
+  "listening": "Listening… ask in English or Malayalam",
+  "placeholder": "Ask about rent, rooms, mess, complaints…",
+  "voice": "Ask by voice",
+  "stopVoice": "Stop listening",
+  "send": "Ask",
+  "source": {
+   "dues": "invoices and UPI payments",
+   "vacant": "the floor plan",
+   "profit": "invoices and expenses",
+   "waste": "mess opt-outs",
+   "late": "QR gate scans",
+   "complaints": "the complaints board",
+   "electricity": "KSEB bills",
+   "headcount": "mess opt-outs and leave",
+   "police": "resident KYC records",
+   "occupancy": "beds, notices and reservations",
+   "leave": "approved gate passes"
+  },
+  "more": "and {count} more",
+  "perMonth": "{amount}/month",
+  "roomType": {
+   "single": "Single",
+   "double": "Double",
+   "triple": "Triple",
+   "six": "6-bed"
+  },
+  "fallback": "I can answer questions about rent, rooms, mess, complaints, gate passes and expenses. Try one of these:",
+  "thinking": {
+   "dues": "Checking this month's invoices…",
+   "vacant": "Looking at the floor plan…",
+   "profit": "Adding up revenue and expenses…",
+   "waste": "Counting mess opt-outs…",
+   "late": "Reading last night's gate log…",
+   "complaints": "Checking open complaints…",
+   "electricity": "Comparing KSEB bills…",
+   "headcount": "Counting today's mess headcount…",
+   "police": "Checking police verification…",
+   "occupancy": "Projecting occupancy…",
+   "leave": "Checking approved leave…",
+   "none": "Thinking…"
+  },
+  "dues": {
+   "head": "{count} residents still owe {total}, most overdue first:",
+   "days": "{days}d late",
+   "action": "Send WhatsApp reminders to {count}",
+   "sent": "Reminders sent",
+   "open": "Open rent"
+  },
+  "vacant": {
+   "head": "{count, plural, one {# bed is} other {# beds are}} free in Block {block}{hasFloor, select, yes {, floor {floor}} other {}}:",
+   "none": "No free beds in Block {block}{hasFloor, select, yes {, floor {floor}} other {}} right now.",
+   "action": "Open floor plan",
+   "checkin": "Check someone into {bed}"
+  },
+  "profit": {
+   "head": "Net profit for {month} so far is {net}, on {revenue} collected ({margin} margin).",
+   "up": "That's {delta} more than last month.",
+   "down": "That's {delta} less than last month, mostly because November's rent is still coming in.",
+   "revenue": "Collected",
+   "expenses": "Expenses",
+   "action": "Open P&L"
+  },
+  "waste": {
+   "head": "{meals} meals weren't cooked this month because residents skipped in advance. That saved {amount}, about {year} a year at this rate.",
+   "rebates": "{count} residents get {amount} in automatic mess rebates on their December invoice.",
+   "action": "Open mess"
+  },
+  "late": {
+   "head": "{count, plural, one {# resident} other {# residents}} came in after curfew last night:",
+   "none": "Nobody came in late last night.",
+   "action": "Message their parents",
+   "sent": "Sent to {count} parents on WhatsApp",
+   "sentShort": "Parents notified",
+   "open": "Open gate log"
+  },
+  "complaints": {
+   "head": "{open} complaints are open and {breached, plural, one {# is} other {# are}} past SLA:",
+   "over": "{h}h {m}m over",
+   "risk": "{count} more will breach soon.",
+   "action": "Open complaints board"
+  },
+  "electricity": {
+   "up": "Electricity in {month} is {cur}, {pct} more than {prev} ({last}).",
+   "down": "Electricity in {month} is {cur}, {pct} less than {prev} ({last}).",
+   "why": "Bills usually rise from October as the monsoon ends and fans run longer.",
+   "action": "Open expenses"
+  },
+  "headcount": {
+   "head": "{count} residents will eat {meal} today. {skipped} of {enrolled} skipped it.",
+   "action": "Send count to kitchen",
+   "sent": "Headcount sent to the head cook on WhatsApp",
+   "sentShort": "Sent to kitchen"
+  },
+  "police": {
+   "head": "{count, plural, one {# resident's police verification isn't} other {# residents' police verification isn't}} filed yet:",
+   "none": "Every resident's police verification is filed.",
+   "since": "in since {date}",
+   "action": "Open their forms"
+  },
+  "occupancy": {
+   "head": "Occupancy is {rate} today ({occupied} beds). {leaving} residents leave by the end of December and {arriving} reserved residents arrive, so December should land near {projected}.",
+   "action": "Open rooms"
+  },
+  "leave": {
+   "head": "{count} residents are on approved leave right now. {awaiting} more requests are waiting for parents.",
+   "action": "Open leave requests"
+  },
+  "sourceLine": "From {source} · just now"
+ }
+}
