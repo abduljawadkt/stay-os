@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { presence } from "@/lib/selectors";
-import { nowISO, todayISO } from "@/lib/clock";
+import { toIST, todayISO } from "@/lib/clock";
 import { simulateGateScan } from "@/lib/demo-actions";
 import { hostel } from "@/data";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,7 @@ export function GateScreen() {
   const [q, setQ] = useState("");
   const [visitorOpen, setVisitorOpen] = useState(false);
   const resById = useMemo(() => Object.fromEntries(residents.map((r) => [r.id, r])), [residents]);
-  const pres = useMemo(() => presence(gate, residents, leaves, nowISO()), [gate, residents, leaves, now]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pres = useMemo(() => presence(gate, residents, leaves, toIST(now)), [gate, residents, leaves, now]);
   const today = todayISO();
   const yday = new Date(new Date(`${today}T12:00:00+05:30`).getTime() - 86400000 + 330 * 60000).toISOString().slice(0, 10);
   const late = useMemo(() => gate.filter((g) => g.late).sort((a, b) => b.at.localeCompare(a.at)), [gate]);

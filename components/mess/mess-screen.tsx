@@ -18,7 +18,7 @@ import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
 import { MEALS, headcount, menuFor, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
-import { todayISO, nowISO } from "@/lib/clock";
+import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { messMenu, type Meal, type MenuItem } from "@/data";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ export function MessScreen() {
   const rb = useMemo(() => rebates(optOuts, month), [optOuts, month]);
   const enrolled = messEnrolled(residents, today).length;
   const resById = useMemo(() => Object.fromEntries(residents.map((r) => [r.id, r])), [residents]);
-  const nowHM = nowISO().slice(11, 16);
+  const nowHM = toIST(now).slice(11, 16);
   const cutoffPassed = (m: Meal) => m === "breakfast" || nowHM >= ({ lunch: "10:00", snacks: "14:00", dinner: "16:00" } as Record<string, string>)[m];
   const decRaised = invoices.some((i) => i.month === demo.nextMonth);
 

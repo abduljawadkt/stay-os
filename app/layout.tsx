@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: `${brand.name} runs rent, rooms, mess, complaints and gate passes for Al Noor Residency, Calicut.`,
   applicationName: brand.name,
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
@@ -29,6 +29,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${geist.variable} ${geistMono.variable} ${notoMl.variable}`}>
+      <head>
+        {/* Inside the iOS app, Capacitor is present before any page script runs. */}
+        <script dangerouslySetInnerHTML={{ __html: "try{if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())document.documentElement.setAttribute('data-native','')}catch(e){}" }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

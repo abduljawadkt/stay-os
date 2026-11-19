@@ -7,6 +7,7 @@ import mess from "./en/mess.json";
 import complaints from "./en/complaints.json";
 import gate from "./en/gate.json";
 import money from "./en/money.json";
+import mobile from "./en/mobile.json";
 
-const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money };
+const messages = { ...core, ...home, ...people, ...rent, ...mess, ...complaints, ...gate, ...money, ...mobile };
 export default messages;

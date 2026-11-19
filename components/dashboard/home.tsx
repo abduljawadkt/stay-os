@@ -23,7 +23,7 @@ import {
 } from "@/lib/selectors";
 import { hostel, staff } from "@/data";
 import { demo } from "@/config/demo";
-import { nowISO, todayISO } from "@/lib/clock";
+import { toIST, todayISO } from "@/lib/clock";
 import { cn } from "@/lib/utils";
 import type { Activity } from "@/data";
 
@@ -53,13 +53,13 @@ export function HomeScreen() {
     const open = complaints.filter((c) => c.status !== "resolved");
     const breached = open.filter((c) => sla(c, now).state === "breached");
     const trend = collectionTrend(invoices, hostel.months);
-    const pres = presence(gate, residents, leaves, nowISO());
+    const pres = presence(gate, residents, leaves, toIST(now));
     const hc = headcount(residents, optOuts, today);
     const occTrend = occupancyTrend(residents, hostel.months, occ.rate).map((x) => x.rate * 100);
     return { occ, sum, prev, p, pp, open, breached, trend, pres, hc, occTrend };
   }, [beds, invoices, expenses, complaints, gate, residents, leaves, optOuts, month, now, today]);
 
-  const hour = Number(nowISO().slice(11, 13));
+  const hour = Number(toIST(now).slice(11, 13));
   const greet = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
   const name = role === "warden" ? staff[0].name.split(" ")[1] : hostel.owner.name.split(" ")[0];
   const owner = role !== "warden";

@@ -386,3 +386,11 @@ html[lang="ml"] {
   background-image: radial-gradient(var(--wa-doodle) 1.2px, transparent 1.3px);
   background-size: 18px 18px;
 }
+
+/* Native iOS shell: no demo chrome, the app owns the whole screen */
+html[data-native] .demo-chrome {
+  display: none !important;
+}
+html[data-native] .phone-frame {
+  height: 100dvh !important;
+}

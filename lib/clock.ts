@@ -2,6 +2,7 @@ import { demo } from "@/config/demo";
 
 // The demo runs on a fixed calendar (Fri 27 Nov 2026, 10:24 AM IST) that ticks forward in real time.
 const BASE = new Date(demo.now).getTime();
+export const BASE_MS = BASE;
 const KEY = "stayos-clock-start";
 const MAX_ELAPSED = 4 * 60 * 60 * 1000;
 let start = Date.now();

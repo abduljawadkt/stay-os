@@ -2,18 +2,26 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useDemo } from "./store";
-import { nowMs } from "./clock";
+import { BASE_MS, nowMs, toIST } from "./clock";
 import { useLocale } from "./i18n";
 import * as f from "./format";
 
-/** Re-renders every `interval` ms with the demo clock. */
+/**
+ * The demo clock, re-rendered every `interval` ms. The first render always uses the fixed demo
+ * start time so server and browser agree; the live time takes over right after mount.
+ */
 export function useNow(interval = 30000) {
-  const [now, setNow] = useState(() => nowMs());
+  const [now, setNow] = useState(BASE_MS);
   useEffect(() => {
+    setNow(nowMs());
     const id = setInterval(() => setNow(nowMs()), interval);
     return () => clearInterval(id);
   }, [interval]);
   return now;
+}
+/** The demo clock as an IST ISO string (hydration-safe, see useNow). */
+export function useNowISO(interval = 30000) {
+  return toIST(useNow(interval));
 }
 
 const visited = new Set<string>();
