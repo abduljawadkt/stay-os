@@ -13,6 +13,9 @@ import { invoiceState } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { hostel } from "@/data";
+import { QRCodeSVG } from "qrcode.react";
+import { useSession } from "@/lib/session";
+import { upiUri } from "@/lib/upi";
 import { AppHeader, MCard } from "./shell";
 import { BackButton } from "./common";
 import { cn } from "@/lib/utils";
@@ -47,6 +50,8 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
   const [phase, setPhase] = useState<Phase>(inv?.status === "paid" ? "done" : "choose");
   const [pin, setPin] = useState(0);
   const r = residents.find((x) => x.id === inv?.residentId);
+  // sample hostels run the test payment; real hostels pay the hostel's own UPI ID until a gateway is connected
+  const sample = useSession((s) => s.org?.settings.clock?.mode === "demo");
 
   useEffect(() => {
     if (phase !== "pin") return;
@@ -90,6 +95,19 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
               </dl>
               <p className="mt-2 font-mono text-xs text-fg-3">{inv.id} · {hostel.upiId}</p>
             </MCard>
+            {!sample ? (
+              <MCard className="mt-4 flex flex-col items-center text-center">
+                <p className="text-base font-semibold text-fg">{t("realTitle")}</p>
+                <p className="mt-1 text-sm text-fg-2">{t("realBody")}</p>
+                <div className="mt-4 rounded-xl bg-white p-3"><QRCodeSVG value={upiUri(inv.total, inv.id)} size={176} level="M" /></div>
+                <p className="mt-3 font-mono text-sm text-fg">{hostel.upiId}</p>
+                <Button asChild variant="primary" size="xl" className="mt-4 h-[52px] w-full rounded-xl text-[17px]">
+                  <a href={upiUri(inv.total, inv.id)}>{t("openApp", { amount: f.inr(inv.total) })}</a>
+                </Button>
+                <p className="mt-3 text-xs text-fg-3">{t("realNote")}</p>
+              </MCard>
+            ) : (
+            <>
             <p className="mx-4 mt-6 mb-2 text-sm font-semibold text-fg">{t("payWith")}</p>
             <div role="radiogroup" aria-label={t("payWith")} className="mx-4 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {APPS.map((a) => (
@@ -104,6 +122,8 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
             <div className="mx-4 mt-6">
               <Button variant="primary" size="xl" className="w-full" onClick={() => { haptic(); setPhase("pin"); }} data-tour="pay-confirm">{t("pay", { amount: f.inr(inv.total) })}</Button>
             </div>
+            </>
+            )}
           </motion.div>
         )}
 

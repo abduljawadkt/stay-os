@@ -4,6 +4,7 @@
 //  - loadOrg reads every table once (row-level security decides what this user sees);
 //  - every change the app makes to the store is upserted shortly after;
 //  - every few seconds changes_since() brings in what other people changed (another device, a parent's phone).
+import { toast } from "sonner";
 import { useDemo, type Role } from "./store";
 import { neon, errorText } from "./neon";
 import { setClock, nowISO, todayISO } from "./clock";
@@ -165,9 +166,13 @@ function queue(coll: Coll | "staff", id: string) {
   setSaving("saving");
 }
 
+/** What residents and parents may write; everything else is read-only for them (see db/migrations/003). */
+const FAMILY_WRITABLE: Coll[] = ["optOuts", "leaves", "complaints", "activity", "whatsapp"];
+
 function onStoreChange(state: Seed, prev: Seed) {
   if (applyingRemote || !orgId) return;
   for (const c of COLLS) {
+    if (!canWriteStaff && !FAMILY_WRITABLE.includes(c)) continue;
     const next = state[c] as { id: string }[];
     const before = prev[c] as { id: string }[];
     if (next === before) continue;
@@ -206,9 +211,15 @@ async function flush() {
         const { error } = await neon().from(table).upsert(rows.slice(i, i + 500), { onConflict: "org_id,id" });
         if (error) {
           failed = true;
+          const code = (error as { code?: string }).code ?? "";
           console.warn(`[sync] ${table}: ${errorText(error)}`);
-          // a row-level security refusal will not succeed on retry; anything else is retried
-          if (!/row-level security|permission denied/i.test(errorText(error))) for (const r of rows.slice(i, i + 500)) pending.set(key(coll, r.id as string), { coll, id: r.id as string });
+          const ids = rows.slice(i, i + 500).map((r) => r.id as string);
+          // network trouble or an expired token: try again. A refusal (security rule, check) will not change.
+          if (!code || code.startsWith("PGRST3")) for (const rid of ids) pending.set(key(coll, rid), { coll, id: rid });
+          else if (coll !== "staff") {
+            toast.error("That change wasn't allowed", { description: errorText(error) });
+            await restoreRows(coll, ids);
+          }
         }
       }
     })
@@ -219,6 +230,42 @@ async function flush() {
     flushTimer = setTimeout(flush, 3000);
     setSaving("error");
   } else setSaving(failed ? "error" : "saved");
+}
+
+/** Put rows back to what the database has (after it refused a change). */
+async function restoreRows(coll: Coll, ids: string[]) {
+  const id = orgId;
+  if (!id) return;
+  const { data } = await neon().from(TABLE[coll]).select("*").eq("org_id", id).in("id", ids);
+  const server = new Map(((data ?? []) as Record<string, unknown>[]).map((r) => [r.id as string, fromRow<{ id: string }>(coll, r)]));
+  const list = (useDemo.getState()[coll] as { id: string }[]).flatMap((x) => (ids.includes(x.id) ? (server.has(x.id) ? [server.get(x.id)!] : []) : [x]));
+  applyingRemote = true;
+  useDemo.setState({ [coll]: list } as Partial<Seed>);
+  applyingRemote = false;
+}
+
+/**
+ * A resident or parent paying in the app. Their invoices are read-only, so the payment is recorded by the
+ * server: in test mode for sample hostels, and refused for real hostels until a payment gateway confirms it.
+ */
+export async function payOnline(invoiceId: string, via: string, paidOn: string, before: Invoice) {
+  const id = orgId;
+  if (!id || canWriteStaff) return;
+  const { data, error } = await neon().rpc("pay_invoice_test", { p_org: id, p_invoice: invoiceId, p_via: via, p_paid_on: paidOn });
+  applyingRemote = true;
+  const s = useDemo.getState();
+  if (error) {
+    useDemo.setState({ invoices: s.invoices.map((i) => (i.id === invoiceId ? before : i)) });
+    applyingRemote = false;
+    const notConnected = /online_payments_not_connected/.test(errorText(error));
+    toast.error(notConnected ? "Online payment isn't connected for this hostel yet" : "Payment not recorded", {
+      description: notConnected ? "Pay by UPI to the hostel's UPI ID. The office marks it paid when the money arrives." : errorText(error),
+    });
+    return;
+  }
+  const row = fromRow<Invoice>("invoices", data as Record<string, unknown>);
+  useDemo.setState({ invoices: s.invoices.map((i) => (i.id === invoiceId ? row : i)) });
+  applyingRemote = false;
 }
 
 /** Push anything not yet saved (before signing out or switching hostel). */

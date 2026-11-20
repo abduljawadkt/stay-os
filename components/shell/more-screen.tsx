@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import {
-  Check, ChevronRight, CloudOff, Download, IndianRupee, LogOut, MessageCircle, Play, Plus, QrCode, RotateCcw, Sparkles,
+  Check, ChevronRight, CloudOff, Download, IndianRupee, KeyRound, LogOut, MessageCircle, Play, Plus, QrCode, RotateCcw, Sparkles,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,6 +16,7 @@ import { isStaffRole, openOrg, signOut, useSession } from "@/lib/session";
 import { useTour } from "@/components/tour/tour-store";
 import { simulateGateScan, simulatePayment, simulateWhatsAppComplaint } from "@/lib/demo-actions";
 import { useLocale } from "@/lib/i18n";
+import { ChangePasswordDialog } from "@/components/auth/change-password";
 import { installAvailable, useInstall } from "@/lib/install";
 import { TOTAL_BEDS } from "@/lib/selectors";
 import { planById } from "@/config/plans";
@@ -60,6 +61,8 @@ export function MoreScreen() {
   const install = useInstall();
   const canInstall = installAvailable(install);
   const [confirm, setConfirm] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const sharedDemoLogin = !!user?.email.endsWith("@demo.stayos.space");
   const [resetting, setResetting] = useState(false);
 
   const tabKeys = new Set<string>(TABS.map((x) => x.key));
@@ -104,9 +107,13 @@ export function MoreScreen() {
           {sample && <Row icon={Play} label={ts("guidedDemo")} onClick={() => { router.push("/dashboard/"); startTour(); }} />}
           <Row icon={MessageCircle} label={t("whatsapp")} onClick={() => openWhatsApp()} />
           <Row icon={Sparkles} label={t("ask")} onClick={() => setAiOpen(true)} />
-          <Row icon={IndianRupee} label={ts("simulatePayment")} onClick={() => simulatePayment()} />
-          <Row icon={MessageCircle} label={ts("simulateComplaint")} onClick={() => { const { threadId } = simulateWhatsAppComplaint(); if (threadId) openWhatsApp(threadId); }} />
-          <Row icon={QrCode} label={ts("simulateScan")} onClick={() => simulateGateScan()} />
+          {sample && (
+            <>
+              <Row icon={IndianRupee} label={ts("simulatePayment")} onClick={() => simulatePayment()} />
+              <Row icon={MessageCircle} label={ts("simulateComplaint")} onClick={() => { const { threadId } = simulateWhatsAppComplaint(); if (threadId) openWhatsApp(threadId); }} />
+              <Row icon={QrCode} label={ts("simulateScan")} onClick={() => simulateGateScan()} />
+            </>
+          )}
           <Row icon={CloudOff} label={ts("simulateOffline")} onClick={() => setOffline(!offline)} checked={offline} />
           {canReset && <Row icon={RotateCcw} label={ts("resetDemo")} danger onClick={() => setConfirm(true)} />}
         </Group>
@@ -144,10 +151,12 @@ export function MoreScreen() {
               }}
             />
           ))}
+        {!sharedDemoLogin && <Row icon={KeyRound} label={t("changePassword")} onClick={() => setPwOpen(true)} />}
         <Row icon={Plus} label={t("addHostel")} href="/onboarding/?new=1" />
         <Row icon={LogOut} label={t("signOut")} danger onClick={async () => { await signOut(); router.replace("/login/"); }} />
       </Group>
 
+      <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>

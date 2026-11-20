@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
-import { boot, signUp, useSession } from "@/lib/session";
+import { boot, resendVerification, signUp, useSession, verifyEmail } from "@/lib/session";
+import { CodeStep } from "@/components/auth/code-step";
 
 export default function SignupPage() {
   const t = useTranslations("account.signup");
@@ -21,6 +22,8 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const tc = useTranslations("account.code");
 
   useEffect(() => {
     boot();
@@ -40,12 +43,35 @@ export default function SignupPage() {
     if (Object.keys(errs).length) return;
     setBusy(true);
     try {
-      await signUp(name, email, password);
+      const result = await signUp(name, email, password);
+      if (result === "verify") {
+        setVerifying(true);
+        setBusy(false);
+        return;
+      }
       router.replace("/onboarding/");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setBusy(false);
     }
+  }
+
+  if (verifying) {
+    return (
+      <AuthShell>
+        <CodeStep
+          email={email}
+          title={tc("verifyTitle")}
+          submitLabel={tc("verifySubmit")}
+          onSubmit={async (code) => {
+            await verifyEmail(email, code, password);
+            router.replace("/onboarding/");
+          }}
+          onResend={() => resendVerification(email)}
+          onBack={() => setVerifying(false)}
+        />
+      </AuthShell>
+    );
   }
 
   const aside = (
@@ -75,7 +101,12 @@ export default function SignupPage() {
           <Button type="submit" variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px] sm:h-12 sm:rounded-lg sm:text-base" loading={busy} disabled={busy}>
             {t("submit")}
           </Button>
-          <p className="text-small text-fg-3">{t("terms")}</p>
+          <p className="text-small text-fg-3">
+            {t.rich("termsRich", {
+              terms: (c) => <Link href="/terms/" className="underline underline-offset-2 hover:text-fg">{c}</Link>,
+              privacy: (c) => <Link href="/privacy/" className="underline underline-offset-2 hover:text-fg">{c}</Link>,
+            })}
+          </p>
         </form>
         <p className="mt-5 text-sm text-fg-2">
           {t("haveAccount")}{" "}

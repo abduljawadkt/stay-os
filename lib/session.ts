@@ -77,10 +77,10 @@ const ORG_KEY = "stayos-org";
 
 export const DEMO_PASSWORD = "stayos-demo-2026";
 export const DEMO_ACCOUNTS: { role: MemberRole; email: string }[] = [
-  { role: "owner", email: "owner@demo.stayos.app" },
-  { role: "warden", email: "warden@demo.stayos.app" },
-  { role: "resident", email: "anjali@demo.stayos.app" },
-  { role: "parent", email: "parent@demo.stayos.app" },
+  { role: "owner", email: "owner@demo.stayos.space" },
+  { role: "warden", email: "warden@demo.stayos.space" },
+  { role: "resident", email: "anjali@demo.stayos.space" },
+  { role: "parent", email: "parent@demo.stayos.space" },
 ];
 
 export const useSession = create<SessionState>()(() => ({
@@ -148,9 +148,32 @@ export async function refreshMemberships() {
   return list;
 }
 
+/** Thrown when an account exists but its email hasn't been confirmed with the emailed code yet. */
+export class EmailNotVerified extends Error {
+  constructor(public email: string) {
+    super("Confirm your email to continue");
+  }
+}
+
+// Better Auth client methods from the email-OTP plugin, which the Neon SDK types loosely.
+type AuthExtras = {
+  emailOtp: {
+    verifyEmail: (a: { email: string; otp: string }) => Promise<{ data: unknown; error: unknown }>;
+    sendVerificationOtp: (a: { email: string; type: "email-verification" | "sign-in" | "forget-password" }) => Promise<{ error: unknown }>;
+    resetPassword: (a: { email: string; otp: string; password: string }) => Promise<{ error: unknown }>;
+  };
+  forgetPassword: { emailOtp: (a: { email: string }) => Promise<{ error: unknown }> };
+  changePassword: (a: { currentPassword: string; newPassword: string; revokeOtherSessions?: boolean }) => Promise<{ error: unknown }>;
+};
+const authx = () => neon().auth as unknown as AuthExtras;
+const codeOf = (e: unknown) => (e as { code?: string; error?: { code?: string } })?.code ?? (e as { error?: { code?: string } })?.error?.code ?? "";
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await neon().auth.signIn.email({ email: email.trim(), password });
-  if (error) throw new Error(errorText(error));
+  if (error) {
+    if (/EMAIL_NOT_VERIFIED/i.test(codeOf(error)) || /not verified/i.test(errorText(error))) throw new EmailNotVerified(email.trim());
+    throw new Error(errorText(error));
+  }
   const u = data?.user as { id: string; name?: string; email: string } | undefined;
   if (!u) throw new Error("Could not sign in");
   booting = Promise.resolve();
@@ -158,13 +181,50 @@ export async function signIn(email: string, password: string) {
   set({ memberships: await fetchMemberships() });
 }
 
-export async function signUp(name: string, email: string, password: string) {
+/** Create an account. Returns "verify" when the emailed code must be entered before signing in. */
+export async function signUp(name: string, email: string, password: string): Promise<"signed_in" | "verify"> {
   const { data, error } = await neon().auth.signUp.email({ name: name.trim(), email: email.trim(), password });
   if (error) throw new Error(errorText(error));
   const u = data?.user as { id: string; name?: string; email: string } | undefined;
   if (!u) throw new Error("Could not create the account");
+  const signedIn = !!(data as { token?: string | null })?.token;
+  if (!signedIn) return "verify";
   booting = Promise.resolve();
   set({ auth: "signed_in", user: { id: u.id, name: u.name ?? name, email: u.email }, memberships: [], orgStatus: "none", orgId: null, org: null });
+  return "signed_in";
+}
+
+/** Confirm an email with the 6-digit code, then sign in (with the password when we have it). */
+export async function verifyEmail(email: string, otp: string, password?: string) {
+  const { error } = await authx().emailOtp.verifyEmail({ email: email.trim(), otp: otp.trim() });
+  if (error) throw new Error(errorText(error));
+  booting = null;
+  if (password) await signIn(email, password);
+  else await boot();
+}
+
+export async function resendVerification(email: string) {
+  const { error } = await authx().emailOtp.sendVerificationOtp({ email: email.trim(), type: "email-verification" });
+  if (error) throw new Error(errorText(error));
+}
+
+/** Forgot password, step 1: email a reset code. */
+export async function requestPasswordReset(email: string) {
+  const { error } = await authx().forgetPassword.emailOtp({ email: email.trim() });
+  if (error) throw new Error(errorText(error));
+}
+
+/** Forgot password, step 2: set the new password with the code, then sign in. */
+export async function resetPassword(email: string, otp: string, password: string) {
+  const { error } = await authx().emailOtp.resetPassword({ email: email.trim(), otp: otp.trim(), password });
+  if (error) throw new Error(errorText(error));
+  await signIn(email, password);
+}
+
+/** Signed in: change the password and sign out every other device. */
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const { error } = await authx().changePassword({ currentPassword, newPassword, revokeOtherSessions: true });
+  if (error) throw new Error(errorText(error));
 }
 
 export async function signOut() {

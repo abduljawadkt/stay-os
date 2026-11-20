@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { CircleCheck, Copy, CreditCard, Download, MessageCircle, RotateCcw, Smartphone, UserPlus } from "lucide-react";
+import { CircleCheck, Copy, CreditCard, Download, MessageCircle, RotateCcw, Smartphone, UserMinus, UserPlus } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { Avatar } from "@/components/common/avatar";
 import { OwnerOnly } from "@/components/common/owner-only";
@@ -120,6 +123,26 @@ function Team() {
   const [residentId, setResidentId] = useState("");
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState<MemberRow | null>(null);
+
+  async function remove(m: MemberRow) {
+    const { error } = await neon().from("members").delete().eq("org_id", orgId).eq("user_id", m.user_id);
+    setRemoving(null);
+    if (error) toast.error(errorText(error));
+    else {
+      toast(t("removed", { name: m.name || m.email }));
+      load();
+    }
+  }
+  async function revoke(c: string) {
+    const { error } = await neon().from("invites").delete().eq("code", c);
+    if (error) toast.error(errorText(error));
+    else {
+      toast(t("revoked", { code: c }));
+      if (code === c) setCode(null);
+      load();
+    }
+  }
 
   const load = useCallback(async () => {
     const [m, i] = await Promise.all([
@@ -158,6 +181,18 @@ function Team() {
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
+      <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("removeTitle", { name: removing?.name || removing?.email || "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("removeBody", { hostel: hostel.name })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={() => removing && remove(removing)}>{t("removeConfirm")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Card className="xl:col-span-3">
         <CardHeader title={t("title")} meta={t("body")} />
         <ul className="divide-y divide-line border-t border-line">
@@ -169,6 +204,9 @@ function Team() {
                 <p className="truncate text-small text-fg-3">{m.email}{m.resident_id ? ` · ${residentName(m.resident_id)}` : ""}</p>
               </div>
               <span className="rounded-full bg-surface-2 px-2 text-xs leading-6 font-medium text-fg-2">{tr(m.role as "owner")}</span>
+              {m.user_id !== me && m.role !== "owner" && (
+                <Button variant="quiet" size="icon-sm" aria-label={t("removeAria", { name: m.name || m.email })} onClick={() => setRemoving(m)}><UserMinus /></Button>
+              )}
             </li>
           ))}
           {!members.length && <li className="px-5 py-6 text-sm text-fg-3">{t("empty")}</li>}
@@ -209,9 +247,10 @@ function Team() {
             <p className="mb-2 text-xs font-medium text-fg-3">{t("pending")}</p>
             <ul className="space-y-1.5 text-sm">
               {invites.slice(0, 6).map((i) => (
-                <li key={i.code} className="flex items-center justify-between gap-2">
+                <li key={i.code} className="flex items-center gap-2">
                   <span className="font-mono text-fg">{i.code}</span>
-                  <span className="truncate text-small text-fg-3">{tr(i.role as "warden")}{i.resident_id ? ` · ${residentName(i.resident_id)}` : ""}</span>
+                  <span className="min-w-0 flex-1 truncate text-small text-fg-3">{tr(i.role as "warden")}{i.resident_id ? ` · ${residentName(i.resident_id)}` : ""}</span>
+                  <Button variant="quiet" size="xs" onClick={() => revoke(i.code)}>{t("revoke")}</Button>
                 </li>
               ))}
             </ul>

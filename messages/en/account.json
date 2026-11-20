@@ -16,7 +16,8 @@
       "current": "Current hostel",
       "newHostel": "Add a hostel",
       "settings": "Settings & billing",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "changePassword": "Change password"
     },
     "login": {
       "title": "Sign in to {brand}",
@@ -38,7 +39,8 @@
       "demoParentMeta": "Rajesh · approve leave, fees, alerts",
       "demoNote": "Use two devices: pay as Anjali on a phone and watch the owner's dashboard update.",
       "errorRequired": "Enter your email and password.",
-      "signingIn": "Signing in…"
+      "signingIn": "Signing in…",
+      "forgot": "Forgot password?"
     },
     "signup": {
       "title": "Start your 14-day free trial",
@@ -53,7 +55,8 @@
       "errorName": "Enter your name.",
       "errorEmail": "Enter a valid email address.",
       "errorPassword": "Use at least 8 characters.",
-      "terms": "By creating an account you agree to the terms of service and privacy policy."
+      "terms": "By creating an account you agree to the terms of service and privacy policy.",
+      "termsRich": "By creating an account you agree to the <terms>terms of service</terms> and <privacy>privacy policy</privacy>."
     },
     "onboarding": {
       "title": "Set up your hostel",
@@ -116,7 +119,8 @@
         "rooms": "Rooms",
         "rent": "Rent",
         "complaints": "Complaints"
-      }
+      },
+      "changePassword": "Change password"
     },
     "install": {
       "title": "Install {brand} on your phone",
@@ -138,6 +142,40 @@
       "rowSub": "Add StayOS to your home screen",
       "landingTitle": "Get the StayOS app",
       "landingBody": "Install from your browser, no App Store needed"
+    },
+    "code": {
+      "sent": "We emailed a 6-digit code to {email}.",
+      "label": "Code",
+      "errorCode": "Enter the 6-digit code from the email.",
+      "back": "Back",
+      "resend": "Send a new code",
+      "resendIn": "Send a new code in {s}s",
+      "resendAgain": "Sent. Send again",
+      "spam": "Not there? Check spam or promotions. The email comes from Neon Auth on behalf of StayOS.",
+      "verifyTitle": "Confirm your email",
+      "verifySubmit": "Confirm and continue"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "body": "Enter your account's email and we'll send a 6-digit code.",
+      "email": "Email",
+      "send": "Send code",
+      "back": "Back to sign in",
+      "codeTitle": "Set a new password",
+      "newPassword": "New password",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Save and sign in",
+      "errorEmail": "Enter a valid email address."
+    },
+    "password": {
+      "title": "Change password",
+      "body": "Other phones and computers signed in to this account will be signed out.",
+      "current": "Current password",
+      "new": "New password",
+      "hint": "At least 8 characters.",
+      "save": "Change password",
+      "saved": "Password changed",
+      "savedSub": "Other devices have been signed out."
     }
   }
 }

@@ -1,40 +1,114 @@
 {
   "marketing": {
-    "nav": { "features": "Features", "pricing": "Pricing", "demo": "Live demo", "signIn": "Sign in", "trial": "Start free trial", "dashboard": "Open dashboard" },
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "demo": "Live demo",
+      "signIn": "Sign in",
+      "trial": "Start free trial",
+      "dashboard": "Open dashboard"
+    },
     "hero": {
       "eyebrow": "Hostel and PG software for Kerala",
       "title": "Rent, rooms and residents, run from WhatsApp.",
       "body": "{brand} sends every resident a UPI link on WhatsApp, matches the payment on its own, and keeps rooms, mess, complaints and gate passes in one place. In English and Malayalam.",
-      "demo": "Try the live demo", "trial": "Start 14-day free trial", "note": "No card needed. Your own hostel in two minutes, with sample data to explore."
+      "demo": "Try the live demo",
+      "trial": "Start 14-day free trial",
+      "note": "No card needed. Your own hostel in two minutes, with sample data to explore."
     },
     "preview": {
-      "label": "Sample hostel · 300 beds", "collected": "Collected in November", "ofBilled": "{pct} of billed", "occupancy": "Occupancy",
-      "waFrom": "Al Noor Residency", "waBody": "Hi Anjali, your November rent of ₹9,000 is due on 7 Nov.", "waButton": "Pay ₹9,000 by UPI",
-      "toast": "₹9,000 received from Anjali Menon", "toastSub": "UPI · matched to INV-2611-0208"
+      "label": "Sample hostel · 300 beds",
+      "collected": "Collected in November",
+      "ofBilled": "{pct} of billed",
+      "occupancy": "Occupancy",
+      "waFrom": "Al Noor Residency",
+      "waBody": "Hi Anjali, your November rent of ₹9,000 is due on 7 Nov.",
+      "waButton": "Pay ₹9,000 by UPI",
+      "toast": "₹9,000 received from Anjali Menon",
+      "toastSub": "UPI · matched to INV-2611-0208"
     },
     "features": {
       "title": "What changes in the first week",
-      "rent": { "title": "Rent collects itself", "body": "Invoices go out on the 1st with a UPI link. Reminders follow on WhatsApp. Payments match to the right invoice without anyone checking a bank statement.", "points": ["UPI links on WhatsApp", "Auto-reconciliation", "Overdue aging and reminders"] },
-      "ops": { "title": "Every bed, on one screen", "body": "See who sleeps where across blocks and floors, move a resident with a drag, and check in a new one with DigiLocker KYC and a police verification form ready to file.", "points": ["Floor plans with live status", "DigiLocker KYC", "Police verification PDF"] },
-      "family": { "title": "Residents and parents stay in the loop", "body": "Residents pay, skip meals and raise complaints from their phone. Parents approve leave on WhatsApp and see when their child comes in.", "points": ["Resident app", "Parent approvals on WhatsApp", "Mess skips with rebates"] }
+      "rent": {
+        "title": "Rent collects itself",
+        "body": "Invoices go out on the 1st with a UPI link. Reminders follow on WhatsApp. Payments match to the right invoice without anyone checking a bank statement.",
+        "points": [
+          "UPI links on WhatsApp",
+          "Auto-reconciliation",
+          "Overdue aging and reminders"
+        ]
+      },
+      "ops": {
+        "title": "Every bed, on one screen",
+        "body": "See who sleeps where across blocks and floors, move a resident with a drag, and check in a new one with DigiLocker KYC and a police verification form ready to file.",
+        "points": [
+          "Floor plans with live status",
+          "DigiLocker KYC",
+          "Police verification PDF"
+        ]
+      },
+      "family": {
+        "title": "Residents and parents stay in the loop",
+        "body": "Residents pay, skip meals and raise complaints from their phone. Parents approve leave on WhatsApp and see when their child comes in.",
+        "points": [
+          "Resident app",
+          "Parent approvals on WhatsApp",
+          "Mess skips with rebates"
+        ]
+      }
     },
     "roles": {
       "title": "One system, four people",
-      "owner": { "title": "Owner", "body": "Collections, occupancy, profit and loss. Ask questions in plain English or Malayalam." },
-      "warden": { "title": "Warden", "body": "Complaints with SLAs, gate log, visitors, staff attendance and the day's headcount." },
-      "resident": { "title": "Resident", "body": "Pay rent, skip a meal, request leave, raise a complaint with a photo." },
-      "parent": { "title": "Parent", "body": "Approve leave, pay fees, and get gate and late-entry alerts." }
+      "owner": {
+        "title": "Owner",
+        "body": "Collections, occupancy, profit and loss. Ask questions in plain English or Malayalam."
+      },
+      "warden": {
+        "title": "Warden",
+        "body": "Complaints with SLAs, gate log, visitors, staff attendance and the day's headcount."
+      },
+      "resident": {
+        "title": "Resident",
+        "body": "Pay rent, skip a meal, request leave, raise a complaint with a photo."
+      },
+      "parent": {
+        "title": "Parent",
+        "body": "Approve leave, pay fees, and get gate and late-entry alerts."
+      }
     },
     "trust": {
       "title": "Built like a bank ledger",
       "items": [
-        { "title": "Your hostel's data stays separate", "body": "Every row belongs to one hostel. Row-level security in the database decides who sees what, not just the app." },
-        { "title": "Each person sees their part", "body": "Residents see their own invoices and room. Parents see their child. Wardens don't see the profit and loss." },
-        { "title": "Hosted in Asia", "body": "Postgres in Singapore (AWS ap-southeast-1), close to Kerala for fast pages on 4G." }
+        {
+          "title": "Your hostel's data stays separate",
+          "body": "Every row belongs to one hostel. Row-level security in the database decides who sees what, not just the app."
+        },
+        {
+          "title": "Each person sees their part",
+          "body": "Residents see their own invoices and room. Parents see their child. Wardens don't see the profit and loss."
+        },
+        {
+          "title": "Hosted in Asia",
+          "body": "Postgres in Singapore (AWS ap-southeast-1), close to Kerala for fast pages on 4G."
+        }
       ]
     },
-    "cta": { "title": "See it with your own hostel's numbers", "body": "Start with the sample hostel, then switch to an empty one when you're ready.", "trial": "Start free trial", "demo": "Try the live demo" },
-    "footer": { "tagline": "Hostel operations for Kerala, on WhatsApp.", "product": "Product", "company": "Company", "contact": "Contact", "rights": "© 2026 {brand}. Demo build." },
+    "cta": {
+      "title": "See it with your own hostel's numbers",
+      "body": "Start with the sample hostel, then switch to an empty one when you're ready.",
+      "trial": "Start free trial",
+      "demo": "Try the live demo"
+    },
+    "footer": {
+      "tagline": "Hostel operations for Kerala, on WhatsApp.",
+      "product": "Product",
+      "company": "Company",
+      "contact": "Contact",
+      "rights": "© 2026 {brand}. Demo build.",
+      "legal": "Legal",
+      "terms": "Terms of service",
+      "privacy": "Privacy policy"
+    },
     "trial": {
       "title": "Your 14-day trial includes",
       "p1": "Every feature on the Growth plan, up to 300 beds",
@@ -45,57 +119,161 @@
     "pricing": {
       "title": "Simple pricing per hostel",
       "body": "Every plan starts with a 14-day free trial. Prices are per month, plus 18% GST.",
-      "monthly": "Monthly", "yearly": "Yearly", "yearlySave": "2 months free",
-      "perMonth": "/month", "billedYearly": "Billed {amount} a year", "plusGst": "+ GST",
-      "beds": "Up to {beds} beds", "staff": "{count, plural, one {# staff login} other {# staff logins}}", "staffUnlimited": "Unlimited staff logins",
-      "popular": "Most popular", "start": "Start free trial", "current": "Current plan", "choose": "Choose {plan}",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "yearlySave": "2 months free",
+      "perMonth": "/month",
+      "billedYearly": "Billed {amount} a year",
+      "plusGst": "+ GST",
+      "beds": "Up to {beds} beds",
+      "staff": "{count, plural, one {# staff login} other {# staff logins}}",
+      "staffUnlimited": "Unlimited staff logins",
+      "popular": "Most popular",
+      "start": "Start free trial",
+      "current": "Current plan",
+      "choose": "Choose {plan}",
       "plans": {
-        "starter": { "name": "Starter", "for": "For PGs and small hostels" },
-        "growth": { "name": "Growth", "for": "For hostels up to 300 beds" },
-        "scale": { "name": "Scale", "for": "For large and multi-block hostels" }
+        "starter": {
+          "name": "Starter",
+          "for": "For PGs and small hostels"
+        },
+        "growth": {
+          "name": "Growth",
+          "for": "For hostels up to 300 beds"
+        },
+        "scale": {
+          "name": "Scale",
+          "for": "For large and multi-block hostels"
+        }
       },
       "features": {
-        "rent": "Rent, invoices and UPI links", "whatsapp": "WhatsApp reminders and receipts", "rooms": "Rooms, beds and floor plans", "residents": "Residents, DigiLocker KYC, police forms",
-        "residentApp": "Resident app (iOS, Android, web)", "mess": "Mess menu, skips and rebates", "gate": "Gate pass, visitors, late entry", "parentApp": "Parent app and WhatsApp approvals",
-        "complaints": "Complaints with SLAs", "reports": "Profit and loss, Excel and PDF exports", "ai": "Ask StayOS, in English and Malayalam", "multi": "Several hostels under one login", "priority": "Priority support on WhatsApp"
+        "rent": "Rent, invoices and UPI links",
+        "whatsapp": "WhatsApp reminders and receipts",
+        "rooms": "Rooms, beds and floor plans",
+        "residents": "Residents, DigiLocker KYC, police forms",
+        "residentApp": "Resident app (iOS, Android, web)",
+        "mess": "Mess menu, skips and rebates",
+        "gate": "Gate pass, visitors, late entry",
+        "parentApp": "Parent app and WhatsApp approvals",
+        "complaints": "Complaints with SLAs",
+        "reports": "Profit and loss, Excel and PDF exports",
+        "ai": "Ask StayOS, in English and Malayalam",
+        "multi": "Several hostels under one login",
+        "priority": "Priority support on WhatsApp"
       },
       "faqTitle": "Questions owners ask",
       "faq": [
-        { "q": "What happens after the 14 days?", "a": "Nothing is charged automatically. Pick a plan in Settings to keep going; your data stays as it is." },
-        { "q": "Do residents and parents pay for the app?", "a": "No. The resident and parent apps are free for them. You pay one price for the hostel." },
-        { "q": "How do UPI payments reach me?", "a": "Straight to your own UPI ID or bank account. StayOS only reads the payment to match it to the invoice." },
-        { "q": "Can I move from my register or Excel?", "a": "Yes. Start empty, add rooms by block and floor, then add residents. Bulk import from Excel is on the way." }
+        {
+          "q": "What happens after the 14 days?",
+          "a": "Nothing is charged automatically. Pick a plan in Settings to keep going; your data stays as it is."
+        },
+        {
+          "q": "Do residents and parents pay for the app?",
+          "a": "No. The resident and parent apps are free for them. You pay one price for the hostel."
+        },
+        {
+          "q": "How do UPI payments reach me?",
+          "a": "Straight to your own UPI ID or bank account. StayOS only reads the payment to match it to the invoice."
+        },
+        {
+          "q": "Can I move from my register or Excel?",
+          "a": "Yes. Start empty, add rooms by block and floor, then add residents. Bulk import from Excel is on the way."
+        }
       ]
     }
   },
   "settings": {
-    "title": "Settings", "subtitle": "{hostel} · only the owner sees this page.",
-    "tabs": { "hostel": "Hostel", "team": "Team & invites", "billing": "Plan & billing", "data": "Sample data" },
+    "title": "Settings",
+    "subtitle": "{hostel} · only the owner sees this page.",
+    "tabs": {
+      "hostel": "Hostel",
+      "team": "Team & invites",
+      "billing": "Plan & billing",
+      "data": "Sample data"
+    },
     "hostel": {
-      "title": "Hostel profile", "body": "Shown on invoices, WhatsApp messages and the resident app.",
-      "name": "Hostel name", "city": "City", "address": "Address", "phone": "Office phone", "whatsapp": "WhatsApp Business number", "upi": "UPI ID for rent",
-      "messFee": "Mess fee per month (₹)", "deposit": "Security deposit (₹)", "dueDay": "Rent due on day", "save": "Save changes", "saved": "Hostel profile saved"
+      "title": "Hostel profile",
+      "body": "Shown on invoices, WhatsApp messages and the resident app.",
+      "name": "Hostel name",
+      "city": "City",
+      "address": "Address",
+      "phone": "Office phone",
+      "whatsapp": "WhatsApp Business number",
+      "upi": "UPI ID for rent",
+      "messFee": "Mess fee per month (₹)",
+      "deposit": "Security deposit (₹)",
+      "dueDay": "Rent due on day",
+      "save": "Save changes",
+      "saved": "Hostel profile saved"
     },
     "team": {
-      "title": "People with access", "body": "Owners and wardens use the dashboard. Residents and parents use the app.",
-      "you": "You", "inviteTitle": "Invite someone", "inviteBody": "They sign up, then enter the code to join this hostel.",
-      "role": "Role", "resident": "Resident", "residentFor": "Resident (for a parent, their child)", "create": "Create invite code",
-      "code": "Invite code", "copy": "Copy", "copied": "Code copied", "share": "Send on WhatsApp", "shareText": "Join {hostel} on {brand}: sign up at {url} and enter the invite code {code}.",
-      "empty": "No one else yet.", "pending": "Unused codes", "chooseResident": "Choose a resident"
+      "title": "People with access",
+      "body": "Owners and wardens use the dashboard. Residents and parents use the app.",
+      "you": "You",
+      "inviteTitle": "Invite someone",
+      "inviteBody": "They sign up, then enter the code to join this hostel.",
+      "role": "Role",
+      "resident": "Resident",
+      "residentFor": "Resident (for a parent, their child)",
+      "create": "Create invite code",
+      "code": "Invite code",
+      "copy": "Copy",
+      "copied": "Code copied",
+      "share": "Send on WhatsApp",
+      "shareText": "Join {hostel} on {brand}: sign up at {url} and enter the invite code {code}.",
+      "empty": "No one else yet.",
+      "pending": "Unused codes",
+      "chooseResident": "Choose a resident",
+      "removeAria": "Remove {name}",
+      "removeTitle": "Remove {name}?",
+      "removeBody": "They lose access to {hostel} straight away. Their records in the hostel stay.",
+      "removeConfirm": "Remove",
+      "cancel": "Cancel",
+      "removed": "{name} removed",
+      "revoke": "Revoke",
+      "revoked": "Code {code} revoked"
     },
     "billing": {
-      "title": "Your plan", "trial": "Free trial · {days, plural, one {# day} other {# days}} left", "trialEnded": "Trial ended", "active": "Active · renews {date}",
-      "usage": "Beds in use", "usageBody": "{beds} of {limit} beds on the {plan} plan", "over": "You have more beds than this plan allows. Move up a plan to stay within it.",
-      "change": "Change plan", "choose": "Choose a plan", "history": "Billing history", "noHistory": "No payments yet. Your first invoice appears here after you pick a plan.",
-      "invoice": "Invoice", "period": "Period", "amount": "Amount", "status": "Status", "paid": "Paid", "download": "Download",
-      "checkoutTitle": "Subscribe to {plan}", "checkoutBody": "Test mode: no money moves. A payment gateway (Razorpay) replaces this step in production.",
-      "cycle": "Billing", "subtotal": "{plan} plan, {cycle}", "gst": "GST (18%)", "total": "Total today", "payWith": "Pay with", "upi": "UPI", "card": "Card",
-      "pay": "Pay {amount} (test)", "processing": "Processing payment…", "success": "You're on the {plan} plan", "successSub": "Invoice {invoice} · {amount} paid",
-      "monthly": "monthly", "yearly": "yearly", "demoNote": "This is the shared live demo. Plan changes here are visible to everyone trying it."
+      "title": "Your plan",
+      "trial": "Free trial · {days, plural, one {# day} other {# days}} left",
+      "trialEnded": "Trial ended",
+      "active": "Active · renews {date}",
+      "usage": "Beds in use",
+      "usageBody": "{beds} of {limit} beds on the {plan} plan",
+      "over": "You have more beds than this plan allows. Move up a plan to stay within it.",
+      "change": "Change plan",
+      "choose": "Choose a plan",
+      "history": "Billing history",
+      "noHistory": "No payments yet. Your first invoice appears here after you pick a plan.",
+      "invoice": "Invoice",
+      "period": "Period",
+      "amount": "Amount",
+      "status": "Status",
+      "paid": "Paid",
+      "download": "Download",
+      "checkoutTitle": "Subscribe to {plan}",
+      "checkoutBody": "Test mode: no money moves. A payment gateway (Razorpay) replaces this step in production.",
+      "cycle": "Billing",
+      "subtotal": "{plan} plan, {cycle}",
+      "gst": "GST (18%)",
+      "total": "Total today",
+      "payWith": "Pay with",
+      "upi": "UPI",
+      "card": "Card",
+      "pay": "Pay {amount} (test)",
+      "processing": "Processing payment…",
+      "success": "You're on the {plan} plan",
+      "successSub": "Invoice {invoice} · {amount} paid",
+      "monthly": "monthly",
+      "yearly": "yearly",
+      "demoNote": "This is the shared live demo. Plan changes here are visible to everyone trying it."
     },
     "data": {
-      "title": "Sample data", "body": "This hostel runs on sample data and a demo clock (Friday 27 November, 10:24 AM). Reset it to start the story again.",
-      "reset": "Reset sample data", "realTitle": "Live hostel", "realBody": "This hostel uses real dates and your own data. There is no sample data to reset."
+      "title": "Sample data",
+      "body": "This hostel runs on sample data and a demo clock (Friday 27 November, 10:24 AM). Reset it to start the story again.",
+      "reset": "Reset sample data",
+      "realTitle": "Live hostel",
+      "realBody": "This hostel uses real dates and your own data. There is no sample data to reset."
     }
   }
 }

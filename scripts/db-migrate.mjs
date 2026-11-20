@@ -15,3 +15,4 @@ await db.connect();
 await db.query(fs.readFileSync(path.resolve(root, file), "utf8"));
 await db.end();
 console.log(`Applied ${file}`);
+console.log("If it added or changed functions, refresh the Data API schema cache: Neon Console → Data API → Refresh schema cache.");

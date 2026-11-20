@@ -192,6 +192,8 @@ export const useDemo = create<DemoState>()(
           activity: pushActivity(s.activity, { kind: "payment", residentId: inv.residentId, amount: inv.total, method, invoiceId }),
           lastEvent: { id: ++evId, type: "payment", invoiceId, residentId: inv.residentId, amount: inv.total, method },
         });
+        // residents and parents can't write invoices: the server records (or refuses) their online payment
+        if (method === "upi") import("./sync").then((m) => m.payOnline(invoiceId, opts.via ?? "app", at, inv));
       },
 
       raiseInvoices: (month) => {

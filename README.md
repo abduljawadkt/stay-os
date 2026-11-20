@@ -37,10 +37,10 @@ The login page signs in to any of them with one click.
 
 | Role | Email |
 |---|---|
-| Owner | owner@demo.stayos.app |
-| Warden | warden@demo.stayos.app |
-| Resident (Anjali, R-1042) | anjali@demo.stayos.app |
-| Parent (Rajesh) | parent@demo.stayos.app |
+| Owner | owner@demo.stayos.space |
+| Warden | warden@demo.stayos.space |
+| Resident (Anjali, R-1042) | anjali@demo.stayos.space |
+| Parent (Rajesh) | parent@demo.stayos.space |
 
 New sign-ups get their own hostel: a copy of the sample data, or an empty layout of blocks × floors.
 

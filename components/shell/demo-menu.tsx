@@ -59,6 +59,8 @@ export function DemoMenu() {
             {resolvedTheme === "dark" ? <Sun /> : <Moon />} {resolvedTheme === "dark" ? t("lightMode") : t("darkMode")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+          {sample && (
+            <>
           <DropdownMenuItem onSelect={() => simulatePayment()}>
             <IndianRupee /> {t("simulatePayment")}
           </DropdownMenuItem>
@@ -73,6 +75,8 @@ export function DemoMenu() {
           <DropdownMenuItem onSelect={() => simulateGateScan()}>
             <QrCode /> {t("simulateScan")}
           </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setOffline(!offline); }}>
             <CloudOff /> <span className="flex-1">{t("simulateOffline")}</span>
             <Switch checked={offline} tabIndex={-1} aria-hidden className="pointer-events-none" />

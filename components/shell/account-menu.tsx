@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Check, ChevronsUpDown, LogOut, Plus, Settings } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronsUpDown, KeyRound, LogOut, Plus, Settings } from "lucide-react";
+import { ChangePasswordDialog } from "@/components/auth/change-password";
 import { Avatar } from "@/components/common/avatar";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -27,8 +29,12 @@ export function AccountMenu({ onNavigate, className }: { onNavigate?: () => void
   const membership = useSession((s) => s.membership);
   const occupied = useDemo((s) => s.beds.filter((b) => b.status === "occupied").length);
   const isOwner = membership?.role === "owner";
+  const [pwOpen, setPwOpen] = useState(false);
+  const sharedDemoLogin = !!user?.email.endsWith("@demo.stayos.space");
 
   return (
+    <>
+    <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn("flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-brand aria-expanded:bg-surface-2", className)}
@@ -82,6 +88,11 @@ export function AccountMenu({ onNavigate, className }: { onNavigate?: () => void
             </Link>
           </DropdownMenuItem>
         )}
+        {!sharedDemoLogin && (
+          <DropdownMenuItem onSelect={() => setPwOpen(true)}>
+            <KeyRound /> {t("changePassword")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onSelect={async () => {
             await signOut();
@@ -92,5 +103,6 @@ export function AccountMenu({ onNavigate, className }: { onNavigate?: () => void
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }

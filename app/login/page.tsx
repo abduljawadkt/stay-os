@@ -8,7 +8,8 @@ import { ArrowRight } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
 import { Avatar } from "@/components/common/avatar";
 import { Button } from "@/components/ui/button";
-import { DEMO_ACCOUNTS, DEMO_PASSWORD, boot, openOrg, signIn, useSession, type MemberRole } from "@/lib/session";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, EmailNotVerified, boot, openOrg, resendVerification, signIn, useSession, verifyEmail, type MemberRole } from "@/lib/session";
+import { CodeStep } from "@/components/auth/code-step";
 import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
@@ -26,10 +27,18 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const tc = useTranslations("account.code");
 
   useEffect(() => {
     boot();
   }, []);
+
+  const afterSignIn = () => {
+    const list = useSession.getState().memberships ?? [];
+    if (!list.length) router.replace("/onboarding/");
+    else router.replace(next && next.startsWith("/") ? next : "/start/");
+  };
 
   // already signed in: go straight to the right place
   useEffect(() => {
@@ -52,12 +61,31 @@ function LoginForm() {
         const demoOrg = list.find((m) => m.isDemo);
         if (demoOrg) openOrg(demoOrg.orgId);
         router.replace(HOME[demoRole]);
-      } else if (!list.length) router.replace("/onboarding/");
-      else router.replace(next && next.startsWith("/") ? next : "/start/");
+      } else afterSignIn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      // account exists but its email isn't confirmed: Neon Auth has just emailed a code
+      if (err instanceof EmailNotVerified) setVerifying(true);
+      else setError(err instanceof Error ? err.message : String(err));
       setBusy(null);
     }
+  }
+
+  if (verifying) {
+    return (
+      <AuthShell>
+        <CodeStep
+          email={email}
+          title={tc("verifyTitle")}
+          submitLabel={tc("verifySubmit")}
+          onSubmit={async (code) => {
+            await verifyEmail(email, code, password);
+            afterSignIn();
+          }}
+          onResend={() => resendVerification(email)}
+          onBack={() => setVerifying(false)}
+        />
+      </AuthShell>
+    );
   }
 
   const demoAside = (
@@ -108,7 +136,10 @@ function LoginForm() {
           noValidate
         >
           <Field id="email" label={t("email")} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <Field id="password" label={t("password")} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <div>
+            <Field id="password" label={t("password")} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Link href={`/forgot-password/${email ? `?email=${encodeURIComponent(email)}` : ""}`} className="mt-2 inline-block text-sm font-medium text-brand-text hover:underline">{t("forgot")}</Link>
+          </div>
           <FormError message={error} />
           <Button type="submit" variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px] sm:h-12 sm:rounded-lg sm:text-base" loading={busy === "form"} disabled={!!busy}>
             {t("submit")}

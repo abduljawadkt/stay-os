@@ -48,8 +48,8 @@ export function SiteFooter() {
   const t = useTranslations("marketing");
   return (
     <footer className="border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[2fr_1fr_1fr]">
-        <div>
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
+        <div className="col-span-2 md:col-span-1">
           <Logo />
           <p className="mt-2 max-w-xs text-sm text-fg-2">{t("footer.tagline")}</p>
         </div>
@@ -59,6 +59,13 @@ export function SiteFooter() {
             <li><Link href="/#features" className="text-fg-2 hover:text-fg">{t("nav.features")}</Link></li>
             <li><Link href="/pricing/" className="text-fg-2 hover:text-fg">{t("nav.pricing")}</Link></li>
             <li><Link href="/login/" className="text-fg-2 hover:text-fg">{t("nav.demo")}</Link></li>
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-medium text-fg-3">{t("footer.legal")}</p>
+          <ul className="mt-2 space-y-1.5 text-sm">
+            <li><Link href="/terms/" className="text-fg-2 hover:text-fg">{t("footer.terms")}</Link></li>
+            <li><Link href="/privacy/" className="text-fg-2 hover:text-fg">{t("footer.privacy")}</Link></li>
           </ul>
         </div>
         <div>

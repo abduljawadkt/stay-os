@@ -16,10 +16,10 @@ const TEMPLATE = "00000000-0000-0000-0000-000000000001";
 const DEMO = "00000000-0000-0000-0000-0000000000d0";
 export const DEMO_PASSWORD = "stayos-demo-2026";
 const DEMO_USERS = [
-  { key: "owner", email: "owner@demo.stayos.app", name: "Rasheed Koya", role: "owner" },
-  { key: "warden", email: "warden@demo.stayos.app", name: "Mohammed Ashraf P.", role: "warden" },
-  { key: "resident", email: "anjali@demo.stayos.app", name: "Anjali Menon", role: "resident", residentId: "R-1042" },
-  { key: "parent", email: "parent@demo.stayos.app", name: "Rajesh Menon", role: "parent", residentId: "R-1042" },
+  { key: "owner", email: "owner@demo.stayos.space", name: "Rasheed Koya", role: "owner" },
+  { key: "warden", email: "warden@demo.stayos.space", name: "Mohammed Ashraf P.", role: "warden" },
+  { key: "resident", email: "anjali@demo.stayos.space", name: "Anjali Menon", role: "resident", residentId: "R-1042" },
+  { key: "parent", email: "parent@demo.stayos.space", name: "Rajesh Menon", role: "parent", residentId: "R-1042" },
 ];
 
 const url = process.env.DATABASE_URL?.replace("sslmode=require", "sslmode=verify-full");
@@ -118,6 +118,8 @@ for (const u of DEMO_USERS) {
   await q(`insert into public.members (org_id, user_id, role, resident_id, name, email) values ($1,$2,$3,$4,$5,$6)`, [DEMO, id, u.role, u.residentId ?? null, u.name, u.email]);
   console.log(`  ${u.role.padEnd(8)} ${u.email}`);
 }
+
+await q(`update neon_auth."user" set "emailVerified" = true where email like '%@demo.stayos.space'`);
 
 const counts = (await q(`select (select count(*) from public.beds where org_id = $1)::int as beds, (select count(*) from public.residents where org_id = $1 and status <> 'checked_out')::int as residents, (select count(*) from public.invoices where org_id = $1)::int as invoices`, [DEMO])).rows[0];
 console.log(`Done. Demo hostel: ${counts.beds} beds, ${counts.residents} current residents, ${counts.invoices} invoices.`);
