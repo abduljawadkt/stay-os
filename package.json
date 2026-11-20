@@ -12,7 +12,8 @@
     "ios": "next build && cap sync ios && cap open ios",
     "deploy": "npx vercel --prod",
     "db:setup": "node scripts/db-setup.mjs",
-    "db:check": "node scripts/db-check.mjs"
+    "db:check": "node scripts/db-check.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.2",

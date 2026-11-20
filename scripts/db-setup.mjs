@@ -42,6 +42,10 @@ if (exists && !force) {
 
 console.log("Applying db/schema.sql");
 await q(fs.readFileSync(path.join(root, "db/schema.sql"), "utf8"));
+for (const f of fs.readdirSync(path.join(root, "db/migrations")).filter((x) => x.endsWith(".sql")).sort()) {
+  console.log(`Applying db/migrations/${f}`);
+  await q(fs.readFileSync(path.join(root, "db/migrations", f), "utf8"));
+}
 
 // ---- sample data, camelCase JSON -> snake_case rows
 const read = (f) => JSON.parse(fs.readFileSync(path.join(root, "data", f), "utf8"));

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { neon, neonConfigured, errorText } from "./neon";
-import { loadOrg, startSync, stopSync, clearOrgData } from "./sync";
+import { loadOrg, startSync, stopSync, clearOrgData, withIdentity } from "./sync";
 import type { Role } from "./store";
 
 export type MemberRole = Role;
@@ -107,15 +107,11 @@ function mapMembership(r: Record<string, unknown>): Membership {
 }
 
 async function fetchMemberships(): Promise<Membership[]> {
-  // The first Data API call on a waking database can run before the token is applied; one retry covers it.
-  for (let attempt = 0; attempt < 2; attempt++) {
+  return withIdentity(async () => {
     const { data, error } = await neon().rpc("my_memberships");
     if (error) throw error;
-    const list = ((data ?? []) as Record<string, unknown>[]).map(mapMembership);
-    if (list.length || attempt === 1) return list;
-    await new Promise((r) => setTimeout(r, 600));
-  }
-  return [];
+    return ((data ?? []) as Record<string, unknown>[]).map(mapMembership);
+  });
 }
 
 let booting: Promise<void> | null = null;
@@ -133,7 +129,11 @@ export function boot(): Promise<void> {
           return;
         }
         set({ auth: "signed_in", user: { id: u.id, name: u.name ?? "", email: u.email } });
-        set({ memberships: await fetchMemberships() });
+        try {
+          set({ memberships: await fetchMemberships() });
+        } catch (e) {
+          set({ orgStatus: "error", orgError: errorText(e) });
+        }
       } catch {
         set({ auth: "signed_out", user: null, memberships: null });
       }

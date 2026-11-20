@@ -14,7 +14,6 @@ import { demo } from "@/config/demo";
 import type { Membership, OrgRow } from "./session";
 
 const POLL_MS = 4000;
-const PAGE = 1000;
 
 let orgId: string | null = null;
 let canWriteStaff = false;
@@ -34,17 +33,6 @@ function setSaving(v: "idle" | "saving" | "saved" | "error") {
   import("./session").then(({ useSession }) => useSession.setState({ saving: v }));
 }
 
-async function fetchAll(table: string, id: string): Promise<Record<string, unknown>[]> {
-  const out: Record<string, unknown>[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await neon().from(table).select("*").eq("org_id", id).order("id").range(from, from + PAGE - 1);
-    if (error) throw error;
-    out.push(...((data ?? []) as Record<string, unknown>[]));
-    if (!data || data.length < PAGE) break;
-  }
-  return out;
-}
-
 const pad = (n: number) => String(n).padStart(2, "0");
 function lastMonths(current: string, n: number) {
   const [y, m] = current.split("-").map(Number);
@@ -60,33 +48,42 @@ function nextMonthOf(ym: string) {
   return m === 12 ? `${y + 1}-01` : `${y}-${pad(m + 1)}`;
 }
 
+type Snapshot = { now: string; org: OrgRow; rooms: Record<string, unknown>[]; staff: Record<string, unknown>[] } & Record<string, Record<string, unknown>[]>;
+
+/**
+ * A database that has just woken up can answer before it has applied the caller's sign-in. The server
+ * functions then raise "auth_not_ready" instead of returning nothing; try again a few times.
+ */
+export async function withIdentity<T>(fn: () => Promise<T>, tries = 5): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 400 * i));
+    try {
+      return await fn();
+    } catch (e) {
+      last = e;
+      if (!/auth_not_ready/.test(errorText(e))) throw e;
+    }
+  }
+  throw last;
+}
+
 /** Read a hostel from the database and put it in the app. */
 export async function loadOrg(id: string, membership: Membership): Promise<OrgRow> {
   const staffRole = membership.role === "owner" || membership.role === "warden";
-  // The org row first, on its own: it also warms the token, and a waking database can answer the very
-  // first request before the user's identity is applied (it then sees no rows), so that one is retried.
-  let org: OrgRow | null = null;
-  for (let attempt = 0; attempt < 3 && !org; attempt++) {
-    if (attempt) await new Promise((r) => setTimeout(r, 500 * attempt));
-    const res = await neon().from("orgs").select("*").eq("id", id).maybeSingle();
-    if (res.error) throw res.error;
-    org = (res.data as OrgRow | null) ?? null;
-  }
-  if (!org) throw new Error("This hostel could not be found, or you no longer have access to it.");
-  const stamp = await neon().rpc("changes_since", { p_org: id, p_since: "infinity" });
-  if (stamp.error) throw stamp.error;
-  const serverNow = (stamp.data as { now: string }).now;
-
-  const [roomsRows, staffRows, ...collRows] = await Promise.all([
-    fetchAll("rooms", id),
-    staffRole
-      ? fetchAll("staff", id)
-      : neon().rpc("staff_directory", { p_org: id }).then(({ data, error }: { data: unknown; error: unknown }) => {
-          if (error) throw error;
-          return ((data ?? []) as Record<string, unknown>[]).map((s) => ({ ...s, salary: 0, attendance: {}, advance: 0, joined_on: null }));
-        }),
-    ...COLLS.map((c) => fetchAll(TABLE[c], id)),
-  ]);
+  const snap = await withIdentity(async () => {
+    const { data, error } = await neon().rpc("org_snapshot", { p_org: id });
+    if (error) throw error;
+    const d = data as Snapshot;
+    // every hostel has beds; none back means the database answered before it knew who we are
+    if (!d?.org || !d.beds?.length) throw new Error("auth_not_ready");
+    return d;
+  });
+  const org = snap.org;
+  const serverNow = snap.now;
+  const roomsRows = snap.rooms;
+  const staffRows = staffRole ? snap.staff : snap.staff.map((s) => ({ ...s, salary: 0, attendance: {}, advance: 0, joined_on: null }));
+  const collRows = COLLS.map((c) => snap[TABLE[c]] ?? []);
 
   // clock: sample-data hostels run on the demo calendar
   const clock = org.settings.clock ?? { mode: "real" as const };

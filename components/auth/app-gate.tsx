@@ -76,7 +76,7 @@ function Splash({ state }: { state: "loading" | "error" | "unconfigured" }) {
             </p>
             <p className="mt-1 text-small text-fg-2">{error ?? t("errorBody")}</p>
             <div className="mt-4 flex justify-center gap-2">
-              <Button variant="primary" onClick={() => orgId && openOrg(orgId, { force: true })}>
+              <Button variant="primary" onClick={() => (orgId ? openOrg(orgId, { force: true }) : window.location.reload())}>
                 <RotateCw /> {t("retry")}
               </Button>
               <Button variant="secondary" onClick={() => signOut()}>
