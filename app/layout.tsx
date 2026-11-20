@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   description: `${brand.name} collects rent by UPI on WhatsApp and runs rooms, mess, complaints and gate passes for hostels and PGs, in English and Malayalam.`,
   applicationName: brand.name,
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "default" },
+  formatDetection: { telephone: false },
   icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
   openGraph: {
     title: `${brand.name} · Hostel operations, on WhatsApp`,

@@ -97,7 +97,7 @@ function LoginForm() {
   return (
     <AuthShell aside={demoAside}>
       <div className="max-w-md">
-        <h1 className="text-[28px] leading-9 font-semibold tracking-[-0.02em] text-fg">{t("title", { brand: brand.name })}</h1>
+        <h1 className="text-[30px] leading-9 font-bold tracking-[-0.02em] text-fg sm:text-[28px] sm:font-semibold">{t("title", { brand: brand.name })}</h1>
         <p className="mt-1.5 text-base text-fg-2">{t("subtitle")}</p>
         <form
           className="mt-6 space-y-4"
@@ -110,7 +110,7 @@ function LoginForm() {
           <Field id="email" label={t("email")} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Field id="password" label={t("password")} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           <FormError message={error} />
-          <Button type="submit" variant="primary" size="xl" className="w-full" loading={busy === "form"} disabled={!!busy}>
+          <Button type="submit" variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px] sm:h-12 sm:rounded-lg sm:text-base" loading={busy === "form"} disabled={!!busy}>
             {t("submit")}
           </Button>
         </form>

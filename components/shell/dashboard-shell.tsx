@@ -12,6 +12,7 @@ import { CheckInDialog } from "@/components/residents/check-in-dialog";
 import { useDemo } from "@/lib/store";
 import { useSession } from "@/lib/session";
 import { TrialBanner } from "./trial-banner";
+import { MobileTabBar, MobileTopBar } from "./mobile-nav";
 import { cn } from "@/lib/utils";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -44,12 +45,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </SheetContent>
       </Sheet>
       <div className={cn("flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-[cubic-bezier(.2,0,0,1)]", waOpen && "2xl:pr-[396px]")}>
-        <TopBar onMenu={() => setMenu(true)} />
-        <TrialBanner />
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:pt-8">
+        <div className="hidden lg:block">
+          <TopBar onMenu={() => setMenu(true)} />
+          <TrialBanner />
+        </div>
+        <MobileTopBar />
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-2 pb-[calc(84px+env(safe-area-inset-bottom))] outline-none sm:px-6 lg:px-8 lg:pt-8 lg:pb-24">
           {children}
         </main>
       </div>
+      <MobileTabBar />
       <ResidentDrawer />
       <BedDrawer />
       <CheckInDialog />

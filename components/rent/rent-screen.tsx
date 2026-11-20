@@ -134,7 +134,7 @@ export function RentScreen() {
             ))}
           </div>
 
-          <div className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" data-tour="rent-summary">
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" data-tour="rent-summary">
             {loading ? Array.from({ length: 4 }).map((_, i) => <Sk key={i} className="h-[104px] rounded-lg" />) : (
               <>
                 <Stat label={t("billed")} value={<CountUp id={`rent-billed-${month}`} value={sum.billed} format={f.inr} />} sub={t("invoices", { count: sum.count })} />
@@ -150,7 +150,7 @@ export function RentScreen() {
               <h2 className="text-sm font-semibold text-fg">{t("aging.title")}</h2>
               {bucket && <Button variant="quiet" size="sm" onClick={() => setBucket(null)}>{t("aging.clear")}</Button>}
             </div>
-            <div className="grid gap-px overflow-hidden border-t border-line bg-line sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-px overflow-hidden border-t border-line bg-line sm:grid-cols-4">
               {ag.map((b, i) => {
                 const max = Math.max(...ag.map((x) => x.amount), 1);
                 const active = bucket === b.id;
@@ -183,7 +183,31 @@ export function RentScreen() {
               <EmptyState icon={filter === "overdue" ? CheckCircle2 : SearchX} title={filter === "overdue" ? t("empty.overdueTitle", { month: f.month(month) }) : t("empty.title")} body={filter === "overdue" ? t("empty.overdueBody") : t("empty.body")} />
             ) : (
               <>
-                <div className="scrollbar-thin relative overflow-x-auto">
+                {/* phones: one tappable row per invoice; the sheet that opens has the actions */}
+                <ul className="divide-y divide-line border-t border-line md:hidden">
+                  {pageIds.map((id) => {
+                    const inv = invById[id];
+                    if (!inv) return null;
+                    const r = resById[inv.residentId];
+                    const flashed = flash[id] && Date.now() - flash[id] < 2500;
+                    return (
+                      <li key={`${id}-${flash[id] ?? 0}`} className={cn(flashed && "flash-paid")}>
+                        <button type="button" onClick={() => setViewInv(inv)} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-surface-2">
+                          <Avatar name={r?.name ?? "?"} size={38} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[15px] font-medium text-fg">{r?.name}</span>
+                            <span className="block truncate text-[13px] text-fg-3"><span className="font-mono">{r?.bedId}</span> · {t("col.due")} {f.day(inv.dueOn)}</span>
+                          </span>
+                          <span className="flex shrink-0 flex-col items-end gap-1">
+                            <span className="text-[15px] font-semibold text-fg tnum">{f.inr(inv.total)}</span>
+                            <InvoiceChip inv={inv} today={today} />
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[900px] text-sm">
                     <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                       <th className="py-2.5 pr-3 pl-5 font-medium">{t("col.resident")}</th>
@@ -277,16 +301,26 @@ export function RentScreen() {
         }}
       />
       {linkFor && <PayLinkDialog inv={linkFor} name={resById[linkFor.residentId]?.name ?? ""} onClose={() => setLinkFor(null)} onSend={() => { sendReminders([linkFor.id]); setLinkFor(null); }} />}
-      {viewInv && <InvoiceDialog inv={invById[viewInv.id] ?? viewInv} name={resById[viewInv.residentId]?.name ?? ""} bed={resById[viewInv.residentId]?.bedId ?? ""} onClose={() => setViewInv(null)} />}
+      {viewInv && (
+        <InvoiceDialog
+          inv={invById[viewInv.id] ?? viewInv}
+          name={resById[viewInv.residentId]?.name ?? ""}
+          bed={resById[viewInv.residentId]?.bedId ?? ""}
+          onClose={() => setViewInv(null)}
+          onLink={() => { const v = viewInv; setViewInv(null); setLinkFor(v); }}
+          onRemind={() => sendReminders([viewInv.id])}
+          onCash={() => payInvoice(viewInv.id, { method: "cash" })}
+        />
+      )}
     </>
   );
 }
 
 function Stat({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "danger" }) {
   return (
-    <div className="rounded-lg border border-line bg-surface p-5">
+    <div className="min-w-0 rounded-2xl border border-line bg-surface p-4 sm:rounded-lg sm:p-5">
       <p className="text-small font-medium text-fg-2">{label}</p>
-      <p className={cn("mt-1.5 text-[26px] leading-8 font-semibold tracking-[-0.02em] tnum", tone === "danger" ? "text-danger-fg" : "text-fg")}>{value}</p>
+      <p className={cn("mt-1.5 truncate text-[20px] leading-7 font-semibold tracking-[-0.02em] tnum sm:text-[26px] sm:leading-8", tone === "danger" ? "text-danger-fg" : "text-fg")}>{value}</p>
       <div className="mt-1 text-xs text-fg-3">{sub}</div>
     </div>
   );
@@ -414,8 +448,9 @@ function PayLinkDialog({ inv, name, onClose, onSend }: { inv: Invoice; name: str
   );
 }
 
-function InvoiceDialog({ inv, name, bed, onClose }: { inv: Invoice; name: string; bed: string; onClose: () => void }) {
+function InvoiceDialog({ inv, name, bed, onClose, onLink, onRemind, onCash }: { inv: Invoice; name: string; bed: string; onClose: () => void; onLink: () => void; onRemind: () => void; onCash: () => void }) {
   const t = useTranslations("rent.invoiceDialog");
+  const ta = useTranslations("rent");
   const tm = useTranslations("method");
   const f = useFormat();
   return (
@@ -439,7 +474,14 @@ function InvoiceDialog({ inv, name, bed, onClose }: { inv: Invoice; name: string
           {inv.utr && <div><p className="text-xs text-fg-3">{t("utr")}</p><p className="font-mono text-fg">{inv.utr}</p></div>}
         </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
+          {inv.status === "unpaid" && (
+            <>
+              <Button variant="primary" onClick={onLink}><IndianRupee /> {ta("act.link")}</Button>
+              <Button variant="secondary" onClick={onRemind}><Send /> {ta("act.send")}</Button>
+              <Button variant="secondary" onClick={onCash}><Banknote /> {ta("act.cash")}</Button>
+            </>
+          )}
           <Button variant="secondary" onClick={() => { document.title = inv.id; window.print(); }}><FileText /> {t("pdf")}</Button>
         </DialogFooter>
       </DialogContent>

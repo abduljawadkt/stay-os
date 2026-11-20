@@ -40,7 +40,7 @@ function Settings() {
     <>
       <PageHeader title={t("title")} description={t("subtitle", { hostel: hostel.name })} />
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
-        <TabsList className="mb-5">
+        <TabsList className="no-scrollbar mb-5 max-w-full justify-start overflow-x-auto">
           {(["hostel", "team", "billing", "data"] as const).map((k) => (
             <TabsTrigger key={k} value={k}>{t(`tabs.${k}`)}</TabsTrigger>
           ))}

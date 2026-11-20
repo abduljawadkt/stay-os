@@ -127,7 +127,22 @@ function Expenses() {
               </Select>
             </div>
             {loading ? <TableSkeleton rows={8} cols={5} /> : list.length === 0 ? <EmptyState icon={ReceiptText} title={t("empty")} body={t("emptyBody")} action={<Button variant="secondary" onClick={() => setAddOpen(true)}><Plus /> {t("add")}</Button>} /> : (
-              <div className="scrollbar-thin relative overflow-x-auto">
+              <>
+              <ul className="divide-y divide-line border-t border-line md:hidden">
+                {list.map((e) => (
+                  <li key={e.id}>
+                    <button type="button" onClick={() => e.receipt && setReceipt(e)} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-surface-2">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2"><span className="size-2.5 rounded-full" style={{ background: COLOR[e.category] }} aria-hidden /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[15px] font-medium text-fg">{e.vendor}</span>
+                        <span className="block truncate text-[13px] text-fg-3">{f.day(e.date)} · {tc(e.category)}{e.receipt ? "" : e.category === "salaries" ? "" : ` · ${t("noReceipt")}`}</span>
+                      </span>
+                      <span className="shrink-0 text-[15px] font-semibold text-fg tnum">{f.inr(e.amount)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[820px] text-sm">
                   <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                     <th className="py-2.5 pr-3 pl-5 font-medium">{t("col.date")}</th><th className="px-3 font-medium">{t("col.vendor")}</th><th className="px-3 font-medium">{t("col.category")}</th>
@@ -149,6 +164,7 @@ function Expenses() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </Card>
         </>

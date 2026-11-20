@@ -131,7 +131,24 @@ export function GateScreen() {
               <Card>
                 <CardHeader title={t("leaves.title")} meta={t("leaves.meta")} />
                 {leaves.length === 0 ? <EmptyState icon={CalendarClock} title={t("leaves.empty")} /> : (
-                  <div className="scrollbar-thin relative overflow-x-auto">
+                  <>
+                  <ul className="divide-y divide-line border-t border-line md:hidden">
+                    {leaves.map((l) => {
+                      const r = resById[l.residentId];
+                      return (
+                        <li key={l.id} className="flex items-start gap-3 px-4 py-3">
+                          <Avatar name={r?.name ?? ""} size={38} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2"><p className="truncate text-[15px] font-medium text-fg">{r?.name}</p><LeaveChip status={l.status} /></div>
+                            <p className="text-[13px] text-fg-2">{l.destination} · <span className="tnum">{f.day(l.from)} → {f.day(l.to)}</span></p>
+                            <p className="truncate text-[13px] text-fg-3">{l.reason}</p>
+                            {l.status === "awaiting_parent" && <Button variant="secondary" size="sm" className="mt-2" onClick={() => toast(t("leaves.nudged", { name: r?.parent.name ?? "" }))}><BellRing /> {t("leaves.nudge")}</Button>}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[860px] text-sm">
                       <thead><tr className="border-y border-line text-left text-xs text-fg-2">
                         <th className="py-2.5 pr-3 pl-5 font-medium">{t("leaves.resident")}</th><th className="px-3 font-medium">{t("leaves.when")}</th>
@@ -153,6 +170,7 @@ export function GateScreen() {
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </Card>
             </TabsContent>
@@ -185,7 +203,23 @@ export function GateScreen() {
               <Card>
                 <CardHeader title={t("visitors.title")} meta={t("visitors.meta", { count: visitors.filter((v) => !v.outAt).length })} />
                 {visitors.length === 0 ? <EmptyState icon={Users} title={t("visitors.empty")} /> : (
-                  <div className="scrollbar-thin relative overflow-x-auto">
+                  <>
+                  <ul className="divide-y divide-line border-t border-line md:hidden">
+                    {visitors.map((v) => {
+                      const r = resById[v.residentId];
+                      return (
+                        <li key={v.id} className="flex items-center gap-3 px-4 py-3">
+                          <Avatar name={v.name} size={38} />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[15px] font-medium text-fg">{v.name}</p>
+                            <p className="truncate text-[13px] text-fg-3">{v.relation} · {r?.name} · <span className="tnum">{f.time(v.inAt)}</span></p>
+                          </div>
+                          {v.outAt ? <span className="text-[13px] text-fg-3 tnum">{f.time(v.outAt)}</span> : <Button variant="secondary" size="sm" onClick={() => checkoutVisitor(v.id)}>{t("visitors.checkout")}</Button>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[860px] text-sm">
                       <thead><tr className="border-y border-line text-left text-xs text-fg-2">
                         <th className="py-2.5 pr-3 pl-5 font-medium">{t("visitors.visitor")}</th><th className="px-3 font-medium">{t("visitors.visiting")}</th>
@@ -207,6 +241,7 @@ export function GateScreen() {
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </Card>
             </TabsContent>

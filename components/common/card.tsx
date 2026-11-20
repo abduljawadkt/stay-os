@@ -18,12 +18,12 @@ export function CardHeader({ title, meta, action, className, id }: { title: Reac
 
 export function PageHeader({ title, description, actions, className }: { title: React.ReactNode; description?: React.ReactNode; actions?: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between", className)}>
+    <div className={cn("mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-4", className)}>
       <div className="min-w-0">
-        <h1 className="text-page font-semibold tracking-[-0.015em] text-fg">{title}</h1>
-        {description && <p className="mt-1 text-sm text-fg-2">{description}</p>}
+        <h1 className="text-[32px] leading-10 font-bold tracking-[-0.02em] text-fg sm:text-page sm:font-semibold sm:tracking-[-0.015em]">{title}</h1>
+        {description && <p className="mt-1 text-[15px] text-fg-2 sm:text-sm">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="no-scrollbar -mx-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">{actions}</div>}
     </div>
   );
 }

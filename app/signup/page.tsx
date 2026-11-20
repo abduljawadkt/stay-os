@@ -65,14 +65,14 @@ export default function SignupPage() {
   return (
     <AuthShell aside={aside}>
       <div className="max-w-md">
-        <h1 className="text-[28px] leading-9 font-semibold tracking-[-0.02em] text-fg">{t("title")}</h1>
+        <h1 className="text-[30px] leading-9 font-bold tracking-[-0.02em] text-fg sm:text-[28px] sm:font-semibold">{t("title")}</h1>
         <p className="mt-1.5 text-base text-fg-2">{t("subtitle")}</p>
         <form className="mt-6 space-y-4" onSubmit={submit} noValidate>
           <Field id="name" label={t("name")} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} />
           <Field id="email" label={t("email")} type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
           <Field id="password" label={t("password")} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} hint={t("passwordHint")} />
           <FormError message={error} />
-          <Button type="submit" variant="primary" size="xl" className="w-full" loading={busy} disabled={busy}>
+          <Button type="submit" variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px] sm:h-12 sm:rounded-lg sm:text-base" loading={busy} disabled={busy}>
             {t("submit")}
           </Button>
           <p className="text-small text-fg-3">{t("terms")}</p>

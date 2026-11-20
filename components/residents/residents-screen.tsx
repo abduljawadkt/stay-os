@@ -127,7 +127,28 @@ export function ResidentsScreen() {
           <EmptyState icon={SearchX} title={q ? t("emptyTitle", { q }) : t("emptyFilter")} body={t("emptyBody")} action={<Button variant="secondary" onClick={() => { setQ(""); setFilter("all"); setBlock("all"); }}>{t("clear")}</Button>} />
         ) : (
           <>
-            <div className="scrollbar-thin relative overflow-x-auto">
+            <ul className="divide-y divide-line border-t border-line md:hidden">
+              {pageRows.map((r) => {
+                const inv = latest.get(r.id);
+                return (
+                  <li key={r.id}>
+                    <button type="button" onClick={() => router.push(`/dashboard/residents/profile/?id=${r.id}`)} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-surface-2">
+                      <Avatar name={r.name} size={40} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[15px] font-medium text-fg">{r.name}</span>
+                        <span className="block truncate text-[13px] text-fg-3"><span className="font-mono">{r.bedId}</span> · {r.institution.split(" · ")[1] ?? r.institution}</span>
+                      </span>
+                      <span className="flex shrink-0 flex-col items-end gap-1">
+                        {inv ? <InvoiceChip inv={inv} today={today} /> : null}
+                        {filter === "police" ? <PoliceChip status={r.police.status} /> : r.kyc.status !== "verified" ? <KycChip status={r.kyc.status} /> : null}
+                      </span>
+                      <ChevronRight className="size-4 shrink-0 text-fg-3" aria-hidden />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
               <table className="w-full min-w-[860px] text-sm">
                 <thead className="sticky top-0 bg-surface">
                   <tr className="border-b border-line text-left text-xs font-medium text-fg-2">

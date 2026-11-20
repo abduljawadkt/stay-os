@@ -139,7 +139,7 @@ export function AskStayOS() {
             exit={{ opacity: 0, y: 8 }}
             onClick={() => setOpen(true)}
             data-tour="ask-pill"
-            className="fixed right-5 bottom-5 z-30 flex h-11 items-center gap-2 rounded-full border border-line bg-surface pr-3 pl-2 text-sm font-medium text-fg shadow-lg transition-colors hover:bg-surface-2"
+            className="fixed right-5 bottom-5 z-30 hidden h-11 items-center lg:flex gap-2 rounded-full border border-line bg-surface pr-3 pl-2 text-sm font-medium text-fg shadow-lg transition-colors hover:bg-surface-2"
             aria-label={t("open")}
           >
             <LogoMark size={26} />
@@ -158,7 +158,7 @@ export function AskStayOS() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.24, ease: [0.2, 0, 0, 1] }}
-            className="fixed inset-0 z-50 flex flex-col bg-surface sm:inset-auto sm:right-5 sm:bottom-5 sm:h-[min(660px,calc(100dvh-40px))] sm:w-[440px] sm:rounded-xl sm:border sm:border-line sm:shadow-lg"
+            className="fixed inset-0 z-50 flex flex-col bg-surface pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] sm:inset-auto sm:pt-0 sm:pb-0 sm:right-5 sm:bottom-5 sm:h-[min(660px,calc(100dvh-40px))] sm:w-[440px] sm:rounded-xl sm:border sm:border-line sm:shadow-lg"
             data-tour="ask-panel"
           >
             <header className="flex items-center gap-3 border-b border-line px-4 py-3">

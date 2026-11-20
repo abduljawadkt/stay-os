@@ -51,7 +51,7 @@ export function StaffScreen() {
         actions={owner ? <Button variant="primary" onClick={() => setPayOpen(true)}><Banknote /> {t("process", { month: f.monthShort(demo.currentMonth) })}</Button> : undefined}
       />
       {owner && (
-        <div className="mb-4 grid gap-4 sm:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           {[["gross", totals.gross], ["ded", totals.ded], ["adv", totals.adv], ["net", totals.net]].map(([k, v]) => (
             <div key={k as string} className="rounded-lg border border-line bg-surface p-4">
               <p className="text-small font-medium text-fg-2">{t(`sum.${k}`)}</p>
@@ -62,7 +62,36 @@ export function StaffScreen() {
       )}
       <Card>
         {error ? <ErrorState what={t("what")} onRetry={retry} /> : loading ? <TableSkeleton rows={10} cols={6} /> : (
-          <div className="scrollbar-thin relative overflow-x-auto">
+          <>
+          {/* phones: today's mark is the main action, the month strip and pay sit underneath */}
+          <ul className="divide-y divide-line md:hidden">
+            {rows.map(({ s, a, m }) => {
+              const mark = (a[today] ?? "P") as AttendanceMark;
+              return (
+                <li key={s.id} className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={s.name} size={38} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-medium text-fg">{s.name}</p>
+                      <p className="truncate text-[13px] text-fg-3">{s.title} · <span className="tnum">{s.shift}</span></p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild><button className="inline-flex h-10 items-center gap-1 rounded-full pl-1" aria-label={t("markFor", { name: s.name })}><Badge variant={MARK_VARIANT[mark]} dot>{tk(mark)}</Badge><ChevronDown className="size-3.5 text-fg-3" aria-hidden /></button></DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">{(["P", "late", "H", "L", "A"] as AttendanceMark[]).map((k) => <DropdownMenuItem key={k} onSelect={() => setAttendance(s.id, today, k)}>{k === mark && <Check />}{tk(k)}</DropdownMenuItem>)}</DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 pl-[50px]">
+                    <div className="flex flex-1 gap-[2px]" role="img" aria-label={t("stripAria", { present: m.present, absent: m.absent, leave: m.leave })}>
+                      {days.map((d) => <span key={d} className={cn("h-3.5 flex-1 rounded-[2px]", MARK_STYLE[(a[d] ?? "P") as AttendanceMark])} />)}
+                    </div>
+                    <span className="text-[13px] text-fg-2 tnum">{m.present}/{days.length}</span>
+                    {owner && <span className="text-[13px] font-medium text-fg tnum">{f.inr(m.net)}</span>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="scrollbar-thin relative hidden overflow-x-auto md:block">
             <table className="w-full min-w-[1000px] text-sm">
               <thead><tr className="border-b border-line text-left text-xs text-fg-2">
                 <th className="py-2.5 pr-3 pl-5 font-medium">{t("col.name")}</th><th className="px-3 font-medium">{t("col.shift")}</th><th className="px-3 font-medium">{t("col.today")}</th>
@@ -104,6 +133,7 @@ export function StaffScreen() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </Card>
       <div className="mt-3 flex flex-wrap gap-4 text-xs text-fg-2">

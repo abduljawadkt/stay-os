@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 // Buttons per DESIGN.md §6: primary (one per view), secondary, quiet, destructive.
 const buttonVariants = cva(
-  "group/button relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-transparent font-medium whitespace-nowrap select-none transition-[background-color,border-color,color,box-shadow] duration-[120ms] ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:pointer-events-none disabled:bg-surface-2 disabled:text-fg-3 disabled:shadow-none disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-transparent font-medium whitespace-nowrap select-none transition-[background-color,border-color,color,box-shadow] duration-[120ms] ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand pointer-coarse:active:opacity-75 disabled:pointer-events-none disabled:bg-surface-2 disabled:text-fg-3 disabled:shadow-none disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -20,15 +20,15 @@ const buttonVariants = cva(
         link: "h-auto! px-0! text-brand-text hover:underline underline-offset-3",
       },
       size: {
-        sm: "h-7 px-2.5 text-small",
-        default: "h-8 px-3 text-sm",
-        lg: "h-9 px-3.5 text-sm",
+        sm: "h-7 px-2.5 text-small pointer-coarse:h-9",
+        default: "h-8 px-3 text-sm pointer-coarse:h-10 pointer-coarse:px-3.5",
+        lg: "h-9 px-3.5 text-sm pointer-coarse:h-11 pointer-coarse:text-[15px]",
         xl: "h-12 rounded-lg px-5 text-base",
-        icon: "size-8",
-        "icon-sm": "size-7",
+        icon: "size-8 pointer-coarse:size-10",
+        "icon-sm": "size-7 pointer-coarse:size-9",
         "icon-lg": "size-10",
         "icon-xs": "size-6 [&_svg:not([class*='size-'])]:size-3.5",
-        xs: "h-6 px-2 text-xs",
+        xs: "h-6 px-2 text-xs pointer-coarse:h-8",
       },
     },
     defaultVariants: { variant: "secondary", size: "default" },

@@ -18,12 +18,12 @@ export function AuthShell({ children, aside, className }: { children: React.Reac
         </Link>
         <div className="flex items-center gap-1.5">
           <LocaleToggle />
-          <ThemeToggle />
+          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
         </div>
       </header>
-      <main id="main" className={cn("mx-auto grid w-full max-w-5xl flex-1 items-start gap-6 px-4 pt-6 pb-12 sm:px-6 lg:pt-14", aside ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10" : "max-w-xl", className)}>
-        <div className="w-full">{children}</div>
-        {aside && <div className="w-full">{aside}</div>}
+      <main id="main" className={cn("mx-auto grid w-full max-w-5xl flex-1 grid-cols-1 items-start gap-8 px-5 pt-4 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 lg:pt-14", aside ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10" : "max-w-xl", className)}>
+        <div className="w-full min-w-0">{children}</div>
+        {aside && <div className="w-full min-w-0">{aside}</div>}
       </main>
     </div>
   );
@@ -35,7 +35,7 @@ export function Field({
   return (
     <div className={cn("space-y-1.5", className)}>
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} aria-invalid={!!error || undefined} aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined} className="h-10 md:h-9" {...props} />
+      <Input id={id} aria-invalid={!!error || undefined} aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined} className="h-12 rounded-xl text-base md:h-9 md:rounded-md md:text-sm" {...props} />
       {error ? (
         <p id={`${id}-error`} className="text-small text-danger-fg">{error}</p>
       ) : hint ? (

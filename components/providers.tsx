@@ -35,7 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <Toaster
               position="bottom-right"
               offset={{ bottom: 76, right: 20 }}
-              mobileOffset={{ bottom: 76 }}
+              mobileOffset={{ bottom: "calc(72px + env(safe-area-inset-bottom))" }}
               toastOptions={{
                 classNames: {
                   toast: "!bg-inverse !text-inverse-fg !border-0 !rounded-lg !shadow-lg !text-sm !font-sans !gap-2.5 !py-3 !px-4",

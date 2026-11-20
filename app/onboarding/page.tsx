@@ -81,7 +81,7 @@ function Onboarding() {
       <p className="mt-1 text-sm text-fg-2">{t("inviteBody")}</p>
       <form onSubmit={join} className="mt-4 flex items-end gap-2" noValidate>
         <Field id="code" label={t("inviteCode")} value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} autoComplete="off" className="flex-1" placeholder="A1B2C3D4" />
-        <Button type="submit" variant="secondary" size="lg" className="h-10 md:h-9" loading={busy === "invite"} disabled={!!busy}>{t("inviteSubmit")}</Button>
+        <Button type="submit" variant="secondary" size="lg" className="h-12 rounded-xl md:h-9 md:rounded-md" loading={busy === "invite"} disabled={!!busy}>{t("inviteSubmit")}</Button>
       </form>
       {inviteError && <p role="alert" className="mt-2 text-small text-danger-fg">{inviteError}</p>}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 text-small text-fg-3">
@@ -99,7 +99,7 @@ function Onboarding() {
         {adding && memberships && memberships.length > 0 && (
           <Link href="/dashboard/" className="mb-4 inline-block text-small font-medium text-brand-text hover:underline">← {t("back")}</Link>
         )}
-        <h1 className="text-[28px] leading-9 font-semibold tracking-[-0.02em] text-fg">{t("title")}</h1>
+        <h1 className="text-[30px] leading-9 font-bold tracking-[-0.02em] text-fg sm:text-[28px] sm:font-semibold">{t("title")}</h1>
         <p className="mt-1.5 text-base text-fg-2">{t("subtitle")}</p>
         <form className="mt-6 space-y-5" onSubmit={create} noValidate>
           <Field id="hostel-name" label={t("name")} placeholder={t("namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} error={nameError} autoComplete="organization" />
@@ -152,7 +152,7 @@ function Onboarding() {
             </div>
           )}
           <FormError message={error} />
-          <Button type="submit" variant="primary" size="xl" className="w-full" loading={busy === "create"} disabled={!!busy}>
+          <Button type="submit" variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px] sm:h-12 sm:rounded-lg sm:text-base" loading={busy === "create"} disabled={!!busy}>
             {busy === "create" ? t("creating") : t("submit")}
           </Button>
         </form>

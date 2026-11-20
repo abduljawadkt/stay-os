@@ -90,6 +90,33 @@
     "empty": {
       "noResidentTitle": "No residents yet",
       "noResidentBody": "Check in a resident from the dashboard to see their app here."
+    },
+    "more": {
+      "title": "More",
+      "back": "Back",
+      "ask": "Ask StayOS",
+      "screens": "Hostel",
+      "demo": "Demo",
+      "demoFooter": "Tools for showing StayOS to a hostel owner. Changes save to this hostel.",
+      "whatsapp": "WhatsApp inbox",
+      "preferences": "Preferences",
+      "appearance": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Auto",
+      "account": "Account",
+      "liveDemo": "Shared live demo",
+      "current": "Current hostel",
+      "addHostel": "Add a hostel",
+      "signOut": "Sign out",
+      "trial": "{plan} trial · {days, plural, one {# day} other {# days}} left",
+      "active": "{plan} plan · active",
+      "tabs": {
+        "home": "Home",
+        "rooms": "Rooms",
+        "rent": "Rent",
+        "complaints": "Complaints"
+      }
     }
   }
 }

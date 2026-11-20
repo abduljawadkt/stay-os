@@ -17,7 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDemo } from "@/lib/store";
 import { useUI } from "@/components/shell/ui-store";
-import { useFormat, useScreenState } from "@/lib/hooks";
+import { useFormat, useMediaQuery, useScreenState } from "@/lib/hooks";
 import { invoiceState, occupancy, roomById, genderFits, blockIds, blockGender } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { initials } from "@/lib/format";
@@ -25,6 +25,7 @@ import { rooms, type Bed, type BlockId, type Resident } from "@/data";
 import { cn } from "@/lib/utils";
 
 export function RoomsScreen() {
+  const wide = useMediaQuery("(min-width: 768px)", true);
   const t = useTranslations("rooms");
   const tb = useTranslations("bedStatus");
   const tg = useTranslations("blockGender");
@@ -118,6 +119,12 @@ export function RoomsScreen() {
               <p className="text-sm font-semibold text-fg">{t("floorTitle", { block, floor })}</p>
               <p className="hidden items-center gap-1.5 text-xs text-fg-3 sm:flex"><Move className="size-3.5" aria-hidden /> {t("dragHint")}</p>
             </div>
+            {/* phones: rooms as a two-column grid of cards; the 6-bed room takes a full row */}
+            {!wide ? (
+            <div className="grid grid-cols-2 gap-3 p-3">
+              {[...topRow, ...bottomRow].map((room) => <RoomCard key={room.id} room={room} loading={loading} anchor className={room.type === "six" ? "col-span-2" : undefined} />)}
+            </div>
+            ) : (
             <div className="scrollbar-thin overflow-x-auto p-4 sm:p-5">
               <div className="min-w-[760px]">
                 <FloorRow rooms={topRow} loading={loading} />
@@ -131,6 +138,7 @@ export function RoomsScreen() {
                 <FloorRow rooms={bottomRow} loading={loading} />
               </div>
             </div>
+            )}
           </Card>
 
           <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(.2,0,0,1)" }}>
@@ -180,35 +188,46 @@ type Ctx = {
 const RoomsCtx = createContext<Ctx>(null as unknown as Ctx);
 
 function FloorRow({ rooms: list, loading: l }: { rooms: typeof rooms; loading: boolean }) {
+  return (
+    <div className="flex gap-3">
+      {list.map((room) => (
+        <RoomCard
+          key={room.id}
+          room={room}
+          loading={l}
+          anchor
+          className={room.type === "six" ? "flex-[6]" : room.type === "triple" ? "flex-[3]" : room.type === "double" ? "flex-[2]" : "flex-[1.2]"}
+        />
+      ))}
+    </div>
+  );
+}
+
+function RoomCard({ room, loading: l, className, anchor = false }: { room: (typeof rooms)[number]; loading: boolean; className?: string; anchor?: boolean }) {
   const { beds, resById, overdue, dragging, highlight } = useContext(RoomsCtx);
   const t = useTranslations("rooms");
   const f = useFormat();
   return (
-    <div className="flex gap-3">
-      {list.map((room) => (
-        <div
-          key={room.id}
-          id={`room-${room.id}`}
-          className={cn(
-            "rounded-lg border bg-surface p-3 transition-colors hover:border-line-strong",
-            highlight === room.id ? "border-brand ring-2 ring-brand/20" : "border-line",
-            room.type === "six" ? "flex-[6]" : room.type === "triple" ? "flex-[3]" : room.type === "double" ? "flex-[2]" : "flex-[1.2]"
-          )}
-        >
-          <div className="mb-2.5 flex items-baseline justify-between gap-2">
-            <span className="font-mono text-small font-medium text-fg">{room.id}</span>
-            <span className="truncate text-xs text-fg-3">{f.inrCompact(room.rent)}</span>
-          </div>
-          <p className="-mt-2 mb-2 truncate text-xs text-fg-3">{t(`type.${room.type}`)}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {beds.filter((b) => b.roomId === room.id).map((b) =>
-              l ? <Sk key={b.id} className="h-12 w-10 rounded-sm" /> : (
-                <BedTile key={b.id} bed={b} resident={b.residentId ? resById[b.residentId] : undefined} overdue={!!b.residentId && overdue.has(b.residentId)} dimmed={!!dragging && b.status !== "vacant" && b.id !== dragging} />
-              )
-            )}
-          </div>
-        </div>
-      ))}
+    <div
+      id={anchor ? `room-${room.id}` : undefined}
+      className={cn(
+        "min-w-0 rounded-xl border bg-surface p-3 transition-colors hover:border-line-strong md:rounded-lg",
+        highlight === room.id ? "border-brand ring-2 ring-brand/20" : "border-line",
+        className
+      )}
+    >
+      <div className="mb-2.5 flex items-baseline justify-between gap-2">
+        <span className="font-mono text-small font-medium whitespace-nowrap text-fg">{room.id}</span>
+        <span className="shrink-0 text-xs text-fg-3">{f.inrCompact(room.rent)}</span>
+      </div>
+      <p className="-mt-2 mb-2 truncate text-xs text-fg-3">{t(`type.${room.type}`)}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {beds.filter((b) => b.roomId === room.id).map((b) =>
+          l ? <Sk key={b.id} className="h-12 w-10 rounded-sm" /> : (
+            <BedTile key={b.id} bed={b} resident={b.residentId ? resById[b.residentId] : undefined} overdue={!!b.residentId && overdue.has(b.residentId)} dimmed={!!dragging && b.status !== "vacant" && b.id !== dragging} />
+          )
+        )}
+      </div>
     </div>
   );
 }
