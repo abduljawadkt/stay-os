@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowRight, BedDouble, Check, CircleCheck, DatabaseZap, IndianRupee, Lock, MapPin, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, BedDouble, Check, CircleCheck, DatabaseZap, Download, IndianRupee, Lock, MapPin, ShieldCheck, Users } from "lucide-react";
+import { installAvailable, useInstall } from "@/lib/install";
 import { SiteFooter, SiteHeader } from "@/components/marketing/site-chrome";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
@@ -46,6 +47,7 @@ function Hero() {
           <Button asChild variant="secondary" size="xl"><Link href="/signup/">{t("trial")}</Link></Button>
         </div>
         <p className="mt-3 text-small text-fg-3">{t("note")}</p>
+        <GetTheApp />
       </div>
       <HeroPreview />
     </section>
@@ -53,6 +55,24 @@ function Hero() {
 }
 
 /** A still of the product: the owner's collection card, the WhatsApp reminder, and the payment landing. */
+/** On phones: install the web app to the home screen (iPhone gets the Share steps). */
+function GetTheApp() {
+  const t = useTranslations("account.install");
+  const install = useInstall();
+  if (!installAvailable(install) || install.platform === "desktop") return null;
+  return (
+    <button type="button" onClick={() => install.setOpen(true)} className="mt-5 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-3 text-left active:bg-surface-2 sm:hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/icon-192.png" alt="" width={44} height={44} className="size-11 rounded-xl" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold text-fg">{t("landingTitle")}</span>
+        <span className="block text-[13px] text-fg-3">{t("landingBody")}</span>
+      </span>
+      <Download className="size-5 text-brand-text" aria-hidden />
+    </button>
+  );
+}
+
 function HeroPreview() {
   const t = useTranslations("marketing.preview");
   const bars = [92, 94, 91, 95, 93, 88.5];

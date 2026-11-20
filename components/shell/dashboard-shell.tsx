@@ -13,6 +13,7 @@ import { useDemo } from "@/lib/store";
 import { useSession } from "@/lib/session";
 import { TrialBanner } from "./trial-banner";
 import { MobileTabBar, MobileTopBar } from "./mobile-nav";
+import { AutoInstallPrompt } from "./install-sheet";
 import { cn } from "@/lib/utils";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -55,6 +56,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <MobileTabBar />
+      <AutoInstallPrompt />
       <ResidentDrawer />
       <BedDrawer />
       <CheckInDialog />

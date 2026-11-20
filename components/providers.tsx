@@ -9,13 +9,16 @@ import { I18nProvider } from "@/lib/i18n";
 import { useDemo } from "@/lib/store";
 import { boot, useSession } from "@/lib/session";
 import { neon } from "@/lib/neon";
+import { initInstall, useInstall } from "@/lib/install";
+import { InstallSheet } from "@/components/shell/install-sheet";
 import { EventToaster } from "@/components/shell/event-toaster";
 import { WhatsAppPanel } from "@/components/whatsapp/whatsapp-panel";
 import { TourOverlay } from "@/components/tour/tour-overlay";
 
 function SessionBoot() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") Object.assign(window, { __demo: useDemo, __session: useSession, __neon: neon });
+    if (process.env.NODE_ENV !== "production") Object.assign(window, { __demo: useDemo, __session: useSession, __neon: neon, __install: useInstall });
+    initInstall();
     boot();
   }, []);
   return null;
@@ -32,6 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <EventToaster />
             <WhatsAppPanel />
             <TourOverlay />
+            <InstallSheet />
             <Toaster
               position="bottom-right"
               offset={{ bottom: 76, right: 20 }}

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import {
-  Check, ChevronRight, CloudOff, IndianRupee, LogOut, MessageCircle, Play, Plus, QrCode, RotateCcw, Sparkles,
+  Check, ChevronRight, CloudOff, Download, IndianRupee, LogOut, MessageCircle, Play, Plus, QrCode, RotateCcw, Sparkles,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,6 +16,7 @@ import { isStaffRole, openOrg, signOut, useSession } from "@/lib/session";
 import { useTour } from "@/components/tour/tour-store";
 import { simulateGateScan, simulatePayment, simulateWhatsAppComplaint } from "@/lib/demo-actions";
 import { useLocale } from "@/lib/i18n";
+import { installAvailable, useInstall } from "@/lib/install";
 import { TOTAL_BEDS } from "@/lib/selectors";
 import { planById } from "@/config/plans";
 import { hostel } from "@/data";
@@ -30,6 +31,7 @@ const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2)
 /** Everything that isn't a tab, as a native grouped list: other screens, demo tools, preferences, account. */
 export function MoreScreen() {
   const t = useTranslations("account.more");
+  const ti = useTranslations("account.install");
   const tn = useTranslations("nav");
   const ts = useTranslations("shell");
   const tr = useTranslations("roles");
@@ -55,6 +57,8 @@ export function MoreScreen() {
   const { sample, canReset } = useSampleHostel();
   const { locale, setLocale } = useLocale();
   const { theme, setTheme } = useTheme();
+  const install = useInstall();
+  const canInstall = installAvailable(install);
   const [confirm, setConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
 
@@ -109,6 +113,7 @@ export function MoreScreen() {
       )}
 
       <Group title={t("preferences")}>
+        {canInstall && <Row icon={Download} label={ti("row")} sub={ti("rowSub")} onClick={() => install.setOpen(true)} />}
         <div className="px-4 py-3">
           <p className="mb-2 text-sm text-fg-2">{ts("language")}</p>
           <Segmented value={locale} options={[{ value: "en", label: "English" }, { value: "ml", label: "മലയാളം" }]} onChange={(v) => setLocale(v as "en" | "ml")} />

@@ -117,6 +117,27 @@
         "rent": "Rent",
         "complaints": "Complaints"
       }
+    },
+    "install": {
+      "title": "Install {brand} on your phone",
+      "body": "It opens full-screen from your home screen, like any app. Free, and no App Store needed.",
+      "b1": "One tap from your home screen",
+      "b2": "Full screen, no browser bars",
+      "b3": "Opens fast, even on a slow connection",
+      "ios1": "Tap the Share button in Safari's toolbar",
+      "ios2": "Scroll down and tap “Add to Home Screen”",
+      "ios3": "Tap “Add” in the top corner",
+      "android1": "Tap the ⋮ menu in Chrome",
+      "android2": "Tap “Install app” or “Add to Home screen”",
+      "android3": "Tap “Install”",
+      "desktop1": "In Chrome or Edge, click the install icon at the right of the address bar",
+      "install": "Install",
+      "gotIt": "Got it",
+      "notNow": "Not now",
+      "row": "Install app",
+      "rowSub": "Add StayOS to your home screen",
+      "landingTitle": "Get the StayOS app",
+      "landingBody": "Install from your browser, no App Store needed"
     }
   }
 }
