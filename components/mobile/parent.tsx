@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, CalendarClock, Check, CheckCircle2, LogIn, LogOut, Phone, Soup, Moon, X } from "lucide-react";
+import { CalendarClock, Check, CheckCircle2, LogIn, LogOut, Phone, Soup, Moon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/common/avatar";
@@ -68,8 +68,7 @@ export function ParentHome() {
   const week = useMemo(() => {
     const since = new Date(new Date(`${today}T12:00:00+05:30`).getTime() - 7 * 86400000).toISOString().slice(0, 10);
     const skipped = optOuts.filter((o) => o.residentId === child.id && o.date >= since && o.date <= today).reduce((a, o) => a + o.meals.length, 0);
-    const late = events.filter((e) => e.late && e.at >= since).length;
-    return { meals: 28 - skipped, late, nights: 7 - leaves.filter((l) => l.residentId === child.id && l.status === "approved" && l.from >= since).length };
+    return { meals: 28 - skipped, nights: 7 - leaves.filter((l) => l.residentId === child.id && l.status === "approved" && l.from >= since).length };
   }, [optOuts, events, leaves, child.id, today]);
   const blockWarden = hostel.blocks.find((b) => b.id === child.bedId.split("-")[0])?.wardenId;
   const warden = staff.find((s) => s.id === blockWarden) ?? staff.find((s) => s.role === "warden") ?? staff[0];
@@ -143,15 +142,16 @@ export function ParentHome() {
         {events.slice(0, 4).map((e) => (
           <li key={e.id} className="flex items-center gap-3 px-4 py-3">
             <span className={cn("grid size-8 place-items-center rounded-full", e.type === "in" ? "bg-success-tint text-success-fg" : "bg-surface-2 text-fg-2")}>{e.type === "in" ? <LogIn className="size-4" aria-hidden /> : <LogOut className="size-4" aria-hidden />}</span>
-            <p className="flex-1 text-sm text-fg">{e.type === "in" ? t("cameIn", { name: child.name.split(" ")[0] }) : t("wentOut", { name: child.name.split(" ")[0] })}{e.late && <Badge variant="danger" className="ml-2">{t("late")}</Badge>}</p>
+            <p className="flex-1 text-sm text-fg">{e.type === "in" ? t("cameIn", { name: child.name.split(" ")[0] }) : t("wentOut", { name: child.name.split(" ")[0] })}</p>
             <span className="text-xs text-fg-3 tnum">{f.relative(e.at, now)}</span>
           </li>
         ))}
       </ul>
 
       <SectionTitle>{t("week")}</SectionTitle>
-      <div className="mx-4 mb-4 grid grid-cols-3 gap-2">
-        {[{ icon: Moon, v: `${week.nights}/7`, l: t("nights") }, { icon: AlertTriangle, v: week.late, l: t("lateEntries") }, { icon: Soup, v: week.meals, l: t("meals") }].map((s) => (
+      {/* parents see presence and meals; late entries stay with the warden */}
+      <div className="mx-4 mb-4 grid grid-cols-2 gap-2">
+        {[{ icon: Moon, v: `${week.nights}/7`, l: t("nights") }, { icon: Soup, v: week.meals, l: t("meals") }].map((s) => (
           <div key={s.l} className="rounded-xl border border-line bg-surface p-3 text-center">
             <s.icon className="mx-auto size-4 text-fg-3" aria-hidden />
             <p className="mt-1 text-title font-semibold text-fg tnum">{s.v}</p>
@@ -177,8 +177,8 @@ export function ParentAlerts() {
         <ol className="mx-4 mb-4 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
           {events.map((e) => (
             <li key={e.id} className="flex items-center gap-3 px-4 py-3">
-              <span className={cn("grid size-9 place-items-center rounded-full", e.late ? "bg-danger-tint text-danger-fg" : e.type === "in" ? "bg-success-tint text-success-fg" : "bg-surface-2 text-fg-2")}>{e.type === "in" ? <LogIn className="size-4" aria-hidden /> : <LogOut className="size-4" aria-hidden />}</span>
-              <div className="flex-1"><p className="text-sm text-fg">{e.type === "in" ? t("cameIn", { name: child.name.split(" ")[0] }) : t("wentOut", { name: child.name.split(" ")[0] })}</p><p className="text-xs text-fg-3">{e.late ? t("afterCurfew") : e.passId ? t("onPass") : t("qrScan")}</p></div>
+              <span className={cn("grid size-9 place-items-center rounded-full", e.type === "in" ? "bg-success-tint text-success-fg" : "bg-surface-2 text-fg-2")}>{e.type === "in" ? <LogIn className="size-4" aria-hidden /> : <LogOut className="size-4" aria-hidden />}</span>
+              <div className="flex-1"><p className="text-sm text-fg">{e.type === "in" ? t("cameIn", { name: child.name.split(" ")[0] }) : t("wentOut", { name: child.name.split(" ")[0] })}</p><p className="text-xs text-fg-3">{e.passId ? t("onPass") : t("qrScan")}</p></div>
               <span className="text-xs text-fg-2 tnum">{e.at.startsWith(today) ? t("today") : f.weekday(e.at)}, {f.time(e.at)}</span>
             </li>
           ))}
