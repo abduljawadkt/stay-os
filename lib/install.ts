@@ -17,6 +17,8 @@ interface InstallState {
   platform: Platform;
   /** Opened inside WhatsApp, Instagram, Facebook or another app's browser, which can't install apps. */
   inApp: boolean;
+  /** Chrome, Edge or Firefox on iPhone: Add to Home Screen is under their own Share button, not Safari's. */
+  iosOtherBrowser: boolean;
   standalone: boolean;
   native: boolean;
   canPrompt: boolean;
@@ -33,6 +35,7 @@ export const useInstall = create<InstallState>((set) => ({
   ready: false,
   platform: "desktop",
   inApp: false,
+  iosOtherBrowser: false,
   standalone: false,
   native: false,
   canPrompt: false,
@@ -57,7 +60,8 @@ export function initInstall() {
   const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
   const ua = navigator.userAgent;
   const inApp = /FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Snapchat|Line\/|LinkedInApp|Twitter|MicroMessenger|; wv\)/i.test(ua);
-  useInstall.setState({ ready: true, platform: detectPlatform(), standalone, native, inApp });
+  const iosOtherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  useInstall.setState({ ready: true, platform: detectPlatform(), standalone, native, inApp, iosOtherBrowser });
 
   if (!native && "serviceWorker" in navigator && process.env.NODE_ENV === "production") {
     window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined), { once: true });

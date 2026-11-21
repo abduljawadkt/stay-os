@@ -1,5 +1,7 @@
 {
-  "roles": { "label": "View as", "owner": "Owner", "warden": "Warden", "resident": "Resident", "parent": "Parent" },
+  "roles": { "label": "View as", "owner": "Owner", "warden": "Warden", "resident": "Resident", "parent": "Parent",
+    "switchTitle": "View as", "switchBody": "See StayOS the way each person does. You stay signed in as {role}.",
+    "ownerSub": "Everything, including money, reports and settings", "wardenSub": "Rooms, residents, complaints, gate and mess", "residentSub": "The app residents use on their phones", "parentSub": "The app parents use on their phones" },
   "shell": {
     "home": "Go to dashboard", "search": "Search", "searchPlaceholder": "Search residents, rooms, pages…",
     "noResults": "No matches. Try a name, a room like B-204, or a phone number.", "residents": "Residents", "rooms": "Rooms", "pages": "Pages",

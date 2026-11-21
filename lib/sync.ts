@@ -136,7 +136,13 @@ export async function loadOrg(id: string, membership: Membership): Promise<OrgRo
 
   const prevRole = useDemo.getState().role;
   const views: Record<string, Role[]> = { owner: ["owner", "warden", "resident", "parent"], warden: ["warden", "resident", "parent"], resident: ["resident"], parent: ["parent"] };
-  const role = orgId === id && views[membership.role].includes(prevRole) ? prevRole : membership.role;
+  // same hostel: keep the view; fresh page load: the view this tab had before the reload
+  let saved: string | null = null;
+  try {
+    saved = sessionStorage.getItem("stayos-view");
+  } catch {}
+  const wanted = orgId === id ? prevRole : orgId === null ? (saved as Role | null) : null;
+  const role = wanted && views[membership.role].includes(wanted) ? wanted : membership.role;
 
   orgId = id;
   canWriteStaff = staffRole;

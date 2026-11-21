@@ -235,6 +235,7 @@ export async function signOut() {
   clearOrgData();
   try {
     localStorage.removeItem(ORG_KEY);
+    sessionStorage.removeItem("stayos-view");
   } catch {}
   booting = Promise.resolve();
   set({ auth: "signed_out", user: null, memberships: null, orgStatus: "none", orgId: null, org: null, membership: null });

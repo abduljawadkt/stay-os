@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +24,44 @@ function SessionBoot() {
   return null;
 }
 
+/**
+ * iPhone and iPad Safari zoom the page in whenever a text field smaller than 16px gets focus, and stay zoomed.
+ * maximum-scale=1 stops that; iOS still lets people pinch to zoom. Only added on iOS, because Android
+ * would honour it and block pinch zoom.
+ */
+function IosViewportFix() {
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (!ios) return;
+    document.documentElement.setAttribute("data-ios", "");
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    if (meta && !meta.content.includes("maximum-scale")) meta.content += ", maximum-scale=1";
+  }, []);
+  return null;
+}
+
+/** Safari's toolbar and the home-screen app's status bar take theme-color; keep it on the app's chosen theme, not the phone's. */
+function ThemeColorSync() {
+  const { resolvedTheme } = useTheme();
+  useEffect(() => {
+    if (!resolvedTheme) return;
+    const color = resolvedTheme === "dark" ? "#0E0E0D" : "#F7F7F5";
+    const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+    if (metas.length === 0) {
+      const m = document.createElement("meta");
+      m.name = "theme-color";
+      m.content = color;
+      document.head.appendChild(m);
+    }
+    metas.forEach((m) => {
+      m.content = color;
+      m.removeAttribute("media");
+    });
+  }, [resolvedTheme]);
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -31,6 +69,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <MotionConfig reducedMotion="user" transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}>
           <TooltipProvider delayDuration={300}>
             <SessionBoot />
+            <IosViewportFix />
+            <ThemeColorSync />
             {children}
             <EventToaster />
             <WhatsAppPanel />

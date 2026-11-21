@@ -13,7 +13,7 @@ import { useDemo, type Role } from "@/lib/store";
 import { useLocale } from "@/lib/i18n";
 import { useFormat, useNow } from "@/lib/hooks";
 import { haptic } from "@/lib/native";
-import { ROLES } from "@/components/shell/role-switcher";
+import { useViews } from "@/components/shell/role-switcher";
 import { cn } from "@/lib/utils";
 
 export function BackButton({ href, label }: { href: string; label: string }) {
@@ -43,6 +43,7 @@ export function ProfileButton({ name, subtitle }: { name: string; subtitle: stri
   const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
   const setRole = useDemo((s) => s.setRole);
+  const views = useViews();
   const go = (r: Role) => {
     setRole(r);
     setOpen(false);
@@ -73,10 +74,14 @@ export function ProfileButton({ name, subtitle }: { name: string; subtitle: stri
               </button>
             </li>
           </ul>
-          <p className="flex items-center gap-1.5 px-5 pt-4 pb-2 text-xs font-medium text-fg-3"><Repeat className="size-3.5" aria-hidden />{t("switch")}</p>
-          <div className="grid grid-cols-2 gap-2 px-5 pb-5">
-            {ROLES.map((r) => <button key={r} onClick={() => go(r)} className="h-11 rounded-lg border border-line bg-surface text-sm font-medium text-fg hover:bg-surface-2">{tr(r)}</button>)}
-          </div>
+          {views.length > 1 ? (
+            <>
+              <p className="flex items-center gap-1.5 px-5 pt-4 pb-2 text-xs font-medium text-fg-3"><Repeat className="size-3.5" aria-hidden />{t("switch")}</p>
+              <div className="grid grid-cols-2 gap-2 px-5 pb-5">
+                {views.map((r) => <button key={r} onClick={() => go(r)} className="h-11 rounded-lg border border-line bg-surface text-sm font-medium text-fg hover:bg-surface-2">{tr(r)}</button>)}
+              </div>
+            </>
+          ) : <div className="pb-4" />}
         </SheetContent>
       </Sheet>
     </>

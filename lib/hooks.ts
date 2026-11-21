@@ -100,3 +100,31 @@ export function useIsNative() {
     () => false
   );
 }
+
+const isTextField = (el: Element | null) => {
+  if (!el) return false;
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return true;
+  if (el instanceof HTMLInputElement) return !["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"].includes(el.type);
+  return (el as HTMLElement).isContentEditable === true;
+};
+
+/**
+ * True while the on-screen keyboard is likely up: a text field has focus on a touch screen. Phone tab bars
+ * hide then, as in native apps; otherwise iOS Safari floats them above the keyboard, over the field.
+ */
+export function useKeyboardOpen() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: coarse)").matches) return;
+    const update = () => setOpen(isTextField(document.activeElement));
+    // focusout fires before the next field gets focus; wait a tick so moving between fields doesn't flicker
+    const onOut = () => window.setTimeout(update, 50);
+    document.addEventListener("focusin", update);
+    document.addEventListener("focusout", onOut);
+    return () => {
+      document.removeEventListener("focusin", update);
+      document.removeEventListener("focusout", onOut);
+    };
+  }, []);
+  return open;
+}

@@ -9,8 +9,10 @@ import { useDemo } from "@/lib/store";
 import { overdueInvoices } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { haptic } from "@/lib/native";
+import { useKeyboardOpen } from "@/lib/hooks";
 import { hostel } from "@/data";
 import { NAV } from "./nav";
+import { ViewSwitchButton } from "./role-switcher";
 import { cn } from "@/lib/utils";
 
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "H";
@@ -77,9 +79,12 @@ export function MobileTopBar() {
     >
       <div className="relative flex h-12 items-center gap-1 px-2">
         {root ? (
-          <Link href="/dashboard/more/" aria-label={tm("title")} className="grid size-11 place-items-center rounded-full active:bg-surface-2">
-            <span className="grid size-8 place-items-center rounded-full bg-brand-tint text-[11px] font-semibold text-brand-tint-fg">{initials(hostel.name)}</span>
-          </Link>
+          <>
+            <Link href="/dashboard/more/" aria-label={tm("title")} className="grid size-11 shrink-0 place-items-center rounded-full active:bg-surface-2">
+              <span className="grid size-8 place-items-center rounded-full bg-brand-tint text-[11px] font-semibold text-brand-tint-fg">{initials(hostel.name)}</span>
+            </Link>
+            <ViewSwitchButton />
+          </>
         ) : (
           <button
             onClick={() => (window.history.length > 1 ? router.back() : router.push("/dashboard/more/"))}
@@ -92,7 +97,7 @@ export function MobileTopBar() {
         <p
           aria-hidden={!scrolled}
           className={cn(
-            "pointer-events-none absolute inset-x-24 truncate text-center text-[17px] font-semibold text-fg transition-opacity duration-200",
+            "pointer-events-none absolute inset-x-28 truncate text-center text-[17px] font-semibold text-fg transition-opacity duration-200",
             scrolled ? "opacity-100" : "opacity-0"
           )}
         >
@@ -119,8 +124,9 @@ export function MobileTabBar() {
   const openComplaints = useDemo((s) => s.complaints.filter((c) => c.status !== "resolved").length);
   const overdue = useDemo((s) => overdueInvoices(s.invoices, todayISO()).length);
   const badges: Record<string, number> = { complaints: openComplaints, rent: overdue };
+  const typing = useKeyboardOpen();
   return (
-    <nav aria-label="App" className="fixed inset-x-0 bottom-0 z-40 select-none border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150 lg:hidden">
+    <nav aria-label="App" hidden={typing} className="fixed inset-x-0 bottom-0 z-40 select-none border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl backdrop-saturate-150 lg:hidden">
       <ul className="mx-auto flex h-[58px] max-w-xl">
         {TABS.map((tab) => {
           const active = tab.match(pathname);

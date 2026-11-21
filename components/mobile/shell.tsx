@@ -13,7 +13,7 @@ import { ScreenTransition } from "@/components/shell/screen-transition";
 import { isStaffRole, useSession } from "@/lib/session";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo, type Role } from "@/lib/store";
-import { useFormat, useNow } from "@/lib/hooks";
+import { useFormat, useKeyboardOpen, useNow } from "@/lib/hooks";
 import { syncStatusBar } from "@/lib/native";
 import { demo } from "@/config/demo";
 import { brand } from "@/config/brand";
@@ -86,8 +86,9 @@ function StatusBar() {
 
 function BottomTabs({ tabs }: { tabs: TabItem[] }) {
   const pathname = usePathname();
+  const typing = useKeyboardOpen();
   return (
-    <nav className="absolute inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] md:pb-4" aria-label="App">
+    <nav hidden={typing} className="absolute inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] md:pb-4" aria-label="App">
       <ul className="flex h-16">
         {tabs.map((t) => {
           const active = t.match ? t.match(pathname) : pathname.replace(/\/$/, "") === t.href.replace(/\/$/, "");

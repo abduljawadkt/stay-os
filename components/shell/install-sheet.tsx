@@ -15,6 +15,7 @@ export function InstallSheet() {
   const platform = useInstall((s) => s.platform);
   const canPrompt = useInstall((s) => s.canPrompt);
   const inApp = useInstall((s) => s.inApp);
+  const iosOther = useInstall((s) => s.iosOtherBrowser);
   const setOpen = useInstall((s) => s.setOpen);
 
   // apps' built-in browsers (WhatsApp, Instagram…) can't install: first hop to Safari or Chrome
@@ -23,7 +24,7 @@ export function InstallSheet() {
       ? [{ icon: Ellipsis, text: t("inApp1") }, { icon: Compass, text: t("inAppIos2") }, { icon: Share, text: t("inApp3") }]
       : [{ icon: EllipsisVertical, text: t("inApp1") }, { icon: ExternalLink, text: t("inAppAndroid2") }, { icon: SquarePlus, text: t("inApp3") }]
     : platform === "ios"
-      ? [{ icon: Share, text: t("ios1") }, { icon: SquarePlus, text: t("ios2") }, { icon: Check, text: t("ios3") }]
+      ? [{ icon: Share, text: t(iosOther ? "iosOther1" : "ios1") }, { icon: SquarePlus, text: t("ios2") }, { icon: Check, text: t("ios3") }]
       : platform === "android"
         ? [{ icon: EllipsisVertical, text: t("android1") }, { icon: SquarePlus, text: t("android2") }, { icon: Check, text: t("android3") }]
         : [{ icon: SquarePlus, text: t("desktop1") }];
@@ -73,7 +74,8 @@ export function InstallSheet() {
 }
 
 /**
- * Offers the install to every phone visitor, on any page, once per visit, a moment after it opens.
+ * Offers the install to every phone visitor, on any page, once per visit, at the first quiet moment:
+ * 2.5 seconds after the last tap, scroll or key press, so it never lands on top of something being tapped.
  * Skipped when the app is already installed, inside the iOS app, or after "Not now" for a day.
  */
 export function AutoInstallPrompt() {
@@ -86,14 +88,29 @@ export function AutoInstallPrompt() {
     try {
       if (sessionStorage.getItem("stayos-install-offered")) return;
     } catch {}
-    const id = setTimeout(() => {
+    let id = 0;
+    const show = () => {
+      // wait while a sheet or dialog is open, or a page is still loading after a tap
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]') || document.querySelector('[aria-busy="true"], .animate-spin')) return arm();
       if (!installAvailable() || snoozed()) return;
       try {
         sessionStorage.setItem("stayos-install-offered", "1");
       } catch {}
+      stop();
       useInstall.getState().setOpen(true);
-    }, 2500);
-    return () => clearTimeout(id);
+    };
+    const arm = () => {
+      window.clearTimeout(id);
+      id = window.setTimeout(show, 2500);
+    };
+    const events = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
+    const stop = () => {
+      window.clearTimeout(id);
+      events.forEach((e) => window.removeEventListener(e, arm, true));
+    };
+    events.forEach((e) => window.addEventListener(e, arm, { capture: true, passive: true }));
+    arm();
+    return stop;
   }, [ready, canPrompt]);
   return null;
 }

@@ -93,7 +93,7 @@ function ChatList({ onOpen, onClose }: { onOpen: (id: string) => void; onClose: 
         </div>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[var(--wa-meta)]" aria-hidden />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} aria-label={t("search")} className="h-9 w-full rounded-lg bg-[var(--wa-in)] pr-3 pl-9 text-[14px] text-[var(--wa-text)] outline-none placeholder:text-[var(--wa-meta)] focus-visible:ring-2 focus-visible:ring-[var(--wa-green)]" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} aria-label={t("search")} className="h-9 w-full rounded-lg bg-[var(--wa-in)] pr-3 pl-9 text-base text-[var(--wa-text)] md:text-[14px] outline-none placeholder:text-[var(--wa-meta)] focus-visible:ring-2 focus-visible:ring-[var(--wa-green)]" />
         </div>
         <div className="mt-3 flex gap-2" role="tablist" aria-label={t("filter")}>
           {(["all", "unread", "parents"] as Filter[]).map((k) => (
@@ -262,7 +262,7 @@ function Conversation({ id, onBack, onClose }: { id: string; onBack: () => void;
         <form onSubmit={(e) => { e.preventDefault(); send(text); }} className="flex items-center gap-2">
           <div className="flex h-11 flex-1 items-center gap-2 rounded-full bg-[var(--wa-in)] px-3">
             <Smile className="size-5 shrink-0 text-[var(--wa-meta)]" aria-hidden />
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t("message")} aria-label={t("message")} className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-[var(--wa-text)] outline-none placeholder:text-[var(--wa-meta)]" />
+            <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t("message")} aria-label={t("message")} className="h-full min-w-0 flex-1 bg-transparent text-base text-[var(--wa-text)] md:text-[15px] outline-none placeholder:text-[var(--wa-meta)]" />
             <Paperclip className="size-5 shrink-0 text-[var(--wa-meta)]" aria-hidden />
           </div>
           <button type="submit" className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--wa-green)] text-white disabled:opacity-60" disabled={!text.trim()} aria-label={t("send")}><SendHorizontal className="size-5" /></button>

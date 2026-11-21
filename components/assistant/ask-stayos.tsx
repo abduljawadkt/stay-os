@@ -191,7 +191,7 @@ export function AskStayOS() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("placeholder")} aria-label={t("placeholder")} className="h-10 min-w-0 flex-1 rounded-md border border-line-input bg-surface px-3 text-sm text-fg placeholder:text-fg-3 focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none" data-tour="ask-input" />
+                <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("placeholder")} aria-label={t("placeholder")} className="h-10 min-w-0 flex-1 rounded-md border border-line-input bg-surface px-3 text-base text-fg md:text-sm placeholder:text-fg-3 focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none" data-tour="ask-input" />
                 <Button type="button" variant="secondary" size="icon-lg" onClick={startVoice} aria-label={listening ? t("stopVoice") : t("voice")} aria-pressed={listening}>{listening ? <MicOff /> : <Mic />}</Button>
                 <Button type="submit" variant="primary" size="icon-lg" disabled={!q.trim()} aria-label={t("send")}><ArrowUp /></Button>
               </div>

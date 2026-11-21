@@ -219,14 +219,14 @@ function Team() {
         <form onSubmit={create} className="space-y-4 px-5 pb-5">
           <div className="space-y-1.5">
             <Label htmlFor="inv-role">{t("role")}</Label>
-            <select id="inv-role" value={role} onChange={(e) => setRole(e.target.value as typeof role)} className="h-9 w-full rounded-md border border-input bg-surface px-2.5 text-sm focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none">
+            <select id="inv-role" value={role} onChange={(e) => setRole(e.target.value as typeof role)} className="h-11 w-full rounded-md border border-input bg-surface px-2.5 text-base md:h-9 md:text-sm focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none">
               {(["warden", "resident", "parent"] as const).map((r) => <option key={r} value={r}>{tr(r)}</option>)}
             </select>
           </div>
           {role !== "warden" && (
             <div className="space-y-1.5">
               <Label htmlFor="inv-res">{t("residentFor")}</Label>
-              <select id="inv-res" value={residentId} onChange={(e) => setResidentId(e.target.value)} className="h-9 w-full rounded-md border border-input bg-surface px-2.5 text-sm focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none">
+              <select id="inv-res" value={residentId} onChange={(e) => setResidentId(e.target.value)} className="h-11 w-full rounded-md border border-input bg-surface px-2.5 text-base md:h-9 md:text-sm focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none">
                 <option value="">{t("chooseResident")}</option>
                 {current.map((r) => <option key={r.id} value={r.id}>{r.name} · {r.bedId}</option>)}
               </select>

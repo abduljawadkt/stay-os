@@ -163,7 +163,13 @@ export const useDemo = create<DemoState>()(
       ...initialUI(),
 
       setHydrated: () => set({ hydrated: true }),
-      setRole: (role) => set({ role }),
+      setRole: (role) => {
+        // remembered for this tab, so a reload (iPhone Safari reloads pages it put to sleep) keeps the view
+        try {
+          sessionStorage.setItem("stayos-view", role);
+        } catch {}
+        set({ role });
+      },
       setOffline: (offline) => set({ offline }),
       openWhatsApp: (threadId = null) => set((s) => ({ waOpen: true, waThreadId: threadId ?? s.waThreadId })),
       closeWhatsApp: () => set({ waOpen: false }),

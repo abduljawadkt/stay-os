@@ -130,6 +130,7 @@
       "b2": "Full screen, no browser bars",
       "b3": "Opens fast, even on a slow connection",
       "ios1": "Tap Share in Safari (on newer iPhones it's inside the ••• menu)",
+      "iosOther1": "Tap Share (the square with an arrow) at the top or bottom of the screen",
       "ios2": "Tap “Add to Home Screen” (scroll down if you don't see it)",
       "ios3": "Keep “Open as Web App” on and tap “Add”",
       "android1": "Tap the ⋮ menu in Chrome",
