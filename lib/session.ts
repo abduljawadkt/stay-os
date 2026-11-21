@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { neon, neonConfigured, errorText } from "./neon";
+import { neon, neonConfigured, errorText, asError } from "./neon";
 import { loadOrg, startSync, stopSync, clearOrgData, withIdentity } from "./sync";
 import type { Role } from "./store";
 
@@ -109,7 +109,7 @@ function mapMembership(r: Record<string, unknown>): Membership {
 async function fetchMemberships(): Promise<Membership[]> {
   return withIdentity(async () => {
     const { data, error } = await neon().rpc("my_memberships");
-    if (error) throw error;
+    if (error) throw asError(error);
     return ((data ?? []) as Record<string, unknown>[]).map(mapMembership);
   });
 }

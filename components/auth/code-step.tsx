@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { errorText } from "@/lib/neon";
 import { useTranslations } from "next-intl";
 import { MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export function CodeStep({
     try {
       await onSubmit(code.trim());
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorText(err));
       setBusy(false);
     }
   }
@@ -90,7 +91,7 @@ export function CodeStep({
               setSent(true);
               setCooldown(30);
             } catch (err) {
-              setError(err instanceof Error ? err.message : String(err));
+              setError(errorText(err));
             }
           }}
           className="font-medium text-brand-text disabled:text-fg-3"

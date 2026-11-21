@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { errorText } from "@/lib/neon";
 import { Building2, Database, LogOut } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ function Onboarding() {
       await openOrg(id, { force: true });
       router.replace("/dashboard/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorText(err));
       setBusy(null);
     }
   }
@@ -67,7 +68,7 @@ function Onboarding() {
       await openOrg(id, { force: true });
       router.replace(m?.role === "resident" ? "/resident/" : m?.role === "parent" ? "/parent/" : "/dashboard/");
     } catch (err) {
-      setInviteError(err instanceof Error ? err.message : String(err));
+      setInviteError(errorText(err));
       setBusy(null);
     }
   }

@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { errorText } from "@/lib/neon";
 import { KeyRound } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
 import { CodeStep } from "@/components/auth/code-step";
@@ -32,7 +33,7 @@ function Forgot() {
       await requestPasswordReset(email);
       setStep("code");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorText(err));
     }
     setBusy(false);
   }

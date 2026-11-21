@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { errorText } from "@/lib/neon";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: { open: boolean; on
       setNext("");
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorText(err));
     }
     setBusy(false);
   }

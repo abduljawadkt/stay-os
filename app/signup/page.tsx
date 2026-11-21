@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { errorText } from "@/lib/neon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -51,7 +52,7 @@ export default function SignupPage() {
       }
       router.replace("/onboarding/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorText(err));
       setBusy(false);
     }
   }

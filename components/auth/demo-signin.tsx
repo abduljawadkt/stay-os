@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { errorText } from "@/lib/neon";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
@@ -26,7 +27,7 @@ export function DemoRoleList({ large = false, onError }: { large?: boolean; onEr
       if (demoOrg) openOrg(demoOrg.orgId);
       router.replace(HOME[role]);
     } catch (e) {
-      onError?.(e instanceof Error ? e.message : String(e));
+      onError?.(errorText(e));
       setBusy(null);
     }
   }

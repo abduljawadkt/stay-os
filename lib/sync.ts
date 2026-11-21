@@ -6,7 +6,7 @@
 //  - every few seconds changes_since() brings in what other people changed (another device, a parent's phone).
 import { toast } from "sonner";
 import { useDemo, type Role } from "./store";
-import { neon, errorText } from "./neon";
+import { neon, errorText, asError } from "./neon";
 import { setClock, nowISO, todayISO } from "./clock";
 import { refreshIndexes } from "./selectors";
 import { COLLS, COLL_BY_TABLE, PREPEND, TABLE, fromRow, sameValue, staffFromRow, toRow, type Coll } from "./db-map";
@@ -63,10 +63,10 @@ export async function withIdentity<T>(fn: () => Promise<T>, tries = 5): Promise<
       return await fn();
     } catch (e) {
       last = e;
-      if (!/auth_not_ready/.test(errorText(e))) throw e;
+      if (!/auth_not_ready/.test(errorText(e))) throw asError(e);
     }
   }
-  throw last;
+  throw asError(last);
 }
 
 /** Read a hostel from the database and put it in the app. */

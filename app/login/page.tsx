@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { errorText } from "@/lib/neon";
 import { ArrowRight } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,7 @@ function LoginForm() {
     } catch (err) {
       // account exists but its email isn't confirmed: Neon Auth has just emailed a code
       if (err instanceof EmailNotVerified) setVerifying(true);
-      else setError(err instanceof Error ? err.message : String(err));
+      else setError(errorText(err));
       setBusy(null);
     }
   }
