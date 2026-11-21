@@ -128,9 +128,9 @@
       "b1": "One tap from your home screen",
       "b2": "Full screen, no browser bars",
       "b3": "Opens fast, even on a slow connection",
-      "ios1": "Tap the Share button in Safari's toolbar",
-      "ios2": "Scroll down and tap “Add to Home Screen”",
-      "ios3": "Tap “Add” in the top corner",
+      "ios1": "Tap Share in Safari (on newer iPhones it's inside the ••• menu)",
+      "ios2": "Tap “Add to Home Screen” (scroll down if you don't see it)",
+      "ios3": "Keep “Open as Web App” on and tap “Add”",
       "android1": "Tap the ⋮ menu in Chrome",
       "android2": "Tap “Install app” or “Add to Home screen”",
       "android3": "Tap “Install”",
@@ -141,7 +141,11 @@
       "row": "Install app",
       "rowSub": "Add StayOS to your home screen",
       "landingTitle": "Get the StayOS app",
-      "landingBody": "Install from your browser, no App Store needed"
+      "landingBody": "Install from your browser, no App Store needed",
+      "inApp1": "Tap the ••• or ⋮ menu at the top of this screen",
+      "inAppIos2": "Tap “Open in Safari” (or “Open in browser”)",
+      "inAppAndroid2": "Tap “Open in Chrome” (or “Open in browser”)",
+      "inApp3": "StayOS opens there and offers the install"
     },
     "code": {
       "sent": "We emailed a 6-digit code to {email}.",

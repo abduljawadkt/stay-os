@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Check, EllipsisVertical, Share, SquarePlus } from "lucide-react";
+import { Check, Compass, Ellipsis, EllipsisVertical, ExternalLink, Share, SquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { installAvailable, promptInstall, snooze, snoozed, useInstall } from "@/lib/install";
@@ -14,10 +14,15 @@ export function InstallSheet() {
   const open = useInstall((s) => s.open);
   const platform = useInstall((s) => s.platform);
   const canPrompt = useInstall((s) => s.canPrompt);
+  const inApp = useInstall((s) => s.inApp);
   const setOpen = useInstall((s) => s.setOpen);
 
-  const steps: { icon: React.ElementType; text: string }[] =
-    platform === "ios"
+  // apps' built-in browsers (WhatsApp, Instagram…) can't install: first hop to Safari or Chrome
+  const steps: { icon: React.ElementType; text: string }[] = inApp
+    ? platform === "ios"
+      ? [{ icon: Ellipsis, text: t("inApp1") }, { icon: Compass, text: t("inAppIos2") }, { icon: Share, text: t("inApp3") }]
+      : [{ icon: EllipsisVertical, text: t("inApp1") }, { icon: ExternalLink, text: t("inAppAndroid2") }, { icon: SquarePlus, text: t("inApp3") }]
+    : platform === "ios"
       ? [{ icon: Share, text: t("ios1") }, { icon: SquarePlus, text: t("ios2") }, { icon: Check, text: t("ios3") }]
       : platform === "android"
         ? [{ icon: EllipsisVertical, text: t("android1") }, { icon: SquarePlus, text: t("android2") }, { icon: Check, text: t("android3") }]
@@ -68,8 +73,8 @@ export function InstallSheet() {
 }
 
 /**
- * Offers the install once per visit on phones, shortly after a signed-in screen opens. Skipped when the
- * app is already installed, inside the iOS app, or the person said "Not now" in the last week.
+ * Offers the install to every phone visitor, on any page, once per visit, a moment after it opens.
+ * Skipped when the app is already installed, inside the iOS app, or after "Not now" for a day.
  */
 export function AutoInstallPrompt() {
   const ready = useInstall((s) => s.ready);

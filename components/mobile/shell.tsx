@@ -9,7 +9,6 @@ import { QRCodeSVG } from "qrcode.react";
 import { BatteryFull, Signal, Wifi, CheckCircle2, Users } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { EmptyState } from "@/components/common/states";
-import { AutoInstallPrompt } from "@/components/shell/install-sheet";
 import { isStaffRole, useSession } from "@/lib/session";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo, type Role } from "@/lib/store";
@@ -55,7 +54,6 @@ export function MobileShell({ role, tabs, children }: { role: Extract<Role, "res
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <div className="demo-chrome"><TopBar variant="app" /></div>
-      <AutoInstallPrompt />
       <div className={cn("flex flex-1 items-start justify-center gap-12 transition-[padding] duration-300 md:px-6 md:py-8 xl:py-10", waOpen && "2xl:pr-[396px]")}>
         {staffView && <Explainer role={role} />}
         <div className="phone-frame relative h-[calc(100dvh-56px)] w-full overflow-hidden bg-canvas md:h-[844px] md:max-h-[calc(100dvh-120px)] md:min-h-[640px] md:w-[390px] md:shrink-0 md:rounded-[52px] md:border-[10px] md:border-[#0b0b0a] md:shadow-[0_30px_80px_-20px_rgb(0_0_0/0.35),0_0_0_1px_rgb(255_255_255/0.06)_inset] dark:md:border-[#1d1d1b]">

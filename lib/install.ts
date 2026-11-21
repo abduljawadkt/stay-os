@@ -15,6 +15,8 @@ interface BeforeInstallPromptEvent extends Event {
 interface InstallState {
   ready: boolean;
   platform: Platform;
+  /** Opened inside WhatsApp, Instagram, Facebook or another app's browser, which can't install apps. */
+  inApp: boolean;
   standalone: boolean;
   native: boolean;
   canPrompt: boolean;
@@ -24,12 +26,13 @@ interface InstallState {
 }
 
 const DISMISS_KEY = "stayos-install-dismissed";
-const SNOOZE_DAYS = 7;
+const SNOOZE_DAYS = 1;
 let deferred: BeforeInstallPromptEvent | null = null;
 
 export const useInstall = create<InstallState>((set) => ({
   ready: false,
   platform: "desktop",
+  inApp: false,
   standalone: false,
   native: false,
   canPrompt: false,
@@ -52,7 +55,9 @@ export function initInstall() {
   if (typeof window === "undefined" || useInstall.getState().ready) return;
   const native = !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
   const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
-  useInstall.setState({ ready: true, platform: detectPlatform(), standalone, native });
+  const ua = navigator.userAgent;
+  const inApp = /FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Snapchat|Line\/|LinkedInApp|Twitter|MicroMessenger|; wv\)/i.test(ua);
+  useInstall.setState({ ready: true, platform: detectPlatform(), standalone, native, inApp });
 
   if (!native && "serviceWorker" in navigator && process.env.NODE_ENV === "production") {
     window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined), { once: true });
