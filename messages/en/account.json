@@ -40,7 +40,8 @@
       "demoNote": "Use two devices: pay as Anjali on a phone and watch the owner's dashboard update.",
       "errorRequired": "Enter your email and password.",
       "signingIn": "Signing in…",
-      "forgot": "Forgot password?"
+      "forgot": "Forgot password?",
+      "demoShort": "Sign in as an owner, warden, resident or parent"
     },
     "signup": {
       "title": "Start your 14-day free trial",
@@ -180,6 +181,43 @@
       "save": "Change password",
       "saved": "Password changed",
       "savedSub": "Other devices have been signed out."
+    },
+    "welcome": {
+      "title": "Your hostel, in your pocket.",
+      "body": "{brand} runs rent, rooms, mess, complaints and gate passes from one app, for owners, wardens, residents and parents.",
+      "demo": "Try the live demo",
+      "signIn": "Sign in",
+      "newHere": "New hostel?",
+      "trial": "Start a free trial",
+      "slides": "What StayOS does",
+      "phoneTitle": "Made for your phone",
+      "phoneBody": "Scan to open StayOS on your phone and add it to your home screen.",
+      "learnMore": "See everything StayOS does",
+      "rent": {
+        "title": "Rent collects itself",
+        "body": "UPI links on WhatsApp, and every payment matched to the right invoice on its own.",
+        "card": "Collected this month",
+        "toast": "₹9,000 received from Anjali"
+      },
+      "rooms": {
+        "title": "Every bed on one screen",
+        "body": "Rooms, residents, mess and complaints. Check in a resident in a minute."
+      },
+      "family": {
+        "title": "Parents stay in the loop",
+        "body": "Leave approvals, fees and in-out updates, in English and Malayalam.",
+        "message": "Anjali wants to go home Fri 5 PM to Sun 7 PM. Approve?",
+        "approve": "Approve",
+        "reject": "Reject",
+        "done": "Approved by Rajesh"
+      }
+    },
+    "demo": {
+      "title": "Try StayOS",
+      "body": "Pick who you want to be. You'll use Al Noor Residency, a 300-bed sample hostel shared by everyone trying {brand}.",
+      "note": "Everyone trying the demo shares this hostel, so don't enter real personal details.",
+      "own": "Want your own hostel?",
+      "trial": "Start a free trial"
     }
   }
 }

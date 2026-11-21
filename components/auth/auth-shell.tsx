@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { LocaleToggle } from "@/components/shell/locale-toggle";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
@@ -9,14 +10,22 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /** Frame for sign-in, sign-up and onboarding: a header, the form, and an optional side panel. */
-export function AuthShell({ children, aside, className }: { children: React.ReactNode; aside?: React.ReactNode; className?: string }) {
+export function AuthShell({ children, aside, className, back = "/" }: { children: React.ReactNode; aside?: React.ReactNode; className?: string; back?: string | null }) {
   return (
     <div className="flex min-h-dvh flex-col bg-canvas pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <header className="flex h-14 shrink-0 items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="rounded-md" aria-label="Home">
+      {/* phones: an app bar with a back arrow; larger screens: the logo */}
+      <header className="flex h-14 shrink-0 items-center justify-between px-2 sm:px-6">
+        {back !== null ? (
+          <Link href={back} className="flex h-11 items-center gap-0.5 rounded-full pr-2 pl-1 text-[17px] text-brand-text active:opacity-60 sm:hidden" aria-label="Back">
+            <ChevronLeft className="size-7" strokeWidth={2.2} aria-hidden />
+          </Link>
+        ) : (
+          <span className="sm:hidden" />
+        )}
+        <Link href="/" className="hidden rounded-md sm:block" aria-label="Home">
           <Logo />
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 pr-2 sm:pr-0">
           <LocaleToggle />
           <span className="hidden sm:inline-flex"><ThemeToggle /></span>
         </div>

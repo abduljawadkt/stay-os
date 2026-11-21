@@ -6,15 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { AuthShell, Field, FormError } from "@/components/auth/auth-shell";
-import { Avatar } from "@/components/common/avatar";
 import { Button } from "@/components/ui/button";
-import { DEMO_ACCOUNTS, DEMO_PASSWORD, EmailNotVerified, boot, openOrg, resendVerification, signIn, useSession, verifyEmail, type MemberRole } from "@/lib/session";
+import { EmailNotVerified, boot, resendVerification, signIn, useSession, verifyEmail } from "@/lib/session";
 import { CodeStep } from "@/components/auth/code-step";
+import { DemoRoleList } from "@/components/auth/demo-signin";
 import { brand } from "@/config/brand";
-import { cn } from "@/lib/utils";
 
-const HOME: Record<MemberRole, string> = { owner: "/dashboard/", warden: "/dashboard/", resident: "/resident/", parent: "/parent/" };
-const DEMO_NAMES: Record<MemberRole, string> = { owner: "Rasheed Koya", warden: "Mohammed Ashraf P.", resident: "Anjali Menon", parent: "Rajesh Menon" };
 
 function LoginForm() {
   const t = useTranslations("account.login");
@@ -47,7 +44,7 @@ function LoginForm() {
     else router.replace(next && next.startsWith("/") ? next : "/start/");
   }, [auth, memberships, busy, next, router]);
 
-  async function go(e: string, p: string, key: string, demoRole?: MemberRole) {
+  async function go(e: string, p: string, key: string) {
     setError(null);
     if (!e || !p) {
       setError(t("errorRequired"));
@@ -56,12 +53,7 @@ function LoginForm() {
     setBusy(key);
     try {
       await signIn(e, p);
-      const list = useSession.getState().memberships ?? [];
-      if (demoRole) {
-        const demoOrg = list.find((m) => m.isDemo);
-        if (demoOrg) openOrg(demoOrg.orgId);
-        router.replace(HOME[demoRole]);
-      } else afterSignIn();
+      afterSignIn();
     } catch (err) {
       // account exists but its email isn't confirmed: Neon Auth has just emailed a code
       if (err instanceof EmailNotVerified) setVerifying(true);
@@ -89,35 +81,10 @@ function LoginForm() {
   }
 
   const demoAside = (
-    <section aria-labelledby="demo-title" className="rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-6">
+    <section aria-labelledby="demo-title" className="hidden rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-6 lg:block">
       <h2 id="demo-title" className="text-lg font-semibold text-fg">{t("demoTitle")}</h2>
       <p className="mt-1 text-sm text-fg-2">{t("demoBody", { brand: brand.name })}</p>
-      <ul className="mt-4 space-y-2">
-        {DEMO_ACCOUNTS.map((a) => {
-          const key = `demo-${a.role}`;
-          const label = t(`demo${a.role[0].toUpperCase()}${a.role.slice(1)}` as "demoOwner");
-          return (
-            <li key={a.role}>
-              <button
-                type="button"
-                disabled={!!busy}
-                onClick={() => go(a.email, DEMO_PASSWORD, key, a.role)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg border border-line bg-surface px-3 py-2.5 text-left transition-colors hover:border-line-strong hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-60",
-                  busy === key && "border-brand"
-                )}
-              >
-                <Avatar name={DEMO_NAMES[a.role]} size={36} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-fg">{label}</span>
-                  <span className="block truncate text-small text-fg-3">{t(`demo${a.role[0].toUpperCase()}${a.role.slice(1)}Meta` as "demoOwnerMeta")}</span>
-                </span>
-                <span className="text-small font-medium text-brand-text">{busy === key ? t("signingIn") : <ArrowRight className="size-4" aria-hidden />}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="mt-4"><DemoRoleList onError={setError} /></div>
       <p className="mt-4 text-small text-fg-3">{t("demoNote")}</p>
     </section>
   );
@@ -145,6 +112,13 @@ function LoginForm() {
             {t("submit")}
           </Button>
         </form>
+        <Link href="/demo/" className="mt-6 flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 active:bg-surface-2 lg:hidden">
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold text-fg">{t("demoTitle")}</span>
+            <span className="block text-[13px] text-fg-3">{t("demoShort")}</span>
+          </span>
+          <ArrowRight className="size-5 text-brand-text" aria-hidden />
+        </Link>
         <p className="mt-5 text-sm text-fg-2">
           {t("noAccount", { brand: brand.name })}{" "}
           <Link href="/signup/" className="font-medium text-brand-text underline-offset-3 hover:underline">{t("createAccount")}</Link>

@@ -23,9 +23,9 @@ export function SiteHeader() {
           <Logo />
         </Link>
         <nav aria-label="Site" className="ml-4 hidden items-center gap-1 md:flex">
-          <Link href="/#features" className="rounded-md px-2.5 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">{t("features")}</Link>
+          <Link href="/features/" className="rounded-md px-2.5 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">{t("features")}</Link>
           <Link href="/pricing/" className="rounded-md px-2.5 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">{t("pricing")}</Link>
-          <Link href="/login/" className="rounded-md px-2.5 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">{t("demo")}</Link>
+          <Link href="/demo/" className="rounded-md px-2.5 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">{t("demo")}</Link>
         </nav>
         <div className="ml-auto flex items-center gap-1.5">
           <LocaleToggle />
@@ -56,9 +56,9 @@ export function SiteFooter() {
         <div>
           <p className="text-xs font-medium text-fg-3">{t("footer.product")}</p>
           <ul className="mt-2 space-y-1.5 text-sm">
-            <li><Link href="/#features" className="text-fg-2 hover:text-fg">{t("nav.features")}</Link></li>
+            <li><Link href="/features/" className="text-fg-2 hover:text-fg">{t("nav.features")}</Link></li>
             <li><Link href="/pricing/" className="text-fg-2 hover:text-fg">{t("nav.pricing")}</Link></li>
-            <li><Link href="/login/" className="text-fg-2 hover:text-fg">{t("nav.demo")}</Link></li>
+            <li><Link href="/demo/" className="text-fg-2 hover:text-fg">{t("nav.demo")}</Link></li>
           </ul>
         </div>
         <div>

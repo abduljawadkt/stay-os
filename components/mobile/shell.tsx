@@ -9,6 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { BatteryFull, Signal, Wifi, CheckCircle2, Users } from "lucide-react";
 import { TopBar } from "@/components/shell/top-bar";
 import { EmptyState } from "@/components/common/states";
+import { ScreenTransition } from "@/components/shell/screen-transition";
 import { isStaffRole, useSession } from "@/lib/session";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo, type Role } from "@/lib/store";
@@ -60,7 +61,7 @@ export function MobileShell({ role, tabs, children }: { role: Extract<Role, "res
           <StatusBar />
           <div ref={scroller} id="app-scroll" className="no-scrollbar h-full overflow-y-auto overscroll-contain pb-[calc(76px+env(safe-area-inset-bottom))] md:pt-11">
             <div className="pt-safe">
-              {hasResident ? children : <EmptyState icon={Users} title={te("noResidentTitle")} body={te("noResidentBody")} className="min-h-[60vh]" />}
+              {hasResident ? <ScreenTransition>{children}</ScreenTransition> : <EmptyState icon={Users} title={te("noResidentTitle")} body={te("noResidentBody")} className="min-h-[60vh]" />}
             </div>
           </div>
           <BottomTabs tabs={tabs} />

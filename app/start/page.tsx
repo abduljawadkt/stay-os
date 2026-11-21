@@ -14,7 +14,7 @@ export default function StartPage() {
     boot();
   }, []);
   useEffect(() => {
-    if (auth === "signed_out") router.replace("/login/");
+    if (auth === "signed_out") router.replace("/");
     if (auth !== "signed_in" || !memberships) return;
     const m = pickOrg(memberships);
     if (!m) {
