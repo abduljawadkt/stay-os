@@ -5,16 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx serve out",
+    "start": "next start",
     "data": "node scripts/generate-data.mjs",
     "typecheck": "tsc --noEmit",
-    "ios:sync": "next build && cap sync ios",
-    "ios": "next build && cap sync ios && cap open ios",
+    "ios:sync": "npm run build:export && cap sync ios",
+    "ios": "npm run build:export && cap sync ios && cap open ios",
     "deploy": "npx vercel --prod",
     "db:setup": "node scripts/db-setup.mjs",
     "db:check": "node scripts/db-check.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
-    "payments:check": "node scripts/payments-check.mjs"
+    "payments:check": "node scripts/payments-check.mjs",
+    "build:export": "node scripts/build-export.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.2",
