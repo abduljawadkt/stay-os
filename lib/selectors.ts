@@ -197,6 +197,18 @@ export function headcount(residents: Resident[], optOuts: MealOptOut[], date: st
   return MEALS.map((meal) => ({ meal, enrolled: enrolled.length, skipped: skipped[meal], cooking: enrolled.length - skipped[meal] }));
 }
 
+/** Lunch eaters for a day, split by where they eat: at their institute (the default) or at the hostel. */
+export function lunchSplit(residents: Resident[], optOuts: MealOptOut[], date: string) {
+  const eating = new Set(messEnrolled(residents, date).map((r) => r.id));
+  let hostel = 0;
+  for (const o of optOuts) {
+    if (o.date !== date || !eating.has(o.residentId)) continue;
+    if (o.meals.includes("lunch")) eating.delete(o.residentId);
+    else if (o.lunchAt === "hostel") hostel++;
+  }
+  return { hostel, institute: eating.size - hostel };
+}
+
 export function wasteSaved(optOuts: MealOptOut[], month: string, uptoDate: string) {
   let meals = 0, amount = 0;
   for (const o of optOuts) {

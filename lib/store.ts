@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import {
   emptySeed, hostel, type Seed, type Activity, type Bed, type Channel, type Complaint, type ComplaintCategory, type ComplaintStatus,
-  type Expense, type Invoice, type LeaveRequest, type Meal, type Resident, type Visitor, type WAMessage, type WAThread,
+  type Expense, type Invoice, type LeaveRequest, type LunchSpot, type Meal, type Resident, type Visitor, type WAMessage, type WAThread,
 } from "@/data";
 import { nowISO, nowMs, todayISO } from "./clock";
 import { roomById, rebates, daysInMonth, addDays, MEALS } from "./selectors";
@@ -75,6 +75,8 @@ interface Actions {
   addComplaint: (input: { residentId: string; category: ComplaintCategory; title: string; description: string; channel: Channel; photo?: string; text?: string }) => string;
   setComplaintStatus: (id: string, status: ComplaintStatus) => void;
   toggleOptOut: (residentId: string, date: string, meal: Meal, source?: "app" | "whatsapp") => boolean;
+  /** Where the resident has lunch that day: their institute (the default) or the hostel. */
+  setLunchAt: (residentId: string, date: string, spot: LunchSpot) => void;
   requestLeave: (residentId: string, input: { from: string; to: string; reason: string; destination: string }) => string;
   decideLeave: (id: string, decision: "approved" | "rejected", via?: "app" | "whatsapp") => void;
   addExpense: (e: Omit<Expense, "id" | "status">) => string;
@@ -380,6 +382,16 @@ export const useDemo = create<DemoState>()(
         });
       },
 
+      setLunchAt: (residentId, date, spot) => {
+        const s = get();
+        const existing = s.optOuts.find((o) => o.residentId === residentId && o.date === date);
+        if ((existing?.lunchAt ?? "institute") === spot) return;
+        set({
+          optOuts: existing
+            ? s.optOuts.map((o) => (o === existing ? { ...o, lunchAt: spot } : o))
+            : [...s.optOuts, { id: uid("OO"), residentId, date, meals: [], reason: "", source: "app", createdAt: nowISO(), lunchAt: spot }],
+        });
+      },
       toggleOptOut: (residentId, date, meal, source = "app") => {
         const s = get();
         const existing = s.optOuts.find((o) => o.residentId === residentId && o.date === date);

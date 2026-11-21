@@ -7,7 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import {
   Bath, BedDouble, Bell, BookOpen, Camera, Check, CheckCircle2, ChevronRight, Clock, Copy, DoorOpen, Droplets, Lamp, Lock, MessageCircle, MessageSquareWarning,
-  Phone, Plug, Shirt, Soup, Wifi, Wrench, X, CalendarClock, Sparkles,
+  Phone, Plug, Shirt, Soup, Wifi, Wrench, X, CalendarClock, Sparkles, GraduationCap, Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,7 @@ export function ResidentHome() {
   const leave = leaves.find((l) => l.residentId === r.id && (l.status === "awaiting_parent" || (l.status === "approved" && l.to >= nowIso)));
   const menu = menuFor(today);
   const mine = optOuts.find((o) => o.residentId === r.id && o.date === today);
+  const tmm = useTranslations("mobile.mess");
   const nowHM = nowIso.slice(11, 16);
   const locked = (m: Meal) => m === "breakfast" || nowHM >= ({ lunch: "10:00", snacks: "14:00", dinner: "16:00" } as Record<string, string>)[m];
   const unreadNotices = notices.filter((n) => n.postedAt.startsWith(today)).length;
@@ -121,7 +122,10 @@ export function ResidentHome() {
           return (
             <li key={m} className="flex items-center gap-3 px-4 py-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-fg-3">{tm(m)} · {messMenu.servingTimes[m]}</p>
+                <p className="text-xs text-fg-3">
+                  {tm(m)} · {messMenu.servingTimes[m]}
+                  {m === "lunch" && !skipped && <> · <span className="font-medium text-fg-2">{(mine?.lunchAt ?? "institute") === "hostel" ? tmm("atHostel") : tmm("atInstitute")}</span></>}
+                </p>
                 <p className={cn("mt-0.5 flex items-center gap-1.5 truncate text-sm", skipped ? "text-fg-3 line-through" : "text-fg")}><VegMark veg={menu[m].veg} />{locale === "ml" ? menu[m].ml : menu[m].en}</p>
               </div>
               {locked(m) ? <span className="flex items-center gap-1 text-xs text-fg-3"><Lock className="size-3" aria-hidden />{skipped ? t("skipped") : t("locked")}</span> : (
@@ -211,6 +215,7 @@ export function ResidentMess() {
   const r = usePersona();
   const optOuts = useDemo((s) => s.optOuts);
   const toggleOptOut = useDemo((s) => s.toggleOptOut);
+  const setLunchAt = useDemo((s) => s.setLunchAt);
   const today = todayISO();
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDaysSel(today, i)), [today]);
   const [day, setDay] = useState(today);
@@ -264,6 +269,35 @@ export function ResidentMess() {
                   <span className={cn("text-[11px] font-medium", skipped ? "text-fg-3" : "text-brand-text")}>{skipped ? t("skipping") : t("eating")}</span>
                 </div>
               </div>
+              {m === "lunch" && !skipped && (
+                <div className="mt-3 flex items-center gap-3 border-t border-line pt-3">
+                  <span className="text-small text-fg-2">{t("lunchAt")}</span>
+                  <div role="radiogroup" aria-label={t("lunchAt")} className="ml-auto grid grid-cols-2 rounded-[10px] bg-surface-2 p-0.5">
+                    {(["institute", "hostel"] as const).map((spot) => {
+                      const on = (mine?.lunchAt ?? "institute") === spot;
+                      const Icon = spot === "institute" ? GraduationCap : Home;
+                      return (
+                        <button
+                          key={spot}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          disabled={passed}
+                          onClick={() => {
+                            if (on) return;
+                            setLunchAt(r.id, day, spot);
+                            haptic();
+                            toast(t(spot === "hostel" ? "lunchHostel" : "lunchInstitute", { day: day === today ? t("today") : f.weekdayLong(day) }));
+                          }}
+                          className={cn("flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors disabled:opacity-60", on ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2")}
+                        >
+                          <Icon className="size-4" aria-hidden />{spot === "institute" ? t("atInstitute") : t("atHostel")}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </li>
           );
         })}

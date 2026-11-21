@@ -268,6 +268,8 @@ create table public.meal_optouts (
   source text not null default 'app',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  -- where the resident has lunch that day: at their college or office, or back at the hostel
+  lunch_at text not null default 'institute' check (lunch_at in ('institute', 'hostel')),
   primary key (org_id, id)
 );
 create index optouts_date_idx on public.meal_optouts (org_id, date);
@@ -456,7 +458,8 @@ begin
   insert into public.gate_events select target, id, resident_id, type, at, method, late, pass_id, now() from public.gate_events where org_id = tpl;
   insert into public.leaves select target, id, resident_id, "from", "to", reason, destination, status, requested_at, parent_decision_at, now() from public.leaves where org_id = tpl;
   insert into public.visitors select target, id, name, phone, relation, resident_id, purpose, in_at, out_at, id_proof, id_last4, now() from public.visitors where org_id = tpl;
-  insert into public.meal_optouts select target, id, resident_id, date, meals, reason, source, created_at, now() from public.meal_optouts where org_id = tpl;
+  insert into public.meal_optouts (org_id, id, resident_id, date, meals, reason, source, created_at, updated_at, lunch_at)
+    select target, id, resident_id, date, meals, reason, source, created_at, now(), lunch_at from public.meal_optouts where org_id = tpl;
   insert into public.notices select target, id, category, pinned, audience, posted_at, title, title_ml, body, body_ml, now() from public.notices where org_id = tpl;
   insert into public.activity select target, id, at, kind, data, now() from public.activity where org_id = tpl;
   insert into public.wa_threads select target, id, contact_name, role, resident_id, phone, unread, messages, now() from public.wa_threads where org_id = tpl;

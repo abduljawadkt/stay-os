@@ -5,6 +5,7 @@ export type Gender = "M" | "F";
 export type RoomType = "single" | "double" | "triple" | "six";
 export type BedStatus = "occupied" | "vacant" | "reserved" | "maintenance";
 export type Meal = "breakfast" | "lunch" | "snacks" | "dinner";
+export type LunchSpot = "institute" | "hostel";
 export type ISODate = string; // 2026-11-27
 export type ISODateTime = string; // 2026-11-27T10:24:00+05:30
 
@@ -209,6 +210,8 @@ export interface MealOptOut {
   meals: Meal[];
   reason: string;
   source: "app" | "whatsapp";
+  /** Where lunch is had that day. Missing means the default, the institute (college or office). */
+  lunchAt?: LunchSpot;
   createdAt: ISODateTime;
 }
 export interface Mess {

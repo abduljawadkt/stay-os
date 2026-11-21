@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
-import { MEALS, headcount, menuFor, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
+import { MEALS, headcount, lunchSplit, menuFor, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
 import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { messMenu, type Meal, type MenuItem } from "@/data";
@@ -47,6 +47,7 @@ export function MessScreen() {
   const [edits, setEdits] = useState<Record<string, string>>({});
 
   const hc = useMemo(() => headcount(residents, optOuts, today), [residents, optOuts, today]);
+  const lunch = useMemo(() => lunchSplit(residents, optOuts, today), [residents, optOuts, today]);
   const waste = useMemo(() => wasteSaved(optOuts, month, today), [optOuts, month, today]);
   const wasteYear = Math.round((waste.amount / Number(today.slice(8))) * 365);
   const rb = useMemo(() => rebates(optOuts, month), [optOuts, month]);
@@ -63,7 +64,7 @@ export function MessScreen() {
       <PageHeader
         title={t("title")}
         description={t("subtitle", { count: enrolled })}
-        actions={<Button variant="primary" onClick={() => toast(t("sentToKitchen", { name: "Kunhimoideen" }), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
+        actions={<Button variant="primary" onClick={() => toast(t("sentToKitchen", { name: "Kunhimoideen" }), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}${h.meal === "lunch" ? ` (${t("headcount.split", lunch)})` : ""}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
       />
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <>
@@ -83,6 +84,7 @@ export function MessScreen() {
                       </div>
                       {loading ? <Sk className="mt-2 h-8 w-16" /> : <p className="mt-1 text-kpi font-semibold tracking-[-0.02em] text-fg tnum"><CountUp id={`hc-${h.meal}`} value={h.cooking} format={(v) => f.num(v)} /></p>}
                       <p className="text-xs text-fg-3 tnum">{t("headcount.of", { enrolled: h.enrolled, skipped: h.skipped })}</p>
+                      {h.meal === "lunch" && !loading && <p className="mt-0.5 text-xs font-medium text-fg-2 tnum">{t("headcount.split", lunch)}</p>}
                       <p className="mt-2 truncate text-xs text-fg-2" title={label(menuFor(today)[h.meal])}><VegMark veg={menuFor(today)[h.meal].veg} className="mr-1 align-[-2px]" />{label(menuFor(today)[h.meal])}</p>
                       <p className="text-xs text-fg-3">{messMenu.servingTimes[h.meal]}</p>
                     </div>
@@ -279,6 +281,8 @@ function DayPanel({ date }: { date: string }) {
   const residents = useDemo((s) => s.residents);
   const optOuts = useDemo((s) => s.optOuts);
   const hc = useMemo(() => headcount(residents, optOuts, date), [residents, optOuts, date]);
+  const lunch = useMemo(() => lunchSplit(residents, optOuts, date), [residents, optOuts, date]);
+  const th = useTranslations("mess.headcount");
   const menu = menuFor(date);
   const sp = messMenu.specials.find((s) => s.date === date);
   return (
@@ -289,6 +293,7 @@ function DayPanel({ date }: { date: string }) {
           <li key={h.meal} className="py-2.5">
             <div className="flex items-baseline justify-between text-sm"><span className="font-medium text-fg">{tm(h.meal)}</span><span className="text-fg tnum">{h.cooking}<span className="text-xs text-fg-3"> / {h.enrolled}</span></span></div>
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-fg-2"><VegMark veg={menu[h.meal].veg} />{locale === "ml" ? menu[h.meal].ml : menu[h.meal].en}</p>
+            {h.meal === "lunch" && <p className="mt-0.5 text-xs text-fg-3 tnum">{th("split", lunch)}</p>}
           </li>
         ))}
       </ul>
@@ -301,7 +306,7 @@ function OptOutList({ date, setDate, resById }: { date: string; setDate: (d: str
   const tm = useTranslations("meals");
   const f = useFormat();
   const optOuts = useDemo((s) => s.optOuts);
-  const list = useMemo(() => optOuts.filter((o) => o.date === date).sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [optOuts, date]);
+  const list = useMemo(() => optOuts.filter((o) => o.date === date && o.meals.length > 0).sort((a, b) => b.createdAt.localeCompare(a.createdAt)), [optOuts, date]);
   const today = todayISO();
   const days = [-2, -1, 0, 1, 2].map((n) => {
     const d = new Date(new Date(`${today}T12:00:00+05:30`).getTime() + n * 86400000);
