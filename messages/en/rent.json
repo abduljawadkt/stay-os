@@ -1,28 +1,115 @@
 {
   "rent": {
-    "title": "Rent & invoices", "what": "invoices", "reconciling": "Auto-reconciling UPI · {bank}", "upiId": "Collecting to {id}",
-    "remind": "Remind {count} overdue on WhatsApp", "raise": "Raise {month} invoices", "raised": "{month} invoices raised", "months": "Billing month",
-    "billed": "Billed", "invoices": "{count} invoices", "collected": "Collected", "pending": "Pending", "unpaid": "{count} unpaid", "rate": "Collection rate", "rateSub": "Paid ÷ billed for this month",
-    "aging": { "title": "Overdue by age", "clear": "Show all", "b1": "1–15 days", "b2": "16–30 days", "b3": "31–60 days", "b4": "60+ days", "count": "{count, plural, =0 {No residents} one {# resident} other {# residents}}", "showing": "Showing {bucket} overdue" },
-    "filter": { "label": "Invoice status", "all": "All", "unpaid": "Unpaid", "overdue": "Overdue", "paid": "Paid" },
+    "title": "Rent & invoices",
+    "what": "invoices",
+    "reconciling": "Auto-reconciling UPI · {bank}",
+    "upiId": "Collecting to {id}",
+    "remind": "Remind {count} overdue on WhatsApp",
+    "raise": "Raise {month} invoices",
+    "raised": "{month} invoices raised",
+    "months": "Billing month",
+    "billed": "Billed",
+    "invoices": "{count} invoices",
+    "collected": "Collected",
+    "pending": "Pending",
+    "unpaid": "{count} unpaid",
+    "rate": "Collection rate",
+    "rateSub": "Paid ÷ billed for this month",
+    "aging": {
+      "title": "Overdue by age",
+      "clear": "Show all",
+      "b1": "1–15 days",
+      "b2": "16–30 days",
+      "b3": "31–60 days",
+      "b4": "60+ days",
+      "count": "{count, plural, =0 {No residents} one {# resident} other {# residents}}",
+      "showing": "Showing {bucket} overdue"
+    },
+    "filter": {
+      "label": "Invoice status",
+      "all": "All",
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "paid": "Paid"
+    },
     "search": "Search name, bed or invoice",
-    "empty": { "title": "No invoices match", "body": "Try another month or clear the search.", "overdueTitle": "Nobody is overdue for {month}", "overdueBody": "Every invoice is paid or not yet due." },
-    "col": { "resident": "Resident", "invoice": "Invoice", "amount": "Amount", "due": "Due", "status": "Status", "paid": "Payment", "actions": "Actions" },
-    "viaWa": "WhatsApp link", "viaApp": "app", "reminded": "{count, plural, one {# reminder sent} other {# reminders sent}}", "actions": "Actions for {id}",
-    "act": { "view": "View invoice", "link": "UPI link and QR", "send": "Send reminder on WhatsApp", "cash": "Record cash payment", "receipt": "View receipt" },
-    "range": "{from}–{to} of {total}", "prev": "Previous page", "next": "Next page",
+    "empty": {
+      "title": "No invoices match",
+      "body": "Try another month or clear the search.",
+      "overdueTitle": "Nobody is overdue for {month}",
+      "overdueBody": "Every invoice is paid or not yet due."
+    },
+    "col": {
+      "resident": "Resident",
+      "invoice": "Invoice",
+      "amount": "Amount",
+      "due": "Due",
+      "status": "Status",
+      "paid": "Payment",
+      "actions": "Actions"
+    },
+    "viaWa": "WhatsApp link",
+    "viaApp": "app",
+    "reminded": "{count, plural, one {# reminder sent} other {# reminders sent}}",
+    "actions": "Actions for {id}",
+    "act": {
+      "view": "View invoice",
+      "link": "UPI link and QR",
+      "send": "Send reminder on WhatsApp",
+      "cash": "Record cash payment",
+      "receipt": "View receipt"
+    },
+    "range": "{from}–{to} of {total}",
+    "prev": "Previous page",
+    "next": "Next page",
     "raiseDialog": {
-      "title": "Raise {month} invoices?", "body": "{count} invoices, {amount} in total. Each resident gets the invoice and a UPI link on WhatsApp.",
-      "residents": "Residents billed", "rebates": "Mess rebates from November ({count} residents)", "due": "Due date", "total": "Total billed",
-      "cancel": "Cancel", "confirm": "Raise and send", "raising": "Raising invoices…", "sent": "Invoices raised",
-      "doneTitle": "{count} invoices raised for {month}", "doneBody": "Sent on WhatsApp with a UPI link. Payments will reconcile on their own.",
-      "check1": "Mess rebates applied automatically", "check2": "Invoices and UPI links sent on WhatsApp", "check3": "Reminders scheduled for 5 and 8 December", "view": "View December invoices"
+      "title": "Raise {month} invoices?",
+      "body": "{count} invoices, {amount} in total. Each resident gets the invoice and a UPI link on WhatsApp.",
+      "residents": "Residents billed",
+      "rebates": "Mess rebates from November ({count} residents)",
+      "due": "Due date",
+      "total": "Total billed",
+      "cancel": "Cancel",
+      "confirm": "Raise and send",
+      "raising": "Raising invoices…",
+      "sent": "Invoices raised",
+      "doneTitle": "{count} invoices raised for {month}",
+      "doneBody": "Sent on WhatsApp with a UPI link. Payments will reconcile on their own.",
+      "check1": "Mess rebates applied automatically",
+      "check2": "Invoices and UPI links sent on WhatsApp",
+      "check3": "Reminders scheduled for 5 and 8 December",
+      "view": "View December invoices"
     },
     "remindDialog": {
-      "title": "Send {count} reminders on WhatsApp", "body": "{amount} is overdue. Each resident gets a personal message with their own UPI link.", "preview": "Preview · to {name}",
-      "note": "Sent from the hostel's verified WhatsApp Business number. Payments made from the link are marked paid automatically.", "cancel": "Cancel", "send": "Send {count} reminders"
+      "title": "Send {count} reminders on WhatsApp",
+      "body": "{amount} is overdue. Each resident gets a personal message with their own UPI link.",
+      "preview": "Preview · to {name}",
+      "note": "Sent from the hostel's verified WhatsApp Business number. Payments made from the link are marked paid automatically.",
+      "cancel": "Cancel",
+      "send": "Send {count} reminders"
     },
-    "linkDialog": { "title": "Collect {amount} by UPI", "body": "{name} · {id}", "scan": "Scan with any UPI app · pays to {upi}", "copy": "Copy", "copied": "Payment link copied", "send": "Send on WhatsApp" },
-    "invoiceDialog": { "for": "{name} · {bed} · {month}", "total": "Total", "issued": "Issued", "due": "Due", "paid": "Paid", "utr": "UPI reference", "pdf": "Download PDF" }
+    "linkDialog": {
+      "title": "Collect {amount} by UPI",
+      "body": "{name} · {id}",
+      "scan": "Scan with any UPI app · pays to {upi}",
+      "copy": "Copy",
+      "copied": "Payment link copied",
+      "send": "Send on WhatsApp",
+      "creating": "Creating the Razorpay link…",
+      "rzpNote": "Razorpay link ({mode}). Paying it marks the invoice paid by itself.",
+      "live": "live",
+      "test": "test mode",
+      "waShare": "Send from my WhatsApp",
+      "waText": "Hi {name}, your {month} rent of {amount} at {hostel} is due. Pay here: {pay}"
+    },
+    "invoiceDialog": {
+      "for": "{name} · {bed} · {month}",
+      "total": "Total",
+      "issued": "Issued",
+      "due": "Due",
+      "paid": "Paid",
+      "utr": "UPI reference",
+      "pdf": "Download PDF"
+    }
   }
 }

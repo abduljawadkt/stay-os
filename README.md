@@ -44,6 +44,27 @@ The login page signs in to any of them with one click.
 
 New sign-ups get their own hostel: a copy of the sample data, or an empty layout of blocks × floors.
 
+## Rent payments (Razorpay)
+
+Each hostel connects its own Razorpay account in **Settings → Payments**, so rent goes straight to the hostel's bank and
+StayOS never holds money.
+
+- `functions/payments/index.mjs` is a Neon Function (no dependencies) that stores each hostel's Razorpay keys encrypted,
+  creates payment links, and verifies Razorpay's signed webhook before marking an invoice paid. Nothing else can mark an
+  invoice paid online: residents and parents can't write invoices (see `db/migrations/003`).
+- After connecting, the owner adds the webhook URL and secret shown in Settings → Payments to Razorpay
+  (Account & Settings → Webhooks, events `payment_link.paid`, `payment_link.expired`, `payment_link.cancelled`).
+- Hostels without Razorpay show their own UPI QR; the office marks those paid. Sample hostels use a test payment.
+- `npm run payments:check` runs the whole flow against the real database with Razorpay faked (22 checks, cleans up after itself).
+- Redeploy the function after changing it: `neon functions deploy payments --src functions/payments/index.mjs --no-bundle`
+  (environment: `NEON_AUTH_URL`, `APP_URL`, `ALLOWED_ORIGINS`; `DATABASE_URL` is injected by Neon).
+
+## Database changes
+
+Schema changes after the first setup live in `db/migrations/` and are applied with `npm run db:migrate -- <file>`.
+`npm run db:setup` applies them all on a fresh database. After adding or changing a function, refresh the Data API schema
+cache (Neon Console → Data API).
+
 ## Deploy
 
 ```bash

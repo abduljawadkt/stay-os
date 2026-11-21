@@ -189,7 +189,8 @@
       "hostel": "Hostel",
       "team": "Team & invites",
       "billing": "Plan & billing",
-      "data": "Sample data"
+      "data": "Sample data",
+      "payments": "Payments"
     },
     "hostel": {
       "title": "Hostel profile",
@@ -274,6 +275,37 @@
       "reset": "Reset sample data",
       "realTitle": "Live hostel",
       "realBody": "This hostel uses real dates and your own data. There is no sample data to reset."
+    },
+    "payments": {
+      "title": "Rent payments",
+      "body": "Connect the hostel's own Razorpay account. Residents and parents then pay rent by UPI or card, the money goes straight to your bank, and each invoice is marked paid by itself.",
+      "step1": "Sign in at dashboard.razorpay.com (create a free account if you don't have one).",
+      "step2": "Go to Account & Settings → API Keys and generate a key. Test mode keys (rzp_test_) let you try it without real money.",
+      "step3": "Paste the Key ID and Key Secret below.",
+      "keyId": "Key ID",
+      "keySecret": "Key Secret",
+      "safety": "The secret is checked with Razorpay, then stored encrypted. Nobody can read it back, including you and us.",
+      "connect": "Connect Razorpay",
+      "connected": "Razorpay connected",
+      "disconnected": "Razorpay disconnected",
+      "connectedMeta": "Connected · {mode} · key ending {key}",
+      "live": "Live",
+      "test": "Test mode",
+      "disconnect": "Disconnect",
+      "liveNote": "Live: residents pay real money into your account.",
+      "testNote": "Test mode: payments use Razorpay's test UPI and cards, no real money moves.",
+      "webhookTitle": "Last step: confirm payments automatically",
+      "webhookBody": "In Razorpay, go to Account & Settings → Webhooks → Add new webhook, and enter these. Without it, payments go through but invoices aren't marked paid.",
+      "webhookUrl": "Webhook URL",
+      "webhookSecret": "Secret",
+      "events": "Active events",
+      "show": "Show",
+      "hide": "Hide",
+      "copy": "Copy",
+      "copied": "Copied",
+      "webhookHint": "Set it up separately in test and live mode: each mode has its own webhooks in Razorpay.",
+      "loading": "Checking the connection…",
+      "unavailable": "Online payments aren't set up on this site."
     }
   }
 }

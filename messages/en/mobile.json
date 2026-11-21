@@ -218,7 +218,14 @@
       "realTitle": "Pay by UPI",
       "realBody": "Scan with any UPI app, or open your UPI app on this phone.",
       "openApp": "Open UPI app · {amount}",
-      "realNote": "The hostel marks this invoice paid when the money reaches them."
+      "realNote": "The hostel marks this invoice paid when the money reaches them.",
+      "gatewayNote": "Secure checkout by Razorpay. Pay with any UPI app or card.",
+      "gatewayError": "Couldn't start the payment",
+      "opening": "Opening secure checkout…",
+      "openingBody": "You'll pay on Razorpay's page and come straight back here.",
+      "confirming": "Confirming your payment…",
+      "confirmingBody": "This takes a few seconds. Please don't pay again.",
+      "slow": "Razorpay hasn't confirmed yet. If money left your account, it will show here as paid soon. You won't be charged twice."
     },
     "parent": {
       "hello": "Hello {name}",

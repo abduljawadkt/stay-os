@@ -16,6 +16,8 @@ import { hostel } from "@/data";
 import { QRCodeSVG } from "qrcode.react";
 import { useSession } from "@/lib/session";
 import { upiUri } from "@/lib/upi";
+import { toast } from "sonner";
+import { createPayLink, razorpayConnected } from "@/lib/payments";
 import { AppHeader, MCard } from "./shell";
 import { BackButton } from "./common";
 import { cn } from "@/lib/utils";
@@ -27,7 +29,7 @@ const APPS = [
   { id: "bhim", name: "BHIM UPI", mark: "B", tint: "bg-[#fdeee4] text-[#c2551b]" },
 ];
 
-type Phase = "choose" | "pin" | "processing" | "done";
+type Phase = "choose" | "pin" | "processing" | "redirecting" | "confirming" | "done";
 
 /** UPI payment, as the resident (or parent) sees it. Success marks the invoice paid everywhere. */
 export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
@@ -47,11 +49,40 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
   });
   const inv = useMemo(() => invoices.find((i) => i.id === invId), [invoices, invId]);
   const [app, setApp] = useState(APPS[0].id);
-  const [phase, setPhase] = useState<Phase>(inv?.status === "paid" ? "done" : "choose");
+  const returnedFromGateway = params.get("paid") === "1" || params.get("razorpay_payment_link_status") === "paid";
+  const [phase, setPhase] = useState<Phase>(inv?.status === "paid" ? "done" : returnedFromGateway ? "confirming" : "choose");
+  const [slow, setSlow] = useState(false);
   const [pin, setPin] = useState(0);
   const r = residents.find((x) => x.id === inv?.residentId);
-  // sample hostels run the test payment; real hostels pay the hostel's own UPI ID until a gateway is connected
-  const sample = useSession((s) => s.org?.settings.clock?.mode === "demo");
+  // Razorpay hostels pay through Razorpay; sample hostels run the test payment; others pay the hostel's UPI ID
+  const org = useSession((s) => s.org);
+  const sample = org?.settings.clock?.mode === "demo";
+  const gateway = razorpayConnected(org);
+
+  // back from Razorpay: wait for its confirmation (it reaches the app within a few seconds)
+  useEffect(() => {
+    if (phase === "confirming" && inv?.status === "paid") {
+      haptic("success");
+      setPhase("done");
+    }
+  }, [phase, inv?.status]);
+  useEffect(() => {
+    if (phase !== "confirming") return;
+    const id = setTimeout(() => setSlow(true), 45000);
+    return () => clearTimeout(id);
+  }, [phase]);
+
+  async function payWithGateway() {
+    if (!org || !inv) return;
+    setPhase("redirecting");
+    try {
+      const { url } = await createPayLink(org.id, inv.id, { via: "app", base });
+      window.location.href = url;
+    } catch (e) {
+      setPhase("choose");
+      toast.error(t("gatewayError"), { description: e instanceof Error ? e.message : String(e) });
+    }
+  }
 
   useEffect(() => {
     if (phase !== "pin") return;
@@ -95,7 +126,12 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
               </dl>
               <p className="mt-2 font-mono text-xs text-fg-3">{inv.id} · {hostel.upiId}</p>
             </MCard>
-            {!sample ? (
+            {gateway ? (
+              <div className="mx-4 mt-6">
+                <Button variant="primary" size="xl" className="h-[52px] w-full rounded-xl text-[17px]" onClick={payWithGateway} data-tour="pay-confirm">{t("pay", { amount: f.inr(inv.total) })}</Button>
+                <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-fg-3"><ShieldCheck className="size-3.5" aria-hidden />{t("gatewayNote")}</p>
+              </div>
+            ) : !sample ? (
               <MCard className="mt-4 flex flex-col items-center text-center">
                 <p className="text-base font-semibold text-fg">{t("realTitle")}</p>
                 <p className="mt-1 text-sm text-fg-2">{t("realBody")}</p>
@@ -147,6 +183,15 @@ export function PayFlow({ base }: { base: "/resident" | "/parent" }) {
                 <p className="text-sm text-fg-2">{t("processing")}</p>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {(phase === "redirecting" || phase === "confirming") && (
+          <motion.div key="wait" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-[560px] flex-col items-center px-6 pt-24 text-center" aria-live="polite">
+            <span className="size-10 animate-spin rounded-full border-[3px] border-brand/25 border-t-brand" aria-hidden />
+            <p className="mt-6 text-lg font-semibold text-fg">{phase === "redirecting" ? t("opening") : t("confirming")}</p>
+            <p className="mt-1 max-w-xs text-sm text-fg-2">{phase === "redirecting" ? t("openingBody") : slow ? t("slow") : t("confirmingBody")}</p>
+            {phase === "confirming" && slow && <Button variant="secondary" className="mt-6" onClick={() => router.push(`${base}/`)}>{t("back")}</Button>}
           </motion.div>
         )}
 

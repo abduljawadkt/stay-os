@@ -7,7 +7,7 @@ alter database neondb set timezone to 'Asia/Kolkata';
 set timezone to 'Asia/Kolkata';
 
 drop schema if exists app cascade;
-drop table if exists public.billing_invoices, public.invites, public.wa_threads, public.activity, public.notices, public.meal_optouts,
+drop table if exists public.payments, public.payment_settings, public.billing_invoices, public.invites, public.wa_threads, public.activity, public.notices, public.meal_optouts,
   public.visitors, public.leaves, public.gate_events, public.complaints, public.staff, public.expenses, public.invoices,
   public.residents, public.beds, public.rooms, public.members, public.orgs cascade;
 drop function if exists public.create_org, public.reset_demo_data, public.changes_since, public.create_invite, public.accept_invite,

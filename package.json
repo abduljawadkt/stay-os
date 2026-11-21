@@ -13,7 +13,8 @@
     "deploy": "npx vercel --prod",
     "db:setup": "node scripts/db-setup.mjs",
     "db:check": "node scripts/db-check.mjs",
-    "db:migrate": "node scripts/db-migrate.mjs"
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "payments:check": "node scripts/payments-check.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.2",

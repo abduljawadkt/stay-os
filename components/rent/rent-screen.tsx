@@ -26,6 +26,8 @@ import { aging, invoiceState, monthSummary, overdueInvoices, rebates, roomById, 
 import { todayISO, nowISO } from "@/lib/clock";
 import { payLink, upiUri } from "@/lib/upi";
 import { simulatePayment } from "@/lib/demo-actions";
+import { useSession } from "@/lib/session";
+import { createPayLink, razorpayConnected, razorpayMode } from "@/lib/payments";
 import { demo } from "@/config/demo";
 import { hostel, type Invoice } from "@/data";
 import { cn } from "@/lib/utils";
@@ -424,7 +426,20 @@ function RemindDialog({ open, onOpenChange, overdue, onSend }: { open: boolean; 
 function PayLinkDialog({ inv, name, onClose, onSend }: { inv: Invoice; name: string; onClose: () => void; onSend: () => void }) {
   const t = useTranslations("rent.linkDialog");
   const f = useFormat();
-  const link = payLink(inv.id);
+  const org = useSession((s) => s.org);
+  const resident = useDemo((s) => s.residents.find((r) => r.id === inv.residentId));
+  const connected = razorpayConnected(org);
+  const sample = org?.settings.clock?.mode === "demo";
+  // Razorpay hostels get a real payment link that marks the invoice paid by itself
+  const [rzp, setRzp] = useState<{ url?: string; error?: string } | null>(null);
+  useEffect(() => {
+    if (!connected || !org) return;
+    createPayLink(org.id, inv.id, { via: "whatsapp_link" }).then((r) => setRzp({ url: r.url })).catch((e) => setRzp({ error: e instanceof Error ? e.message : String(e) }));
+  }, [connected, org, inv.id]);
+  const url = connected ? rzp?.url : sample ? `https://${payLink(inv.id)}` : undefined;
+  const first = name.split(" ")[0];
+  const waText = t("waText", { name: first, amount: f.inr(inv.total), month: f.month(inv.month), pay: url ?? `UPI ${hostel.upiId}`, hostel: hostel.name });
+  const phone = (resident?.phone ?? "").replace(/\D/g, "");
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[420px]">
@@ -432,16 +447,21 @@ function PayLinkDialog({ inv, name, onClose, onSend }: { inv: Invoice; name: str
           <DialogTitle>{t("title", { amount: f.inr(inv.total) })}</DialogTitle>
           <DialogDescription>{t("body", { name, id: inv.id })}</DialogDescription>
         </DialogHeader>
-        <div className="mx-auto rounded-lg border border-line bg-white p-4">
-          <QRCodeSVG value={upiUri(inv.total, inv.id)} size={176} level="M" />
+        <div className="mx-auto grid size-[210px] place-items-center rounded-lg border border-line bg-white p-4">
+          {connected && !rzp ? <span className="size-6 animate-spin rounded-full border-2 border-brand/25 border-t-brand" aria-label={t("creating")} /> : <QRCodeSVG value={url ?? upiUri(inv.total, inv.id)} size={176} level="M" />}
         </div>
-        <p className="text-center text-xs text-fg-3">{t("scan", { upi: hostel.upiId })}</p>
+        <p className="text-center text-xs text-fg-3">
+          {connected ? (rzp?.error ? <span className="text-danger-fg">{rzp.error}</span> : t("rzpNote", { mode: razorpayMode(org) === "live" ? t("live") : t("test") })) : t("scan", { upi: hostel.upiId })}
+        </p>
         <div className="flex items-center gap-2 rounded-md border border-line bg-surface-2 px-3 py-2">
-          <span className="flex-1 truncate font-mono text-small text-fg">{link}</span>
-          <Button variant="quiet" size="sm" onClick={() => { navigator.clipboard?.writeText(`https://${link}`); toast(t("copied")); }}><Copy /> {t("copy")}</Button>
+          <span className="flex-1 truncate font-mono text-small text-fg">{url ? url.replace(/^https:\/\//, "") : hostel.upiId}</span>
+          <Button variant="quiet" size="sm" disabled={connected && !url} onClick={() => { navigator.clipboard?.writeText(url ?? hostel.upiId); toast(t("copied")); }}><Copy /> {t("copy")}</Button>
         </div>
-        <DialogFooter>
-          <Button variant="primary" onClick={onSend}><MessageCircle /> {t("send")}</Button>
+        <DialogFooter className="gap-2">
+          {sample && !connected && <Button variant="secondary" onClick={onSend}><MessageCircle /> {t("send")}</Button>}
+          <Button asChild variant="primary" aria-disabled={connected && !url}>
+            <a href={`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer"><MessageCircle /> {t("waShare")}</a>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

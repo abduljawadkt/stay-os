@@ -11,7 +11,8 @@ import {
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { Avatar } from "@/components/common/avatar";
 import { OwnerOnly } from "@/components/common/owner-only";
-import { Field } from "@/components/auth/auth-shell";
+import { Field, FormError } from "@/components/auth/auth-shell";
+import { connectRazorpay, disconnectRazorpay, getConnection, paymentsAvailable, type Connection } from "@/lib/payments";
 import { CycleToggle, PricingTable, type Cycle } from "@/components/marketing/pricing-table";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,7 +28,7 @@ import { brand } from "@/config/brand";
 import { hostel } from "@/data";
 import { cn } from "@/lib/utils";
 
-type Tab = "hostel" | "team" | "billing" | "data";
+type Tab = "hostel" | "team" | "payments" | "billing" | "data";
 
 export function SettingsScreen() {
   const role = useSession((s) => s.membership?.role);
@@ -44,12 +45,13 @@ function Settings() {
       <PageHeader title={t("title")} description={t("subtitle", { hostel: hostel.name })} />
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList className="no-scrollbar mb-5 max-w-full justify-start overflow-x-auto">
-          {(["hostel", "team", "billing", "data"] as const).map((k) => (
+          {(["hostel", "team", "payments", "billing", "data"] as const).map((k) => (
             <TabsTrigger key={k} value={k}>{t(`tabs.${k}`)}</TabsTrigger>
           ))}
         </TabsList>
         <TabsContent value="hostel"><HostelProfile /></TabsContent>
         <TabsContent value="team"><Team /></TabsContent>
+        <TabsContent value="payments"><Payments /></TabsContent>
         <TabsContent value="billing"><Billing /></TabsContent>
         <TabsContent value="data"><SampleData /></TabsContent>
       </Tabs>
@@ -257,6 +259,117 @@ function Team() {
           </div>
         )}
       </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+/** Owner connects the hostel's own Razorpay account; rent then goes straight to the hostel's bank. */
+function Payments() {
+  const t = useTranslations("settings.payments");
+  const orgId = useSession((s) => s.orgId)!;
+  const [conn, setConn] = useState<Connection | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [keyId, setKeyId] = useState("");
+  const [keySecret, setKeySecret] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showSecret, setShowSecret] = useState(false);
+
+  useEffect(() => {
+    if (!paymentsAvailable) return;
+    getConnection(orgId).then(setConn).catch((e) => setLoadError(e instanceof Error ? e.message : String(e)));
+  }, [orgId]);
+
+  async function connect(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      const c = await connectRazorpay(orgId, keyId.trim(), keySecret.trim());
+      setConn(c);
+      setKeySecret("");
+      await refreshOrgRow();
+      toast(t("connected"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+    setBusy(false);
+  }
+  async function disconnect() {
+    setBusy(true);
+    try {
+      setConn(await disconnectRazorpay(orgId));
+      await refreshOrgRow();
+      toast(t("disconnected"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err));
+    }
+    setBusy(false);
+  }
+  const copy = (v: string) => { navigator.clipboard?.writeText(v); toast(t("copied")); };
+
+  if (!paymentsAvailable) return <Card><CardHeader title={t("title")} meta={t("unavailable")} /></Card>;
+  if (loadError) return <Card><CardHeader title={t("title")} meta={loadError} /></Card>;
+  if (!conn) return <Card><CardHeader title={t("title")} meta={t("loading")} /></Card>;
+
+  if (!conn.connected) {
+    return (
+      <Card>
+        <CardHeader title={t("title")} meta={t("body")} />
+        <ol className="mx-5 mb-4 list-decimal space-y-1.5 pl-5 text-sm text-fg-2">
+          <li>{t("step1")}</li>
+          <li>{t("step2")}</li>
+          <li>{t("step3")}</li>
+        </ol>
+        <form onSubmit={connect} className="grid gap-4 px-5 pb-5 sm:grid-cols-2" noValidate autoComplete="off">
+          <Field id="rzp-key" label={t("keyId")} placeholder="rzp_test_…" value={keyId} onChange={(e) => setKeyId(e.target.value)} autoComplete="off" spellCheck={false} />
+          <Field id="rzp-secret" label={t("keySecret")} type="password" value={keySecret} onChange={(e) => setKeySecret(e.target.value)} autoComplete="new-password" spellCheck={false} />
+          <div className="sm:col-span-2">
+            <FormError message={error} />
+            <p className="mb-3 text-small text-fg-3">{t("safety")}</p>
+            <Button type="submit" variant="primary" loading={busy} disabled={busy || !keyId || !keySecret}>{t("connect")}</Button>
+          </div>
+        </form>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader
+          title={t("title")}
+          meta={t("connectedMeta", { mode: conn.mode === "live" ? t("live") : t("test"), key: conn.keyHint ?? "" })}
+          action={<Button variant="secondary" size="sm" onClick={disconnect} loading={busy}>{t("disconnect")}</Button>}
+        />
+        <p className={cn("mx-5 mb-5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", conn.mode === "live" ? "bg-success-tint text-success-fg" : "bg-warning-tint text-warning-fg")}>
+          <span className={cn("size-1.5 rounded-full", conn.mode === "live" ? "bg-success" : "bg-warning")} aria-hidden />
+          {conn.mode === "live" ? t("liveNote") : t("testNote")}
+        </p>
+      </Card>
+      {conn.webhookUrl && conn.webhookSecret && (
+        <Card>
+          <CardHeader title={t("webhookTitle")} meta={t("webhookBody")} />
+          <div className="space-y-3 px-5 pb-5">
+            {[
+              { label: t("webhookUrl"), value: conn.webhookUrl, mono: true },
+              { label: t("webhookSecret"), value: showSecret ? conn.webhookSecret : "•".repeat(24), mono: true, secret: true },
+              { label: t("events"), value: "payment_link.paid, payment_link.expired, payment_link.cancelled", mono: false },
+            ].map((row) => (
+              <div key={row.label}>
+                <p className="mb-1 text-small font-medium text-fg-2">{row.label}</p>
+                <div className="flex items-center gap-2 rounded-md border border-line bg-surface-2 px-3 py-2">
+                  <span className={cn("min-w-0 flex-1 truncate text-small text-fg", row.mono && "font-mono")}>{row.value}</span>
+                  {row.secret && <Button variant="quiet" size="sm" onClick={() => setShowSecret((v) => !v)}>{showSecret ? t("hide") : t("show")}</Button>}
+                  <Button variant="quiet" size="sm" onClick={() => copy(row.secret ? conn.webhookSecret! : row.value)}><Copy /> {t("copy")}</Button>
+                </div>
+              </div>
+            ))}
+            <p className="text-small text-fg-3">{t("webhookHint")}</p>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
