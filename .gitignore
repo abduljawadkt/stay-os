@@ -7,3 +7,7 @@ next-env.d.ts
 .DS_Store
 .env*.local
 .api-parked
+
+# tutorial videos (large files, kept out of git)
+/tutorial-videos/
+/.venv-tts/

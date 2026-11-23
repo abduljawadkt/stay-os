@@ -65,6 +65,31 @@ Schema changes after the first setup live in `db/migrations/` and are applied wi
 `npm run db:setup` applies them all on a fresh database. After adding or changing a function, refresh the Data API schema
 cache (Neon Console → Data API).
 
+## Tutorial videos (Malayalam)
+
+`npm run tutorial:video` records the Malayalam tutorial from the live demo at stayos.space: four parts (owner and warden,
+residents, parents, installing on a phone) plus one full video, in `tutorial-videos/` (not in git). It drives the
+demo as an iPhone in WebKit, shows Malayalam captions and a tap marker, and narrates each step with Microsoft's
+Malayalam voice (`ml-IN-SobhanaNeural`, via edge-tts). The narration and the steps are in `scripts/tutorial-video.mjs`;
+re-record after the app changes.
+
+One-time setup:
+
+```bash
+npx playwright install webkit
+python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts
+```
+
+```bash
+npm run tutorial:video                  # all four parts and the full video (about 10 minutes)
+npm run tutorial:video -- resident      # one part: owner, resident, parent or install
+npm run tutorial:video -- all --dry     # check every step quickly; screenshots in tutorial-videos/.work/
+```
+
+The demo hostel is shared. The resident part skips a meal and changes a lunch spot on screen; it notes how that day
+was first and puts it back afterwards. For paid ads, use a human voice-over or a licensed voice service instead of
+edge-tts.
+
 ## Deploy
 
 ```bash
