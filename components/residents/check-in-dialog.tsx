@@ -31,6 +31,14 @@ function blocksFor(gender: "M" | "F") {
   return (ids.length ? ids : hostel.blocks.map((b) => b.id)).join(", ");
 }
 
+/** A 10-digit Indian mobile number (with or without +91 or a leading 0) as "+91 98470 12345", or null. */
+function indianMobile(raw: string) {
+  let d = raw.replace(/\D/g, "");
+  if (d.length === 12 && d.startsWith("91")) d = d.slice(2);
+  else if (d.length === 11 && d.startsWith("0")) d = d.slice(1);
+  return /^[6-9]\d{9}$/.test(d) ? `+91 ${d.slice(0, 5)} ${d.slice(5)}` : null;
+}
+
 export function CheckInDialog() {
   const t = useTranslations("checkin");
   const tr = useTranslations("roomType");
@@ -82,10 +90,13 @@ export function CheckInDialog() {
   };
   const validate = () => {
     const e: Record<string, string> = {};
+    // "98470 12345", "098470 12345" or "+91 9847012345" all become "+91 98470 12345" (what WhatsApp and UPI need)
+    const phone = indianMobile(form.phone), parentPhone = indianMobile(form.parentPhone);
     if (form.name.trim().length < 3) e.name = t("errors.name");
-    if (!/^\+91 ?\d{5} ?\d{5}$/.test(form.phone.trim())) e.phone = t("errors.phone");
-    if (!/^\+91 ?\d{5} ?\d{5}$/.test(form.parentPhone.trim())) e.parentPhone = t("errors.phone");
+    if (!phone) e.phone = t("errors.phone");
+    if (!parentPhone) e.parentPhone = t("errors.phone");
     if (!form.institution.trim()) e.institution = t("errors.required");
+    if (phone && parentPhone && (phone !== form.phone || parentPhone !== form.parentPhone)) setForm({ ...form, phone, parentPhone });
     setErrors(e);
     return Object.keys(e).length === 0;
   };

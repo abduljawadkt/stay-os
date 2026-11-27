@@ -7,6 +7,7 @@
     "payingUpi": "{name} is paying by UPI…", "sendAs": "Send as", "as": "As {name}", "asHostel": "As hostel",
     "asHint": "Tap a reply or type. The StayOS bot answers.", "asHostelHint": "Reply from the hostel's number", "message": "Message", "send": "Send",
     "quick": { "fan": "Fan not working in my room 😓", "skip": "Skip dinner today", "link": "Send payment link", "paid": "PAID", "approve": "1", "reject": "2", "thanks": "Thank you 🙏" },
+    "liveButton": "Only {name} can tap this, on their own phone.", "liveHint": "Your reply goes to {name} on WhatsApp if they wrote in the last 24 hours. Bills, reminders and updates go as WhatsApp templates.", "liveOff": "WhatsApp is off for this hostel, so messages stay in StayOS. Turn it on in Settings → WhatsApp.",
     "linkOpened": "Opens {link} on {name}'s phone", "appOpened": "Opens the StayOS app on {name}'s phone"
   }
 }

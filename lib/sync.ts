@@ -12,6 +12,7 @@ import { refreshIndexes } from "./selectors";
 import { COLLS, COLL_BY_TABLE, PREPEND, TABLE, fromRow, sameValue, staffFromRow, toRow, type Coll } from "./db-map";
 import { emptySeed, setReferenceData, staff as staffList, type Hostel, type Invoice, type Room, type Seed, type Staff, type Complaint, type LeaveRequest, type GateEvent, type Resident } from "@/data";
 import { demo } from "@/config/demo";
+import { flushWhatsApp } from "./whatsapp";
 import type { Membership, OrgRow } from "./session";
 
 const POLL_MS = 4000;
@@ -212,11 +213,13 @@ async function flush() {
     byColl.get(coll)!.push(toRow(coll, item, id));
   }
   let failed = false;
+  let sentThreads = false;
   await Promise.all(
     [...byColl.entries()].map(async ([coll, rows]) => {
       const table = coll === "staff" ? "staff" : TABLE[coll];
       for (let i = 0; i < rows.length; i += 500) {
         const { error } = await neon().from(table).upsert(rows.slice(i, i + 500), { onConflict: "org_id,id" });
+        if (!error && coll === "whatsapp") sentThreads = true;
         if (error) {
           failed = true;
           const code = (error as { code?: string }).code ?? "";
@@ -245,6 +248,8 @@ async function flush() {
     if (!pending.has(key(coll, itemId))) refusals.delete(key(coll, itemId));
   }
   if (orgId !== id) return;
+  // new WhatsApp messages are saved: ask the StayOS number to send them (real hostels with WhatsApp on only)
+  if (sentThreads) import("./session").then(({ useSession }) => flushWhatsApp(useSession.getState().org)).catch(() => undefined);
   if (pending.size) {
     flushTimer = setTimeout(flush, 3000);
     setSaving("error");

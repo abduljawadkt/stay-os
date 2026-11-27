@@ -15,6 +15,7 @@
     "db:check": "node scripts/db-check.mjs",
     "db:migrate": "node scripts/db-migrate.mjs",
     "payments:check": "node scripts/payments-check.mjs",
+    "whatsapp:check": "node scripts/whatsapp-check.mjs",
     "build:export": "node scripts/build-export.mjs",
     "tutorial:video": "node scripts/tutorial-video.mjs",
     "test:e2e": "node scripts/e2e.mjs"

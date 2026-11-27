@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Copy, Download, MessageCircle, RotateCcw, UserMinus, UserPlus } from "lucide-react";
+import { Copy, Download, MessageCircle, RefreshCw, RotateCcw, UserMinus, UserPlus } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -13,6 +13,9 @@ import { Avatar } from "@/components/common/avatar";
 import { OwnerOnly, useOwnerView } from "@/components/common/owner-only";
 import { Field, FormError } from "@/components/auth/auth-shell";
 import { connectRazorpay, disconnectRazorpay, getConnection, paymentsAvailable, type Connection } from "@/lib/payments";
+import { recentOutbox, setWhatsApp, whatsappSettings, whatsappStatus, type OutboxRow } from "@/lib/whatsapp";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { CycleToggle, PricingTable, type Cycle } from "@/components/marketing/pricing-table";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,7 +31,7 @@ import { brand } from "@/config/brand";
 import { hostel } from "@/data";
 import { cn } from "@/lib/utils";
 
-type Tab = "hostel" | "team" | "payments" | "billing" | "data";
+type Tab = "hostel" | "team" | "payments" | "whatsapp" | "billing" | "data";
 
 export function SettingsScreen() {
   const ownerView = useOwnerView();
@@ -45,13 +48,14 @@ function Settings() {
       <PageHeader title={t("title")} description={t("subtitle", { hostel: hostel.name })} />
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList className="no-scrollbar mb-5 max-w-full justify-start overflow-x-auto">
-          {(["hostel", "team", "payments", "billing", "data"] as const).map((k) => (
+          {(["hostel", "team", "payments", "whatsapp", "billing", "data"] as const).map((k) => (
             <TabsTrigger key={k} value={k}>{t(`tabs.${k}`)}</TabsTrigger>
           ))}
         </TabsList>
         <TabsContent value="hostel"><HostelProfile /></TabsContent>
         <TabsContent value="team"><Team /></TabsContent>
         <TabsContent value="payments"><Payments /></TabsContent>
+        <TabsContent value="whatsapp"><WhatsAppTab /></TabsContent>
         <TabsContent value="billing"><Billing /></TabsContent>
         <TabsContent value="data"><SampleData /></TabsContent>
       </Tabs>
@@ -549,3 +553,122 @@ function SampleData() {
   );
 }
 
+const WA_STATUS: Record<OutboxRow["status"], "neutral" | "brand" | "success" | "warning" | "danger"> = {
+  pending: "neutral", sent: "brand", delivered: "success", read: "success", failed: "danger", dry_run: "warning", skipped: "neutral",
+};
+
+/** WhatsApp from the StayOS number: on or off for this hostel, the 9 AM rent reminders, and what was sent. */
+function WhatsAppTab() {
+  const t = useTranslations("settings.whatsapp");
+  const f = useFormat();
+  const org = useSession((s) => s.org);
+  const residents = useDemo((s) => s.residents);
+  const sample = !org || org.is_demo || org.settings.clock?.mode === "demo";
+  const ws = whatsappSettings(org);
+  const [status, setStatus] = useState<{ available: boolean; configured: boolean } | null>(null);
+  const [log, setLog] = useState<OutboxRow[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const orgId = org?.id;
+
+  useEffect(() => {
+    whatsappStatus().then(setStatus);
+  }, []);
+  const loadLog = useCallback(() => {
+    if (orgId && !sample) recentOutbox(orgId).then(setLog).catch(() => setLog([]));
+  }, [orgId, sample]);
+  useEffect(() => {
+    loadLog();
+  }, [loadLog]);
+
+  const save = async (enabled: boolean, reminders: boolean) => {
+    if (!orgId) return;
+    setBusy(true);
+    try {
+      await setWhatsApp(orgId, enabled, reminders);
+      await refreshOrgRow();
+      toast(enabled !== ws.enabled ? (enabled ? t("turnedOn") : t("turnedOff")) : t("saved"));
+    } catch (e) {
+      toast.error(errorText(e));
+    }
+    setBusy(false);
+  };
+
+  if (sample) {
+    return (
+      <Card>
+        <CardHeader title={t("title")} meta={t("sampleBody")} />
+      </Card>
+    );
+  }
+  const who = (r: OutboxRow) => {
+    const res = residents.find((x) => x.id === r.resident_id);
+    if (!res) return r.role === "parent" ? t("aParent") : t("aResident");
+    return r.role === "parent" ? t("parentOf", { name: res.parent?.name || res.name.split(" ")[0] }) : res.name;
+  };
+  const templateLabel = (name: string) => (t.has(`templates.${name}`) ? t(`templates.${name}`) : name);
+  // the function's own reasons for not sending; Meta's errors are shown as Meta wrote them
+  const reason = (e: string) => (/24 hours/.test(e) ? t("reasons.window") : /no phone/.test(e) ? t("reasons.noPhone") : e);
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader
+          title={t("title")}
+          meta={t("body")}
+          action={status && (
+            <Badge variant={status.configured ? "success" : "warning"}>{status.configured ? t("connected") : t("testMode")}</Badge>
+          )}
+        />
+        {status && !status.configured && <p className="mx-5 mb-4 rounded-lg bg-warning-tint px-3 py-2 text-sm text-warning-fg">{t("testModeBody")}</p>}
+        <div className="divide-y divide-line border-t border-line">
+          <label className="flex items-start gap-4 px-5 py-4">
+            <span className="min-w-0 flex-1">
+              <span className="block text-base font-medium text-fg">{t("send")}</span>
+              <span className="mt-0.5 block text-sm text-fg-2">{t("sendBody")}</span>
+            </span>
+            <Switch size="lg" checked={ws.enabled} disabled={busy} onCheckedChange={(v) => save(v, ws.reminders)} aria-label={t("send")} />
+          </label>
+          <label className={cn("flex items-start gap-4 px-5 py-4", !ws.enabled && "opacity-60")}>
+            <span className="min-w-0 flex-1">
+              <span className="block text-base font-medium text-fg">{t("reminders")}</span>
+              <span className="mt-0.5 block text-sm text-fg-2">{t("remindersBody")}</span>
+            </span>
+            <Switch size="lg" checked={ws.enabled && ws.reminders} disabled={busy || !ws.enabled} onCheckedChange={(v) => save(true, v)} aria-label={t("reminders")} />
+          </label>
+        </div>
+        <p className="border-t border-line px-5 py-3 text-small text-fg-3">{t("consent")}</p>
+      </Card>
+
+      {ws.enabled && (
+        <Card>
+          <CardHeader
+            title={t("logTitle")}
+            meta={t("logBody")}
+            action={<Button variant="quiet" size="icon" aria-label={t("refresh")} onClick={loadLog}><RefreshCw /></Button>}
+          />
+          {log === null ? (
+            <p className="px-5 pb-5 text-sm text-fg-3">{t("loading")}</p>
+          ) : log.length === 0 ? (
+            <p className="mx-5 mb-5 rounded-lg border border-dashed border-line-input p-4 text-center text-sm text-fg-2">{t("logEmpty")}</p>
+          ) : (
+            <ul className="divide-y divide-line border-t border-line">
+              {log.map((r) => (
+                <li key={r.id} className="flex items-start gap-3 px-5 py-3">
+                  <MessageCircle className="mt-0.5 size-4 shrink-0 text-fg-3" aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-fg">{templateLabel(r.template)} · {who(r)}</p>
+                    <p className="text-small text-fg-3">
+                      {f.date(r.created_at)}, {f.time(r.created_at)}{r.to_phone ? ` · •••• ${r.to_phone.slice(-4)}` : ""}
+                    </p>
+                    {r.error && <p className={cn("mt-0.5 text-small", r.status === "failed" ? "text-danger-fg" : "text-fg-3")}>{reason(r.error)}</p>}
+                  </div>
+                  <Badge variant={WA_STATUS[r.status]}>{t(`status.${r.status}`)}</Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      )}
+    </div>
+  );
+}

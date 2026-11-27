@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Building2, CalendarPlus, CheckCircle2, LogOut, Mail, Phone, RefreshCw, ShieldCheck, Users, XCircle } from "lucide-react";
+import { Building2, CalendarPlus, CheckCircle2, Copy, LogOut, Mail, MessageCircle, Phone, RefreshCw, ShieldCheck, Users, XCircle } from "lucide-react";
 import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { boot, checkPlatformAdmin, signOut, useSession } from "@/lib/session";
 import { neon, errorText } from "@/lib/neon";
+import { whatsappSetup, type WhatsAppSetup } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 
 /** One hostel as public.admin_hostels() returns it. */
@@ -109,6 +110,7 @@ export default function AdminPage() {
         </div>
 
         {error && <p className="mt-4 text-sm text-danger-fg" role="alert">{error}</p>}
+        {filter === "requests" && <WhatsAppCard />}
         {hostels === null && !error ? (
           <p className="mt-8 text-sm text-fg-3">Loading hostels…</p>
         ) : shown.length === 0 ? (
@@ -192,5 +194,71 @@ function HostelCard({ h, onChanged }: { h: Hostel; onChanged: () => void }) {
         </AlertDialogContent>
       </AlertDialog>
     </li>
+  );
+}
+
+/** The one StayOS WhatsApp number: whether its keys are set, and what to paste into Meta. See docs/whatsapp-setup.md. */
+function WhatsAppCard() {
+  const [setup, setSetup] = useState<WhatsAppSetup | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    whatsappSetup().then(setSetup).catch((e) => setErr(errorText(e)));
+  }, []);
+  const copy = (v: string) => {
+    navigator.clipboard?.writeText(v);
+    toast("Copied");
+  };
+  if (err) return <p className="mt-4 rounded-xl border border-line bg-surface p-4 text-sm text-fg-2">WhatsApp: {err}</p>;
+  if (!setup) return null;
+  const keys: [string, boolean][] = [["WA_TOKEN", setup.tokenSet], ["WA_PHONE_ID", setup.phoneIdSet], ["WA_APP_SECRET", setup.appSecretSet]];
+  return (
+    <section className="mt-5 rounded-2xl border border-line bg-surface p-4 sm:p-5" aria-labelledby="wa-setup">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-tint text-brand-tint-fg"><MessageCircle className="size-5" aria-hidden /></span>
+        <div className="min-w-0 flex-1">
+          <h2 id="wa-setup" className="text-[17px] font-semibold text-fg">StayOS WhatsApp number</h2>
+          <p className="text-sm text-fg-2">{setup.configured ? "Connected. Hostels that switch WhatsApp on send from this number." : "Not connected: messages are recorded as test mode and not sent."}</p>
+        </div>
+        <Badge variant={setup.configured ? "success" : "warning"}>{setup.configured ? "Connected" : "Test mode"}</Badge>
+        <Button variant="secondary" onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Hide setup" : "Setup details"}</Button>
+      </div>
+      {open && (
+        <div className="mt-4 space-y-4 border-t border-line pt-4 text-sm text-fg-2">
+          <div>
+            <p className="font-medium text-fg">1. Keys on the &ldquo;whatsapp&rdquo; Neon Function (Neon Console → Functions → whatsapp → Environment)</p>
+            <ul className="mt-1.5 flex flex-wrap gap-2">
+              {keys.map(([k, ok]) => <li key={k}><Badge variant={ok ? "success" : "danger"}>{k}: {ok ? "set" : "missing"}</Badge></li>)}
+              <li><Badge variant="neutral">WA_LANG: {setup.language}</Badge></li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-medium text-fg">2. Webhook (Meta App → WhatsApp → Configuration)</p>
+            <div className="mt-1.5 grid gap-2">
+              <CopyRow label="Callback URL" value={setup.webhookUrl} onCopy={copy} />
+              {setup.verifyToken && <CopyRow label="Verify token" value={setup.verifyToken} onCopy={copy} secret />}
+            </div>
+            <p className="mt-1.5 text-fg-3">Subscribe to the &ldquo;messages&rdquo; field.</p>
+          </div>
+          <div>
+            <p className="font-medium text-fg">3. Message templates to create in WhatsApp Manager ({setup.templates.length})</p>
+            <p className="mt-1.5 font-mono text-small leading-6 break-words text-fg-2">{setup.templates.join(" · ")}</p>
+            <p className="mt-1.5 text-fg-3">The exact wording of each is in docs/whatsapp-setup.md.</p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CopyRow({ label, value, onCopy, secret }: { label: string; value: string; onCopy: (v: string) => void; secret?: boolean }) {
+  const [show, setShow] = useState(!secret);
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2">
+      <span className="w-24 shrink-0 text-small text-fg-3">{label}</span>
+      <code className="min-w-0 flex-1 truncate font-mono text-small text-fg">{show ? value : "•".repeat(16)}</code>
+      {secret && <Button variant="quiet" size="sm" onClick={() => setShow((s) => !s)}>{show ? "Hide" : "Show"}</Button>}
+      <Button variant="quiet" size="icon" aria-label={`Copy ${label}`} onClick={() => onCopy(value)}><Copy /></Button>
+    </div>
   );
 }

@@ -14,6 +14,8 @@ import { todayISO } from "@/lib/clock";
 import { hostel, type WAThread } from "@/data";
 import { Bubble } from "./bubble";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/session";
+import { whatsappSettings } from "@/lib/whatsapp";
 
 type Filter = "all" | "unread" | "parents";
 
@@ -147,7 +149,13 @@ function Conversation({ id, onBack, onClose }: { id: string; onBack: () => void;
   const payInvoice = useDemo((s) => s.payInvoice);
   const decideLeave = useDemo((s) => s.decideLeave);
   const [text, setText] = useState("");
-  const [asContact, setAsContact] = useState(true);
+  // A real hostel: the people in these chats are real, so staff write only as the hostel and can't tap a
+  // resident's or parent's buttons for them. Sample hostels keep the simulator (type as the contact).
+  const org = useSession((s) => s.org);
+  const live = !!org && !org.is_demo && org.settings.clock?.mode !== "demo";
+  const waOn = whatsappSettings(org).enabled;
+  const [asContactPick, setAsContact] = useState(true);
+  const asContact = !live && asContactPick;
   const [typing, setTyping] = useState(false);
   const [paying, setPaying] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -175,6 +183,7 @@ function Conversation({ id, onBack, onClose }: { id: string; onBack: () => void;
   const onButton = (msgId: string, action: string | undefined, label: string) => {
     const m = thread.messages.find((x) => x.id === msgId);
     if (!m) return;
+    if (live) return toast(t("liveButton", { name: contactFirst }));
     if (!action) return send(label, true);
     if (action === "invoice" || action === "receipt") return toast(t("linkOpened", { link: payLink(String(m.data?.invoiceId ?? "")), name: contactFirst }));
     if (action === "app") return toast(t("appOpened", { name: contactFirst }));
@@ -245,6 +254,9 @@ function Conversation({ id, onBack, onClose }: { id: string; onBack: () => void;
         )}
       </div>
       <div className="border-t border-[var(--wa-divider)] bg-[var(--wa-header)] px-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
+        {live ? (
+          <p className="mb-2 px-1 text-[11.5px] text-[var(--wa-meta)]">{waOn ? t("liveHint", { name: contactFirst }) : t("liveOff")}</p>
+        ) : (
         <div className="mb-2 flex items-center gap-2 px-1">
           <div className="flex shrink-0 rounded-full bg-[var(--wa-in)] p-0.5 text-[12px]" role="radiogroup" aria-label={t("sendAs")}>
             <button role="radio" aria-checked={asContact} onClick={() => setAsContact(true)} className={cn("h-7 rounded-full px-2.5 font-medium whitespace-nowrap", asContact ? "bg-[var(--wa-green)] text-white" : "text-[var(--wa-meta)]")}>{t("as", { name: contactFirst })}</button>
@@ -252,6 +264,7 @@ function Conversation({ id, onBack, onClose }: { id: string; onBack: () => void;
           </div>
           <span className="truncate text-[11.5px] text-[var(--wa-meta)]">{asContact ? t("asHint") : t("asHostelHint")}</span>
         </div>
+        )}
         {asContact && (
           <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto px-1">
             {QUICK[thread.role].map((k) => (

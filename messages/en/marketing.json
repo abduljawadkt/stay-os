@@ -190,7 +190,8 @@
       "team": "Team & invites",
       "billing": "Plan & billing",
       "data": "Sample data",
-      "payments": "Payments"
+      "payments": "Payments",
+      "whatsapp": "WhatsApp"
     },
     "hostel": {
       "title": "Hostel profile",
@@ -311,6 +312,58 @@
       "webhookHint": "Set it up separately in test and live mode: each mode has its own webhooks in Razorpay.",
       "loading": "Checking the connection…",
       "unavailable": "Online payments aren't set up on this site."
+    },
+    "whatsapp": {
+      "title": "WhatsApp",
+      "body": "Messages go to residents and parents from the StayOS WhatsApp number, with your hostel's name in every message. Replies come back to WhatsApp in StayOS.",
+      "connected": "Connected",
+      "testMode": "Test mode",
+      "testModeBody": "The StayOS WhatsApp number isn't connected yet. Messages are recorded below as \"Test mode\" but not sent.",
+      "send": "Send WhatsApp messages",
+      "sendBody": "Welcome messages, rent bills and receipts, complaint updates, leave approvals for parents and gate in/out alerts.",
+      "reminders": "Rent reminders at 9 AM",
+      "remindersBody": "On the due date, then 1, 4, 7, 14, 21 and 30 days late, to anyone whose rent is still unpaid.",
+      "consent": "Switch this on only if residents and parents agreed to get WhatsApp messages from the hostel, for example in the admission form. Messages go only to the phone numbers saved for each resident and parent.",
+      "turnedOn": "WhatsApp is on",
+      "turnedOff": "WhatsApp is off",
+      "saved": "Saved",
+      "sampleBody": "This is a sample hostel, so WhatsApp messages stay inside StayOS. In your real hostel they go from the StayOS WhatsApp number.",
+      "logTitle": "Sent messages",
+      "logBody": "The last 25 messages and whether they arrived.",
+      "logEmpty": "Nothing sent yet. Messages appear here as StayOS sends them.",
+      "refresh": "Refresh",
+      "loading": "Loading…",
+      "aParent": "A parent",
+      "aResident": "A resident",
+      "parentOf": "{name} (parent)",
+      "status": {
+        "pending": "Sending",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "dry_run": "Test mode",
+        "skipped": "Not sent"
+      },
+      "templates": {
+        "stayos_welcome": "Welcome",
+        "stayos_welcome_parent": "Welcome",
+        "stayos_rent_invoice": "Rent bill",
+        "stayos_rent_due": "Rent due today",
+        "stayos_rent_overdue": "Rent overdue",
+        "stayos_payment_receipt": "Payment receipt",
+        "stayos_complaint_received": "Complaint received",
+        "stayos_complaint_update": "Complaint update",
+        "stayos_complaint_resolved": "Complaint resolved",
+        "stayos_leave_request": "Leave request",
+        "stayos_leave_decision": "Leave decision",
+        "stayos_gate_update": "Gate in/out",
+        "text": "Reply"
+      },
+      "reasons": {
+        "window": "They haven't written in the last 24 hours, so WhatsApp only allows ready-made template messages.",
+        "noPhone": "No mobile number saved."
+      }
     }
   }
 }

@@ -18,7 +18,8 @@ const when = (v: string | number | undefined, lang: "en" | "ml") => {
   return `${fmtWeekday(v, lang)}, ${fmtTime(v, lang)}`;
 };
 const amt = (v: string | number | undefined) => inr(Number(v ?? 0));
-const FOOTER = `${hostel.name} · Calicut`;
+// read when each message is written: `hostel` is the hostel that is open now
+const footer = () => [hostel.name, hostel.city].filter(Boolean).join(" · ");
 
 export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Rendered {
   const ml = lang === "ml";
@@ -29,7 +30,7 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `നമസ്കാരം ${d.name}, ${d.month}-ലെ ബില്ല് തയ്യാറാണ്.\n\nതുക: ${amt(d.amount)}\nഅവസാന തീയതി: ${d.due}\nബില്ല്: ${d.invoiceId}\n\nഏത് UPI ആപ്പ് വഴിയും ഉടൻ അടയ്ക്കാം 👇`
           : `Hi ${d.name}, your ${d.month} invoice is ready.\n\nAmount: ${amt(d.amount)}\nDue by: ${d.due}\nInvoice: ${d.invoiceId}\n\nPay in seconds with any UPI app 👇\n${payLink(String(d.invoiceId))}`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: ml ? `${amt(d.amount)} അടയ്ക്കുക` : `Pay ${amt(d.amount)}`, kind: "url", action: "pay" }, { label: ml ? "ബില്ല് കാണുക" : "View invoice", kind: "url", action: "invoice" }],
       };
     case "reminder_due":
@@ -37,7 +38,7 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `നമസ്കാരം ${d.name}, ${amt(d.amount)} (${d.invoiceId}) അടയ്ക്കേണ്ട ദിവസമാണ് ഇന്ന്. ഒരു മിനിറ്റിൽ UPI വഴി അടയ്ക്കാം.`
           : `Hi ${d.name}, a gentle reminder that ${amt(d.amount)} (${d.invoiceId}) is due today. Tap below to pay by UPI in under a minute.\n${payLink(String(d.invoiceId))}`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: ml ? `${amt(d.amount)} അടയ്ക്കുക` : `Pay ${amt(d.amount)}`, kind: "url", action: "pay" }],
       };
     case "reminder_overdue":
@@ -45,7 +46,7 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `നമസ്കാരം ${d.name}, ${amt(d.amount)} വാടക ${d.days} ദിവസമായി കുടിശ്ശികയാണ്. ഇന്ന് തന്നെ അടയ്ക്കാൻ ശ്രമിക്കുക. ഇതിനകം അടച്ചെങ്കിൽ PAID എന്ന് മറുപടി നൽകുക.`
           : `Hi ${d.name}, your rent of ${amt(d.amount)} is overdue by ${d.days} days. Please pay today. Already paid? Reply PAID and we'll check.\n${payLink(String(d.invoiceId))}`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: ml ? `${amt(d.amount)} അടയ്ക്കുക` : `Pay ${amt(d.amount)}`, kind: "url", action: "pay" }, { label: ml ? "വാർഡനുമായി സംസാരിക്കുക" : "Talk to the warden", kind: "reply" }],
       };
     case "receipt":
@@ -54,7 +55,7 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `${d.child ? `${d.child}-ന്റെ ` : ""}${d.month} മാസത്തെ ${amt(d.amount)} ലഭിച്ചു (${d.invoiceId}).\nUPI റഫറൻസ്: ${d.utr}\n\nനന്ദി!`
           : `Received ${amt(d.amount)} for ${d.month} (${d.invoiceId}).\nUPI ref: ${d.utr}\n\nThank you! Your receipt is below.`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: ml ? "രസീത് ഡൗൺലോഡ്" : "Download receipt", kind: "url", action: "receipt" }],
       };
     case "complaint_ack":
@@ -62,14 +63,14 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `പരാതി ${d.id} രേഖപ്പെടുത്തി ✅\nവിഭാഗം: ${d.category}\nമുറി: ${d.room}\n${d.sla}-നുള്ളിൽ പരിഹരിക്കും. വിവരങ്ങൾ ഇവിടെ ലഭിക്കും.`
           : `Complaint ${d.id} registered ✅\nCategory: ${d.category}\nRoom: ${d.room}\nWe'll fix it within ${d.sla}. You'll get updates right here.`,
-        footer: FOOTER,
+        footer: footer(),
       };
     case "complaint_update":
-      return { body: ml ? `${d.id}: ${d.by} “${d.title}” ശരിയാക്കാൻ വരുന്നു 🔧` : `Update on ${d.id}: ${d.by} is on the way to fix “${d.title}” 🔧`, footer: FOOTER };
+      return { body: ml ? `${d.id}: ${d.by} “${d.title}” ശരിയാക്കാൻ വരുന്നു 🔧` : `Update on ${d.id}: ${d.by} is on the way to fix “${d.title}” 🔧`, footer: footer() };
     case "complaint_resolved":
       return {
         body: ml ? `${d.id} പരിഹരിച്ചു ✅ (${d.by}).\nഞങ്ങളുടെ സേവനം എങ്ങനെയുണ്ടായിരുന്നു? 1–5 എന്ന് മറുപടി നൽകുക.` : `${d.id} is resolved ✅ (${d.by}).\nHow did we do? Reply with 1 to 5.`,
-        footer: FOOTER,
+        footer: footer(),
       };
     case "leave_request":
       return {
@@ -77,31 +78,31 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
         body: ml
           ? `${d.child} ലീവിന് അപേക്ഷിച്ചിട്ടുണ്ട്.\n\nപുറപ്പെടുന്നത്: ${when(d.from, "ml")}\nതിരികെ: ${when(d.to, "ml")}\nപോകുന്നത്: ${d.destination}\nകാരണം: ${d.reason}\n\nഅംഗീകരിക്കാൻ 1, നിരസിക്കാൻ 2 എന്ന് മറുപടി നൽകുക.`
           : `${d.child} has asked for leave.\n\nLeaving: ${when(d.from, "en")}\nBack: ${when(d.to, "en")}\nGoing to: ${d.destination}\nReason: ${d.reason}\n\nReply 1 to approve or 2 to reject.`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: ml ? "അംഗീകരിക്കുക" : "Approve", kind: "reply", action: "approve" }, { label: ml ? "നിരസിക്കുക" : "Reject", kind: "reply", action: "reject" }],
       };
     case "leave_decision": {
       const ok = d.decision === "approved";
       if (d.resident)
-        return { body: ok ? "Your parent approved your leave ✅ Your gate pass QR is ready in the app. Show it at the gate." : "Your parent did not approve this leave request. Talk to them or the warden if plans change.", footer: FOOTER };
-      return { body: ml ? (ok ? "നന്ദി. ലീവ് അംഗീകരിച്ചു ✅ വാർഡനെ അറിയിച്ചിട്ടുണ്ട്. പുറപ്പെടുമ്പോഴും തിരികെ എത്തുമ്പോഴും സന്ദേശം ലഭിക്കും." : "നന്ദി. ലീവ് നിരസിച്ചു. വാർഡനെ അറിയിച്ചിട്ടുണ്ട്.") : ok ? "Thank you. The leave is approved ✅ The warden is informed. You'll get a message when they leave and when they're back." : "Thank you. The leave is rejected. The warden is informed.", footer: FOOTER };
+        return { body: ok ? "Your parent approved your leave ✅ Your gate pass QR is ready in the app. Show it at the gate." : "Your parent did not approve this leave request. Talk to them or the warden if plans change.", footer: footer() };
+      return { body: ml ? (ok ? "നന്ദി. ലീവ് അംഗീകരിച്ചു ✅ വാർഡനെ അറിയിച്ചിട്ടുണ്ട്. പുറപ്പെടുമ്പോഴും തിരികെ എത്തുമ്പോഴും സന്ദേശം ലഭിക്കും." : "നന്ദി. ലീവ് നിരസിച്ചു. വാർഡനെ അറിയിച്ചിട്ടുണ്ട്.") : ok ? "Thank you. The leave is approved ✅ The warden is informed. You'll get a message when they leave and when they're back." : "Thank you. The leave is rejected. The warden is informed.", footer: footer() };
     }
     case "gate_in":
-      return { body: ml ? `${d.child} ${d.time}-ന് ഹോസ്റ്റലിൽ തിരികെ എത്തി ✅` : `${d.child} entered the hostel at ${d.time} ✅`, footer: FOOTER };
+      return { body: ml ? `${d.child} ${d.time}-ന് ഹോസ്റ്റലിൽ തിരികെ എത്തി ✅` : `${d.child} entered the hostel at ${d.time} ✅`, footer: footer() };
     case "gate_out":
-      return { body: ml ? `${d.child} ${d.time}-ന് ഹോസ്റ്റലിൽ നിന്ന് പുറത്ത് പോയി.` : `${d.child} left the hostel at ${d.time}.`, footer: FOOTER };
+      return { body: ml ? `${d.child} ${d.time}-ന് ഹോസ്റ്റലിൽ നിന്ന് പുറത്ത് പോയി.` : `${d.child} left the hostel at ${d.time}.`, footer: footer() };
     case "late_entry":
-      return { body: ml ? `${d.child} ഇന്നലെ ${d.time}-നാണ് എത്തിയത്, ${d.curfew} കർഫ്യൂവിന് ശേഷം.` : `${d.child} came in at ${d.time}, after the ${d.curfew} curfew.`, footer: FOOTER };
+      return { body: ml ? `${d.child} ഇന്നലെ ${d.time}-നാണ് എത്തിയത്, ${d.curfew} കർഫ്യൂവിന് ശേഷം.` : `${d.child} came in at ${d.time}, after the ${d.curfew} curfew.`, footer: footer() };
     case "weekly_summary":
       return {
         header: ml ? "ആഴ്ചയിലെ വിവരം" : "This week",
         body: ml
           ? `${d.child}-ന്റെ ഈ ആഴ്ച:\n✅ 7-ൽ ${d.present} രാത്രി ഹോസ്റ്റലിൽ\n🕙 വൈകിയുള്ള പ്രവേശനം: ${d.late}\n🍛 ${d.meals} ഭക്ഷണം കഴിച്ചു`
           : `This week for ${d.child}:\n✅ ${d.present} of 7 nights at the hostel\n🕙 Late entries: ${d.late}\n🍛 ${d.meals} meals taken`,
-        footer: FOOTER,
+        footer: footer(),
       };
     case "optout_ack":
-      return { body: ml ? `ശരി ✅ ${d.date}-ലെ ${d.meal} ഒഴിവാക്കി. അടുക്കളയിലെ എണ്ണം പുതുക്കി.` : `Done ✅ ${String(d.meal).replace(/^./, (c) => c.toUpperCase())} on ${d.date} is skipped. The kitchen headcount is updated.`, footer: FOOTER };
+      return { body: ml ? `ശരി ✅ ${d.date}-ലെ ${d.meal} ഒഴിവാക്കി. അടുക്കളയിലെ എണ്ണം പുതുക്കി.` : `Done ✅ ${String(d.meal).replace(/^./, (c) => c.toUpperCase())} on ${d.date} is skipped. The kitchen headcount is updated.`, footer: footer() };
     case "welcome":
       if (d.parent)
         return {
@@ -109,12 +110,12 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
           body: ml
             ? `${d.name} ${hostel.name}-ൽ ചെക്ക്-ഇൻ ചെയ്തു (കിടക്ക ${d.bed}).\n\nഫീസ്, വരവ്/പോക്ക്, ലീവ് അപേക്ഷകൾ എല്ലാം ഈ നമ്പറിൽ വാട്സ്ആപ്പിൽ ലഭിക്കും.`
             : `${d.name} has checked in to ${hostel.name} (bed ${d.bed}).\n\nFees, in/out alerts and leave approvals will all come to you here on WhatsApp.`,
-          footer: FOOTER,
+          footer: footer(),
         };
       return {
         header: `Welcome to ${hostel.name} 🏡`,
         body: `Hi ${d.name}! Your bed is ${d.bed}.\n\nFirst invoice: ${amt(d.amount)} (${d.invoiceId})${clockMode() === "demo" ? `\nWi-Fi: AlNoor-${String(d.bed)[0]} · password on your room card` : ""}\nGate closes at ${String(d.bed).startsWith("C") ? "9:30 PM" : "10 PM"}\n\nSave this number. Rent, mess, complaints and gate passes all work right here on WhatsApp.`,
-        footer: FOOTER,
+        footer: footer(),
         buttons: [{ label: `Pay ${amt(d.amount)}`, kind: "url", action: "pay" }, { label: "Open the app", kind: "url", action: "app" }],
       };
   }

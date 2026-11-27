@@ -59,6 +59,20 @@ StayOS never holds money.
 - Redeploy the function after changing it: `neon functions deploy payments --src functions/payments/index.mjs --no-bundle`
   (environment: `NEON_AUTH_URL`, `APP_URL`, `ALLOWED_ORIGINS`; `DATABASE_URL` is injected by Neon).
 
+## WhatsApp (one StayOS number)
+
+All hostels send from one StayOS WhatsApp number through Meta's WhatsApp Cloud API. Owners switch it on in
+**Settings → WhatsApp** (with 9 AM rent reminders on or off) and see what was sent and delivered there.
+
+- `functions/whatsapp/index.mjs` is a Neon Function: the app calls `/flush` after saving messages, a schedule calls
+  `/cron/daily` at 9 AM IST for rent reminders, and Meta calls `/webhook` with delivery status, replies and the parent's
+  Approve/Reject on leave requests. Phone numbers always come from the `residents` table, and sample hostels never send.
+- Without Meta keys it runs in test mode (records messages, sends nothing). `npm run whatsapp:check` tests it all with Meta faked. Connecting the number, the webhook and the
+  12 message templates: [docs/whatsapp-setup.md](docs/whatsapp-setup.md). `/admin` shows what is configured.
+- Redeploy: `neon functions deploy whatsapp --src functions/whatsapp/index.mjs --no-bundle`
+  (environment: `NEON_AUTH_URL`, `APP_URL`, `ALLOWED_ORIGINS`, `WA_VERIFY_TOKEN`, `WA_LANG`, and from Meta `WA_TOKEN`,
+  `WA_PHONE_ID`, `WA_APP_SECRET`).
+
 ## Database changes
 
 Schema changes after the first setup live in `db/migrations/` and are applied with `npm run db:migrate -- <file>`.
@@ -70,6 +84,7 @@ cache (Neon Console → Data API).
 ```bash
 npm run db:check                              # who may see and change what (row-level security), with demo accounts
 npm run payments:check                        # the payments function, with Razorpay faked
+npm run whatsapp:check                        # the WhatsApp function, with Meta faked (temporary hostel, cleaned up)
 npm run test:e2e -- sweep                     # every screen, every role: iPhone, Android, desktop Chrome and Safari, EN and ML
 npm run test:e2e -- flows                     # the main jobs across roles on the live demo (complaint, gate pass, rent…)
 npm run test:e2e -- flows --only="gate|rent"  # some of them
