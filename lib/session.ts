@@ -270,12 +270,17 @@ export function openOrg(orgId: string, opts: { force?: boolean } = {}): Promise<
       } catch {}
       startSync(orgId);
     } catch (e) {
+      // leaving the page cuts the request off; that isn't a failure worth reporting
+      if (leavingPage) return;
       console.error("[openOrg]", e);
       if (get().orgId === orgId) set({ orgStatus: "error", orgError: errorText(e) });
     }
   })();
   return loadingOrg;
 }
+
+let leavingPage = false;
+if (typeof window !== "undefined") window.addEventListener("pagehide", () => { leavingPage = true; });
 
 export async function createOrg(input: { name: string; city: string; sample: boolean; blocks?: number; floors?: number }) {
   const { data, error } = await neon().rpc("create_org", {

@@ -33,7 +33,7 @@
    "triple": "Triple",
    "six": "6-bed"
   },
-  "fallback": "I can answer questions about rent, rooms, mess, complaints, gate passes and expenses. Try one of these:",
+  "ownerOnly": "Only the hostel owner can see money questions like profit and bills. Ask me about rooms, rent dues, meals, complaints or leave.", "fallback": "I can answer questions about rent, rooms, mess, complaints, gate passes and expenses. Try one of these:",
   "thinking": {
    "dues": "Checking this month's invoices…",
    "vacant": "Looking at the floor plan…",

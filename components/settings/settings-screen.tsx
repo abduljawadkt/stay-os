@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { Avatar } from "@/components/common/avatar";
-import { OwnerOnly } from "@/components/common/owner-only";
+import { OwnerOnly, useOwnerView } from "@/components/common/owner-only";
 import { Field, FormError } from "@/components/auth/auth-shell";
 import { connectRazorpay, disconnectRazorpay, getConnection, paymentsAvailable, type Connection } from "@/lib/payments";
 import { CycleToggle, PricingTable, type Cycle } from "@/components/marketing/pricing-table";
@@ -31,8 +31,8 @@ import { cn } from "@/lib/utils";
 type Tab = "hostel" | "team" | "payments" | "billing" | "data";
 
 export function SettingsScreen() {
-  const role = useSession((s) => s.membership?.role);
-  if (role !== "owner") return <OwnerOnly />;
+  const ownerView = useOwnerView();
+  if (!ownerView) return <OwnerOnly />;
   return <Settings />;
 }
 

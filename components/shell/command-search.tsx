@@ -11,6 +11,7 @@ import { rooms } from "@/data";
 import { NAV } from "./nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useOwnerView } from "@/components/common/owner-only";
 
 export function CommandSearch({ className, compact = false }: { className?: string; compact?: boolean }) {
   const t = useTranslations("shell");
@@ -20,7 +21,7 @@ export function CommandSearch({ className, compact = false }: { className?: stri
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const residents = useDemo((s) => s.residents);
-  const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -94,7 +95,7 @@ export function CommandSearch({ className, compact = false }: { className?: stri
           )}
           <CommandGroup heading={t("pages")}>
             {NAV.flatMap((g) => g.items)
-              .filter((i) => role === "owner" || !i.ownerOnly)
+              .filter((i) => ownerView || !i.ownerOnly)
               .map((i) => (
                 <CommandItem key={i.key} value={`page ${tn(i.key)}`} onSelect={() => go(i.href)}>
                   <i.icon />

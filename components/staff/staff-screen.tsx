@@ -19,6 +19,7 @@ import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { staff as staffList, type AttendanceMark } from "@/data";
 import { cn } from "@/lib/utils";
+import { useOwnerView } from "@/components/common/owner-only";
 
 const MARK_STYLE: Record<AttendanceMark, string> = {
   P: "bg-brand", late: "bg-warning", H: "bg-brand/50", L: "bg-line-input", A: "bg-danger",
@@ -31,12 +32,12 @@ export function StaffScreen() {
   const tk = useTranslations("staff.mark");
   const f = useFormat();
   const { loading, error, retry } = useScreenState("staff");
-  const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
   const att = useDemo((s) => s.staffAttendance);
   const setAttendance = useDemo((s) => s.setAttendance);
   const [payOpen, setPayOpen] = useState(false);
   const today = todayISO();
-  const owner = role !== "warden";
+  const owner = ownerView;
   const rows = useMemo(() => staffList.map((s) => ({ s, a: att[s.id] ?? {}, m: staffMonth(s, att[s.id] ?? {}, today) })), [att, today]);
   const todayCounts = rows.reduce((acc, r) => { const k = r.a[today] ?? "P"; acc[k] = (acc[k] ?? 0) + 1; return acc; }, {} as Record<string, number>);
   const present = (todayCounts.P ?? 0) + (todayCounts.late ?? 0) + (todayCounts.H ?? 0);

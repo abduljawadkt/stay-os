@@ -6,7 +6,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { Download, FileText, Loader2, Paperclip, Plus, ReceiptText, ScanLine, Upload, CalendarClock } from "lucide-react";
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { EmptyState, ErrorState, Sk, TableSkeleton } from "@/components/common/states";
-import { OwnerOnly } from "@/components/common/owner-only";
+import { OwnerOnly, useOwnerView } from "@/components/common/owner-only";
 import { ChartTooltip, LegendItem, axisProps } from "@/components/dashboard/chart-bits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 const COLOR: Record<ExpenseCategory, string> = { food: "var(--chart-1)", electricity: "var(--chart-2)", water: "var(--chart-3)", salaries: "var(--chart-4)", maintenance: "var(--chart-5)", internet: "var(--chart-6)" };
 
 export function ExpensesScreen() {
-  const role = useDemo((s) => s.role);
-  if (role === "warden") return <OwnerOnly />;
+  const ownerView = useOwnerView();
+  if (!ownerView) return <OwnerOnly />;
   return <Expenses />;
 }
 

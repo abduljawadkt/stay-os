@@ -26,6 +26,7 @@ import { TABS } from "./mobile-nav";
 import { useRoleNavigation, useViews } from "./role-switcher";
 import { useSampleHostel } from "./demo-menu";
 import { cn } from "@/lib/utils";
+import { useOwnerView } from "@/components/common/owner-only";
 
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "H";
 
@@ -39,6 +40,7 @@ export function MoreScreen() {
   const tp = useTranslations("marketing.pricing.plans");
   const router = useRouter();
   const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
   const occupied = useDemo((s) => s.beds.filter((b) => b.status === "occupied").length);
   const residents = useDemo((s) => s.residents.filter((r) => r.status !== "checked_out").length);
   const offline = useDemo((s) => s.offline);
@@ -66,7 +68,7 @@ export function MoreScreen() {
   const [resetting, setResetting] = useState(false);
 
   const tabKeys = new Set<string>(TABS.map((x) => x.key));
-  const screens = NAV.flatMap((g) => g.items).filter((i) => !tabKeys.has(i.key) && (role !== "warden" || !i.ownerOnly) && (i.key !== "settings" || owner));
+  const screens = NAV.flatMap((g) => g.items).filter((i) => !tabKeys.has(i.key) && (ownerView || !i.ownerOnly) && (i.key !== "settings" || owner));
   const trialDays = org?.trial_ends_at ? Math.max(0, Math.ceil((new Date(org.trial_ends_at).getTime() - Date.now()) / 86400000)) : 0;
   const plan = org ? tp(`${planById(org.plan).id}.name`) : "";
 

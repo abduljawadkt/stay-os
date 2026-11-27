@@ -400,14 +400,23 @@ end $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['expenses','staff','activity']
+  foreach t in array array['staff','activity']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format('create policy %I_staff on public.%I for all to authenticated using (app.is_staff(org_id)) with check (app.is_staff(org_id))', t, t);
   end loop;
 end $$;
 
-create policy activity_member_insert on public.activity for insert to authenticated with check (app.is_member(org_id));
+-- residents and parents: activity about their own resident (the staff feed shows it live)
+create policy activity_family_read on public.activity for select to authenticated using ((data ->> 'residentId') = app.my_resident(org_id));
+create policy activity_family_insert on public.activity for insert to authenticated with check ((data ->> 'residentId') = app.my_resident(org_id));
+create policy activity_family_update on public.activity for update to authenticated
+  using ((data ->> 'residentId') = app.my_resident(org_id)) with check ((data ->> 'residentId') = app.my_resident(org_id));
+
+-- owner only: the hostel's spending
+alter table public.expenses enable row level security;
+create policy expenses_owner on public.expenses for all to authenticated using (app.is_owner(org_id)) with check (app.is_owner(org_id));
+
 
 -- residents and parents see their own rows (and residents see roommates); staff see everything
 alter table public.residents enable row level security;

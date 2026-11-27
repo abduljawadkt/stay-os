@@ -25,6 +25,8 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let polling = false;
 const pending = new Map<string, { coll: Coll | "staff"; id: string }>();
+/** How many times a row was refused in a way that may be the sign-in timing window (see flush). */
+const refusals = new Map<string, number>();
 const inflight = new Set<string>();
 
 const key = (coll: string, id: string) => `${coll}:${id}`;
@@ -220,9 +222,17 @@ async function flush() {
           const code = (error as { code?: string }).code ?? "";
           console.warn(`[sync] ${table}: ${errorText(error)}`);
           const ids = rows.slice(i, i + 500).map((r) => r.id as string);
-          // network trouble or an expired token: try again. A refusal (security rule, check) will not change.
-          if (!code || code.startsWith("PGRST3")) for (const rid of ids) pending.set(key(coll, rid), { coll, id: rid });
+          // Network trouble or an expired token: try again. Right after sign-in the database can also briefly not know
+          // who is asking, which looks like a refusal ("row-level security", auth_not_ready): try that twice more.
+          // A real refusal (security rule, check) will not change, so after that the row is put back.
+          const maybeIdentity = code === "42501" || /auth_not_ready/.test(errorText(error));
+          const retry = !code || code.startsWith("PGRST3") || (maybeIdentity && ids.every((rid) => (refusals.get(key(coll, rid)) ?? 0) < 2));
+          if (retry) for (const rid of ids) {
+            if (maybeIdentity) refusals.set(key(coll, rid), (refusals.get(key(coll, rid)) ?? 0) + 1);
+            pending.set(key(coll, rid), { coll, id: rid });
+          }
           else if (coll !== "staff") {
+            for (const rid of ids) refusals.delete(key(coll, rid));
             toast.error("That change wasn't allowed", { description: errorText(error) });
             await restoreRows(coll, ids);
           }
@@ -230,7 +240,10 @@ async function flush() {
       }
     })
   );
-  for (const { coll, id: itemId } of batch) inflight.delete(key(coll, itemId));
+  for (const { coll, id: itemId } of batch) {
+    inflight.delete(key(coll, itemId));
+    if (!pending.has(key(coll, itemId))) refusals.delete(key(coll, itemId));
+  }
   if (orgId !== id) return;
   if (pending.size) {
     flushTimer = setTimeout(flush, 3000);

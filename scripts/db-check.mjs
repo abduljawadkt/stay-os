@@ -42,13 +42,26 @@ for (const [role, email] of [["owner", "owner@demo.stayos.space"], ["warden", "w
     expect(`${role} cannot change the plan`, plan.status >= 400);
     expect(`${role} sees only own invoices`, row.invoices > 0 && row.invoices < 20);
     expect(`${role} sees no expenses or salaries`, row.expenses === 0 && row.staff === 0);
+    // activity about their own resident only (db/migrations/009)
+    const mine = await api(jwt, "activity?on_conflict=org_id,id", { method: "POST", headers: { prefer: "resolution=merge-duplicates" }, body: JSON.stringify({ org_id: DEMO, id: `CHECK-${role}`, at: "2026-11-27T10:00:00+05:30", kind: "optout", data: { residentId: "R-1042", meals: ["lunch"] } }) });
+    expect(`${role} can record activity about their own resident`, mine.status < 300);
+    const other = await api(jwt, "activity", { method: "POST", body: JSON.stringify({ org_id: DEMO, id: `CHECK-${role}-other`, at: "2026-11-27T10:00:00+05:30", kind: "optout", data: { residentId: "R-1001", meals: ["lunch"] } }) });
+    expect(`${role} cannot record activity about another resident`, other.status === 403);
   } else {
     expect(`${role} sees the whole hostel`, row.residents > 300 && row.invoices > 1000);
+    // expenses are the owner's (db/migrations/008)
+    if (role === "warden") {
+      expect("warden sees no expenses", row.expenses === 0);
+      const exp = await api(jwt, "expenses", { method: "POST", body: JSON.stringify({ org_id: DEMO, id: "CHECK", date: "2026-11-27", category: "food", vendor: "x", amount: 1 }) });
+      expect("warden cannot add expenses", exp.status === 403);
+    } else expect("owner sees the expenses", row.expenses > 100);
     const direct = await api(jwt, `orgs?id=eq.${DEMO}`, { method: "PATCH", body: JSON.stringify({ plan: "scale" }) });
     expect(`${role} cannot set the plan directly`, direct.status === 403);
   }
 }
 console.table(rows);
+// remove the activity entries the checks above added
+await api(await login("owner@demo.stayos.space"), `activity?org_id=eq.${DEMO}&id=like.CHECK-*`, { method: "DELETE" });
 
 // ---- what residents and parents may change (db/migrations/003)
 {
@@ -80,6 +93,15 @@ console.table(rows);
     expect("resident cannot approve own leave", self.status >= 400);
     const byParent = await api(parent, `leaves?org_id=eq.${DEMO}&id=eq.${leave.id}`, { method: "PATCH", headers: rep, body: JSON.stringify({ status: "approved", parent_decision_at: new Date().toISOString() }) });
     expect("parent can approve the leave", byParent.status === 200 && byParent.data?.[0]?.status === "approved");
+    // the app saves with "insert, or update if it's there" (upsert); the guard must judge that as an update (db/migrations/010)
+    await api(owner, `leaves?org_id=eq.${DEMO}&id=eq.${leave.id}`, { method: "PATCH", body: JSON.stringify({ status: "awaiting_parent", parent_decision_at: null }) });
+    const full = (await api(owner, `leaves?select=*&org_id=eq.${DEMO}&id=eq.${leave.id}`)).data?.[0];
+    const { updated_at: _u, ...row } = full ?? {};
+    const upsert = (who, body) => api(who, "leaves?on_conflict=org_id,id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(body) });
+    const selfUp = await upsert(resident, { ...row, status: "approved", parent_decision_at: new Date().toISOString() });
+    expect("resident cannot approve own leave the way the app saves", selfUp.status >= 400);
+    const parentUp = await upsert(parent, { ...row, status: "approved", parent_decision_at: new Date().toISOString() });
+    expect("parent can approve the leave the way the app saves", parentUp.status < 300);
   }
   const fake = await api(resident, "complaints", { method: "POST", body: JSON.stringify({ org_id: DEMO, id: "CHECK-R", resident_id: "R-1042", room_id: "C-207", category: "other", title: "x", channel: "app", status: "resolved", created_at: new Date().toISOString(), sla_hours: 4 }) });
   expect("resident cannot file a complaint as already resolved", fake.status >= 400);

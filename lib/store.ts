@@ -156,8 +156,13 @@ export function classifyWhatsApp(text: string): { kind: "complaint"; category: C
   return null;
 }
 
-/** Next number for ids like R-1043 or CMP-1044, starting at `start` in an empty hostel. */
-const nextNum = (ids: string[], prefix: number, start: number) => ids.reduce((m, id) => Math.max(m, Number(id.slice(prefix)) || 0), start - 1) + 1;
+/**
+ * A new record id, like CMP-3F9Q2X7. Counting up from the ids on this phone isn't safe: a resident only sees their own
+ * complaints, so they would pick a number someone else already has, and two people can create at the same moment.
+ * Seconds (base 36, repeats every ~2 years) plus two random characters can't collide in practice.
+ */
+const newId = (prefix: string) =>
+  `${prefix}-${Math.floor(Date.now() / 1000 % 60466176).toString(36).toUpperCase().padStart(5, "0")}${Math.random().toString(36).slice(2, 4).toUpperCase().padEnd(2, "0")}`;
 
 export const useDemo = create<DemoState>()(
     (set, get) => ({
@@ -296,7 +301,7 @@ export const useDemo = create<DemoState>()(
 
       checkIn: (input) => {
         const s = get();
-        const id = `R-${nextNum(s.residents.map((r) => r.id), 2, 1001)}`;
+        const id = newId("R");
         const today = todayISO();
         const r: Resident = {
           id, name: input.name, gender: input.gender, phone: input.phone, dob: input.dob, bloodGroup: input.bloodGroup, hometown: input.hometown,
@@ -335,7 +340,7 @@ export const useDemo = create<DemoState>()(
       addComplaint: ({ residentId, category, title, description, channel, photo, text }) => {
         const s = get();
         const r = s.residents.find((x) => x.id === residentId)!;
-        const id = `CMP-${nextNum(s.complaints.map((c) => c.id), 4, 1001)}`;
+        const id = newId("CMP");
         const at = nowISO();
         const c: Complaint = {
           id, residentId, roomId: s.beds.find((b) => b.id === r.bedId)!.roomId, category, title, description, channel, status: "new",
@@ -415,7 +420,7 @@ export const useDemo = create<DemoState>()(
 
       requestLeave: (residentId, input) => {
         const s = get();
-        const id = `LV-${nextNum(s.leaves.map((l) => l.id), 3, 101)}`;
+        const id = newId("LV");
         const at = nowISO();
         const r = s.residents.find((x) => x.id === residentId)!;
         const lv: LeaveRequest = { id, residentId, ...input, status: "awaiting_parent", requestedAt: at, parentDecisionAt: null };
@@ -478,7 +483,7 @@ export const useDemo = create<DemoState>()(
 
       addExpense: (e) => {
         const s = get();
-        const id = `EXP-${String(nextNum(s.expenses.map((e) => e.id), 4, 1)).padStart(4, "0")}`;
+        const id = newId("EXP");
         set({ expenses: [...s.expenses, { ...e, id, status: "paid" }], lastEvent: { id: ++evId, type: "expense", expenseId: id } });
         return id;
       },

@@ -16,11 +16,14 @@ import { nowISO } from "@/lib/clock";
 import { inr, inrCompact, pct, fmtMonth, fmtTime, fmtDay } from "@/lib/format";
 import { SUGGESTIONS, answer, detectIntent, isMalayalam, type Answer, type Intent } from "@/lib/ai";
 import { useAsk } from "./ask-store";
+import { useOwnerView } from "@/components/common/owner-only";
 import enMessages from "@/messages/en";
 import mlMessages from "@/messages/ml";
 import { cn } from "@/lib/utils";
 
-type Turn = { id: number; q: string; lang: "en" | "ml"; intent: Intent | null; a: Answer | null; phase: "thinking" | "done" };
+type Turn = { id: number; q: string; lang: "en" | "ml"; intent: Intent | null; a: Answer | null; phase: "thinking" | "done"; blocked?: boolean };
+/** Answers about the hostel's money, for the owner only. */
+const MONEY: Intent[] = ["profit", "electricity"];
 let turnId = 0;
 
 type Tr = (key: string, values?: Record<string, string | number>) => string;
@@ -37,6 +40,9 @@ export function AskStayOS() {
   const open = useDemo((s) => s.aiOpen);
   const setOpen = useDemo((s) => s.setAiOpen);
   const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
+  const ownerViewRef = useRef(ownerView);
+  ownerViewRef.current = ownerView;
   const pending = useAsk((s) => s.pending);
   const clearPending = useAsk((s) => s.clear);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -68,11 +74,12 @@ export function AskStayOS() {
     if (!text) return;
     const lang: "en" | "ml" = isMalayalam(text) ? "ml" : locale;
     const intent = detectIntent(text);
+    const blocked = !!intent && MONEY.includes(intent) && !ownerViewRef.current;
     const id = ++turnId;
-    setTurns((ts) => [...ts, { id, q: text, lang, intent, a: null, phase: "thinking" }]);
+    setTurns((ts) => [...ts, { id, q: text, lang, intent, a: null, phase: "thinking", blocked }]);
     setQ("");
     setTimeout(() => {
-      const a = intent ? answer(intent, text, useDemo.getState(), nowISO()) : null;
+      const a = intent && !blocked ? answer(intent, text, useDemo.getState(), nowISO()) : null;
       setTurns((ts) => ts.map((x) => (x.id === id ? { ...x, a, phase: "done" } : x)));
     }, 750);
   };
@@ -215,7 +222,7 @@ function TurnView({ turn, onAsk }: { turn: Turn; onAsk: (q: string) => void }) {
         <motion.div initial="h" animate="s" variants={{ s: { transition: { staggerChildren: 0.05 } } }} lang={turn.lang} className="rounded-lg border border-line bg-surface p-3.5" data-tour="ask-answer">
           {turn.a ? <AnswerBody a={turn.a} lang={turn.lang} /> : (
             <>
-              <Line>{tl("fallback")}</Line>
+              <Line>{turn.blocked ? tl("ownerOnly") : tl("fallback")}</Line>
               <div className="mt-3 flex flex-wrap gap-1.5">{SUGGESTIONS.slice(3, 9).map((s) => <button key={s.q} onClick={() => onAsk(s.q)} className="rounded-full border border-line px-2.5 py-1 text-xs text-fg-2 hover:bg-surface-2">{s.q}</button>)}</div>
             </>
           )}

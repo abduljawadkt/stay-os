@@ -7,7 +7,7 @@ import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, T
 import { FileSpreadsheet, FileText, TrendingDown, TrendingUp } from "lucide-react";
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { ErrorState, Sk } from "@/components/common/states";
-import { OwnerOnly } from "@/components/common/owner-only";
+import { OwnerOnly, useOwnerView } from "@/components/common/owner-only";
 import { ChartTooltip, axisProps } from "@/components/dashboard/chart-bits";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/lib/store";
@@ -20,8 +20,8 @@ import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 export function ReportsScreen() {
-  const role = useDemo((s) => s.role);
-  if (role === "warden") return <OwnerOnly />;
+  const ownerView = useOwnerView();
+  if (!ownerView) return <OwnerOnly />;
   return <Reports />;
 }
 

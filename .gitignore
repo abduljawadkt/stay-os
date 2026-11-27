@@ -11,3 +11,4 @@ next-env.d.ts
 # tutorial videos (large files, kept out of git)
 /tutorial-videos/
 /.venv-tts/
+/.e2e/

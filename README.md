@@ -65,6 +65,20 @@ Schema changes after the first setup live in `db/migrations/` and are applied wi
 `npm run db:setup` applies them all on a fresh database. After adding or changing a function, refresh the Data API schema
 cache (Neon Console → Data API).
 
+## Testing
+
+```bash
+npm run db:check                              # who may see and change what (row-level security), with demo accounts
+npm run payments:check                        # the payments function, with Razorpay faked
+npm run test:e2e -- sweep                     # every screen, every role: iPhone, Android, desktop Chrome and Safari, EN and ML
+npm run test:e2e -- flows                     # the main jobs across roles on the live demo (complaint, gate pass, rent…)
+npm run test:e2e -- flows --only="gate|rent"  # some of them
+```
+
+`test:e2e` needs `npx playwright install webkit chromium` once, and tests https://stayos.space unless `E2E_BASE` says
+otherwise. The flows change the shared demo hostel, so they snapshot it first and put it back exactly afterwards
+(`node scripts/demo-snapshot.mjs save | diff | restore`, using `DATABASE_URL`). Screenshots of failures go to `.e2e/`.
+
 ## Tutorial videos (Malayalam)
 
 `npm run tutorial:video` records the Malayalam tutorial from the live demo at stayos.space: four parts (owner and warden,

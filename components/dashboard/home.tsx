@@ -25,6 +25,7 @@ import { demo } from "@/config/demo";
 import { toIST, todayISO } from "@/lib/clock";
 import { cn } from "@/lib/utils";
 import type { Activity } from "@/data";
+import { useOwnerView } from "@/components/common/owner-only";
 
 export function HomeScreen() {
   const t = useTranslations("home");
@@ -32,6 +33,7 @@ export function HomeScreen() {
   const now = useNow(30000);
   const { loading, error, retry } = useScreenState("home");
   const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
   const userName = useSession((s) => s.user?.name ?? "");
   const beds = useDemo((s) => s.beds);
   const invoices = useDemo((s) => s.invoices);
@@ -63,7 +65,7 @@ export function HomeScreen() {
   const greet = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
   const warden = staff.find((s) => s.id === hostel.wardenId) ?? staff.find((s) => s.role === "warden");
   const name = (role === "warden" ? warden?.name.split(" ")[1] ?? warden?.name : hostel.owner.name.split(" ")[0]) || userName.split(" ")[0];
-  const owner = role !== "warden";
+  const owner = ownerView;
 
   return (
     <>

@@ -11,11 +11,12 @@ import { overdueInvoices } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { NAV } from "./nav";
 import { cn } from "@/lib/utils";
+import { useOwnerView } from "@/components/common/owner-only";
 
 export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; className?: string }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const role = useDemo((s) => s.role);
+  const ownerView = useOwnerView();
   const hydrated = useDemo((s) => s.hydrated);
   const openComplaints = useDemo((s) => s.complaints.filter((c) => c.status !== "resolved").length);
   const overdue = useDemo((s) => overdueInvoices(s.invoices, todayISO()).length);
@@ -31,7 +32,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
       </div>
       <div className="scrollbar-thin flex-1 overflow-y-auto px-3 pt-2 pb-4">
         {NAV.map((g) => {
-          const items = g.items.filter((i) => role !== "warden" || !i.ownerOnly);
+          const items = g.items.filter((i) => ownerView || !i.ownerOnly);
           if (!items.length) return null;
           return (
             <div key={g.group} className="mb-4">
