@@ -170,9 +170,9 @@ export function RentScreen() {
 
           <Card data-tour="invoice-table">
             <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row sm:items-center">
-              <div role="tablist" aria-label={t("filter.label")} className="flex gap-1">
+              <div role="tablist" aria-label={t("filter.label")} className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                 {(["all", "unpaid", "overdue", "paid"] as Filter[]).map((k) => (
-                  <button key={k} role="tab" aria-selected={filter === k} onClick={() => setFilter(k)} className={cn("h-8 rounded-md px-2.5 text-small font-medium transition-colors", filter === k ? "bg-surface-2 text-fg" : "text-fg-2 hover:text-fg")}>{t(`filter.${k}`)}</button>
+                  <button key={k} role="tab" aria-selected={filter === k} onClick={() => setFilter(k)} className={cn("h-8 shrink-0 rounded-md px-2.5 text-small font-medium transition-colors", filter === k ? "bg-surface-2 text-fg" : "text-fg-2 hover:text-fg")}>{t(`filter.${k}`)}</button>
                 ))}
               </div>
               {bucket && <span className="text-small text-fg-2">{t("aging.showing", { bucket: t(`aging.${bucket}`) })}</span>}
