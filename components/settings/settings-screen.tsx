@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { CircleCheck, Copy, CreditCard, Download, MessageCircle, RotateCcw, Smartphone, UserMinus, UserPlus } from "lucide-react";
+import { Copy, Download, MessageCircle, RotateCcw, UserMinus, UserPlus } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -20,10 +20,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDemo } from "@/lib/store";
 import { neon, errorText } from "@/lib/neon";
-import { refreshMemberships, refreshOrgRow, useSession, type OrgRow } from "@/lib/session";
+import { refreshMemberships, refreshOrgRow, requestApproval, useSession, type OrgRow } from "@/lib/session";
 import { useFormat } from "@/lib/hooks";
 import { TOTAL_BEDS } from "@/lib/selectors";
-import { planById, price, type PlanDef } from "@/config/plans";
+import { planById, price } from "@/config/plans";
 import { brand } from "@/config/brand";
 import { hostel } from "@/data";
 import { cn } from "@/lib/utils";
@@ -384,7 +384,7 @@ function Billing() {
   const org = useSession((s) => s.org)!;
   const isDemo = useSession((s) => s.membership?.isDemo);
   const [cycle, setCycle] = useState<Cycle>(org.billing_cycle ?? "monthly");
-  const [checkout, setCheckout] = useState<PlanDef | null>(null);
+  const [asking, setAsking] = useState<string | null>(null);
   const [history, setHistory] = useState<BillRow[]>([]);
   const plan = planById(org.plan);
 
@@ -400,7 +400,7 @@ function Billing() {
   const status =
     org.subscription_status === "trialing"
       ? trialDays > 0 ? t("trial", { days: trialDays }) : t("trialEnded")
-      : t("active", { date: org.current_period_end ? f.date(org.current_period_end) : "" });
+      : t("approvedUntil", { date: org.current_period_end ? f.date(org.current_period_end) : "" });
   const used = TOTAL_BEDS;
   const pct = Math.min(100, Math.round((used / plan.beds) * 100));
 
@@ -431,14 +431,32 @@ function Billing() {
         <h2 className="text-base font-semibold text-fg">{org.subscription_status === "trialing" ? t("choose") : t("change")}</h2>
         <CycleToggle cycle={cycle} onChange={setCycle} />
       </div>
+      <p className="-mt-2 text-sm text-fg-2">
+        {org.approval_requested_at
+          ? t("requestedOn", { date: f.date(org.approval_requested_at), plan: tp(`plans.${org.requested_plan ?? org.plan}.name`) })
+          : t("howItWorks")}
+      </p>
       <PricingTable
         cycle={cycle}
         current={org.subscription_status === "active" ? plan.id : null}
         action={(p) => {
           const isCurrent = org.subscription_status === "active" && p.id === plan.id && (org.billing_cycle ?? "monthly") === cycle;
           return (
-            <Button variant={p.popular ? "primary" : "secondary"} size="lg" className="w-full" disabled={isCurrent} onClick={() => setCheckout(p)}>
-              {isCurrent ? tp("current") : tp("choose", { plan: tp(`plans.${p.id}.name`) })}
+            <Button
+              variant={p.popular ? "primary" : "secondary"} size="lg" className="w-full" disabled={isCurrent || !!asking || isDemo}
+              loading={asking === p.id}
+              onClick={async () => {
+                setAsking(p.id);
+                try {
+                  await requestApproval(p.id, cycle);
+                  toast(t("requestSent"));
+                } catch (e) {
+                  toast.error(errorText(e));
+                }
+                setAsking(null);
+              }}
+            >
+              {isCurrent ? tp("current") : t("requestFor", { plan: tp(`plans.${p.id}.name`) })}
             </Button>
           );
         }}
@@ -478,84 +496,7 @@ function Billing() {
         )}
       </Card>
 
-      <CheckoutDialog plan={checkout} cycle={cycle} onClose={() => setCheckout(null)} onPaid={load} />
     </div>
-  );
-}
-
-function CheckoutDialog({ plan, cycle, onClose, onPaid }: { plan: PlanDef | null; cycle: Cycle; onClose: () => void; onPaid: () => void }) {
-  const t = useTranslations("settings.billing");
-  const tp = useTranslations("marketing.pricing");
-  const f = useFormat();
-  const orgId = useSession((s) => s.orgId);
-  const [method, setMethod] = useState<"upi" | "card">("upi");
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<{ invoice: string; total: number } | null>(null);
-  useEffect(() => {
-    if (plan) setDone(null);
-  }, [plan]);
-  if (!plan) return null;
-  const pr = price(plan, cycle);
-  const name = tp(`plans.${plan.id}.name`);
-
-  async function pay() {
-    setBusy(true);
-    // a gateway would take the payment here; test mode waits a moment like one would
-    await new Promise((r) => setTimeout(r, 900));
-    const { data, error } = await neon().rpc("checkout_plan", { p_org: orgId, p_plan: plan!.id, p_cycle: cycle, p_method: method });
-    setBusy(false);
-    if (error) {
-      toast.error(errorText(error));
-      return;
-    }
-    const res = data as { invoice: string; total: number };
-    setDone(res);
-    await Promise.all([refreshOrgRow(), refreshMemberships()]);
-    onPaid();
-    toast(t("success", { plan: name }), { description: t("successSub", { invoice: res.invoice, amount: f.inr(res.total) }) });
-  }
-
-  return (
-    <Dialog open={!!plan} onOpenChange={(o) => !o && !busy && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        {done ? (
-          <div className="py-4 text-center">
-            <CircleCheck className="mx-auto size-10 text-success" aria-hidden />
-            <DialogTitle className="mt-3">{t("success", { plan: name })}</DialogTitle>
-            <DialogDescription className="mt-1">{t("successSub", { invoice: done.invoice, amount: f.inr(done.total) })}</DialogDescription>
-            <Button variant="primary" className="mt-5" onClick={onClose}>OK</Button>
-          </div>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>{t("checkoutTitle", { plan: name })}</DialogTitle>
-              <DialogDescription>{t("checkoutBody")}</DialogDescription>
-            </DialogHeader>
-            <dl className="space-y-2 rounded-lg border border-line p-4 text-sm">
-              <div className="flex justify-between gap-3"><dt className="text-fg-2">{t("subtotal", { plan: name, cycle: t(cycle) })}</dt><dd className="text-fg tnum">{f.inr(pr.amount)}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-fg-2">{t("gst")}</dt><dd className="text-fg tnum">{f.inr(pr.gst)}</dd></div>
-              <div className="flex justify-between gap-3 border-t border-line pt-2 font-semibold"><dt className="text-fg">{t("total")}</dt><dd className="text-fg tnum">{f.inr(pr.total)}</dd></div>
-            </dl>
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-fg">{t("payWith")}</legend>
-              <div role="radiogroup" className="grid grid-cols-2 gap-2">
-                {([["upi", Smartphone], ["card", CreditCard]] as const).map(([m, Icon]) => (
-                  <button key={m} type="button" role="radio" aria-checked={method === m} onClick={() => setMethod(m)}
-                    className={cn("flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium", method === m ? "border-brand bg-brand-tint text-brand-tint-fg" : "border-line text-fg-2 hover:border-line-strong")}>
-                    <Icon className="size-4" aria-hidden /> {t(m)}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <DialogFooter>
-              <Button variant="primary" size="lg" className="w-full" loading={busy} onClick={pay}>
-                {busy ? t("processing") : t("pay", { amount: f.inr(pr.total) })}
-              </Button>
-            </DialogFooter>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
   );
 }
 

@@ -3,6 +3,7 @@ import type { WATemplate } from "@/data";
 import { hostel } from "@/data";
 import { inr, fmtTime, fmtWeekday } from "./format";
 import { payLink } from "./upi";
+import { clockMode } from "./clock";
 
 export interface Rendered {
   header?: string;
@@ -111,8 +112,8 @@ export function renderTemplate(tpl: WATemplate, d: Data, lang: "en" | "ml"): Ren
           footer: FOOTER,
         };
       return {
-        header: "Welcome to Al Noor Residency 🏡",
-        body: `Hi ${d.name}! Your bed is ${d.bed}.\n\nFirst invoice: ${amt(d.amount)} (${d.invoiceId})\nWi-Fi: AlNoor-${String(d.bed)[0]} · password on your room card\nGate closes at ${String(d.bed).startsWith("C") ? "9:30 PM" : "10 PM"}\n\nSave this number. Rent, mess, complaints and gate passes all work right here on WhatsApp.`,
+        header: `Welcome to ${hostel.name} 🏡`,
+        body: `Hi ${d.name}! Your bed is ${d.bed}.\n\nFirst invoice: ${amt(d.amount)} (${d.invoiceId})${clockMode() === "demo" ? `\nWi-Fi: AlNoor-${String(d.bed)[0]} · password on your room card` : ""}\nGate closes at ${String(d.bed).startsWith("C") ? "9:30 PM" : "10 PM"}\n\nSave this number. Rent, mess, complaints and gate passes all work right here on WhatsApp.`,
         footer: FOOTER,
         buttons: [{ label: `Pay ${amt(d.amount)}`, kind: "url", action: "pay" }, { label: "Open the app", kind: "url", action: "app" }],
       };

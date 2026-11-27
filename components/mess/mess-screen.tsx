@@ -17,10 +17,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
-import { MEALS, headcount, lunchSplit, menuFor, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
+import { MEALS, headcount, lunchSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
 import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
-import { messMenu, type Meal, type MenuItem } from "@/data";
+import { messMenu, staff, type Meal, type MenuItem } from "@/data";
+import { neon, errorText } from "@/lib/neon";
+import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export function VegMark({ veg, className }: { veg: boolean; className?: string }) {
@@ -45,6 +47,23 @@ export function MessScreen() {
   const month = demo.currentMonth;
   const [date, setDate] = useState(today);
   const [edits, setEdits] = useState<Record<string, string>>({});
+  const orgId = useSession((s) => s.orgId);
+  // the hostel's own head cook, if one is on the staff list
+  const cook = staff.find((s) => s.role === "cook");
+  const saveDish = async (day: number, meal: Meal, text: string) => {
+    const key = `${day}-${meal}`;
+    setEdits((e) => ({ ...e, [key]: text }));
+    const { data, error } = await neon().rpc("set_menu_item", { p_org: orgId, p_day: day, p_meal: meal, p_text: text });
+    if (error) {
+      setEdits((e) => { const { [key]: _drop, ...rest } = e; return rest; });
+      toast.error(errorText(error));
+      return;
+    }
+    // keep this device's copy in step with what was saved
+    const saved = data as (typeof messMenu.menu)[number];
+    messMenu.menu = [...messMenu.menu.filter((x) => x.day !== day), saved];
+    toast(t("week.saved"));
+  };
 
   const hc = useMemo(() => headcount(residents, optOuts, today), [residents, optOuts, today]);
   const lunch = useMemo(() => lunchSplit(residents, optOuts, today), [residents, optOuts, today]);
@@ -63,8 +82,8 @@ export function MessScreen() {
     <>
       <PageHeader
         title={t("title")}
-        description={t("subtitle", { count: enrolled })}
-        actions={<Button variant="primary" onClick={() => toast(t("sentToKitchen", { name: "Kunhimoideen" }), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}${h.meal === "lunch" ? ` (${t("headcount.split", lunch)})` : ""}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
+        description={cook ? t("subtitleCook", { count: enrolled, name: cook.name }) : t("subtitle", { count: enrolled })}
+        actions={<Button variant="primary" onClick={() => toast(cook ? t("sentToKitchen", { name: cook.name.split(" ")[0] }) : t("sentToKitchenAll"), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}${h.meal === "lunch" ? ` (${t("headcount.split", lunch)})` : ""}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
       />
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <>
@@ -128,13 +147,13 @@ export function MessScreen() {
                         <tr key={m}>
                           <th scope="row" className="pr-2 text-left align-top text-xs font-medium text-fg-2">{tm(m)}<span className="block font-normal text-fg-3">{messMenu.servingTimes[m]}</span></th>
                           {[1, 2, 3, 4, 5, 6, 0].map((d) => {
-                            const item = messMenu.menu.find((x) => x.day === d)![m];
+                            const item = menuForDay(d)[m];
                             const key = `${d}-${m}`;
                             const isToday = new Date(`${today}T12:00:00+05:30`).getDay() === d;
                             return (
                               <td key={d} className={cn("rounded-md border p-2 align-top", isToday ? "border-brand/40 bg-brand-tint/40" : "border-line")}>
-                                <MenuCell value={edits[key] ?? label(item)} veg={item.veg} onSave={(v) => { setEdits({ ...edits, [key]: v }); toast(t("week.saved")); }} />
-                                {m === "lunch" && d === 0 && messMenu.menu[0].special && <Badge variant="brand" className="mt-1.5"><Sparkles aria-hidden />{label(messMenu.menu[0].special)}</Badge>}
+                                <MenuCell value={edits[key] ?? label(item)} veg={item.veg} onSave={(v) => saveDish(d, m, v)} />
+                                {m === "lunch" && d === 0 && messMenu.menu[0]?.special && <Badge variant="brand" className="mt-1.5"><Sparkles aria-hidden />{label(messMenu.menu[0].special)}</Badge>}
                               </td>
                             );
                           })}

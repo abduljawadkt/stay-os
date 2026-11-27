@@ -111,6 +111,69 @@ await api(await login("owner@demo.stayos.space"), `activity?org_id=eq.${DEMO}&id
   if (mineBefore) { const { id: _i, ...rest } = mineBefore; await api(owner, `invoices?org_id=eq.${DEMO}&id=eq.${mineBefore.id}`, { method: "PATCH", body: JSON.stringify(rest) }); }
   if (leaveBefore) { const { id: _l, ...rest } = leaveBefore; await api(owner, `leaves?org_id=eq.${DEMO}&id=eq.${leaveBefore.id}`, { method: "PATCH", body: JSON.stringify(rest) }); }
 }
+// ---- free trial, then StayOS approval (db/migrations/011)
+// A temporary hostel whose trial has ended, owned by the demo owner; removed at the end.
+{
+  const { default: pg } = await import("pg");
+  const db = new pg.Client({ connectionString: process.env.DATABASE_URL?.replace("sslmode=require", "sslmode=verify-full") });
+  await db.connect();
+  const LOCKED = "00000000-0000-0000-0000-00000000c4ec";
+  const owner = await login("owner@demo.stayos.space");
+  const ownerId = (await db.query(`select id::text from neon_auth."user" where email = 'owner@demo.stayos.space'`)).rows[0].id;
+  try {
+    await db.query("delete from public.orgs where id = $1", [LOCKED]);
+    await db.query(`insert into public.orgs (id, name, city, subscription_status, trial_ends_at) values ($1, 'Check: trial ended', 'Kozhikode', 'trialing', now() - interval '1 day')`, [LOCKED]);
+    await db.query(`insert into public.members (org_id, user_id, role, name, email) values ($1, $2, 'owner', 'Check', 'owner@demo.stayos.space')`, [LOCKED, ownerId]);
+    await db.query(`insert into public.rooms (org_id, id, block, floor, number, type, rent, capacity, bath) values ($1, 'X-101', 'X', 1, 101, 'single', 5000, 1, 'attached')`, [LOCKED]);
+
+    const mine = (await api(owner, "rpc/my_memberships", { method: "POST", body: "{}" })).data?.find((m) => m.org_id === LOCKED);
+    expect("an ended trial shows as not active", mine && mine.active === false);
+    const rooms = await api(owner, `rooms?select=id&org_id=eq.${LOCKED}`);
+    expect("an ended trial's data can't be read", rooms.status === 200 && rooms.data.length === 0);
+    const add = await api(owner, "rooms", { method: "POST", body: JSON.stringify({ org_id: LOCKED, id: "X-102", block: "X", floor: 1, number: 102, type: "single", rent: 5000, capacity: 1, bath: "attached" }) });
+    expect("an ended trial's data can't be changed", add.status === 403);
+    const snap = await api(owner, "rpc/org_snapshot", { method: "POST", body: JSON.stringify({ p_org: LOCKED }) });
+    expect("loading an ended trial says it is locked", snap.status >= 400 && JSON.stringify(snap.data).includes("hostel_locked"));
+    const own = await api(owner, "rpc/checkout_plan", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_plan: "growth", p_cycle: "monthly" }) });
+    expect("owners can't switch a plan on by themselves", own.status >= 400);
+    const ask = await api(owner, "rpc/request_approval", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_plan: "growth", p_cycle: "yearly" }) });
+    const asked = (await db.query("select approval_requested_at is not null as asked, requested_plan from public.orgs where id = $1", [LOCKED])).rows[0];
+    expect("the owner can ask StayOS for approval", ask.status === 200 && asked.asked && asked.requested_plan === "growth");
+    const notAdmin = await api(owner, "rpc/admin_hostels", { method: "POST", body: "{}" });
+    expect("hostel owners can't use the StayOS admin list", notAdmin.status >= 400);
+    const notAdminSet = await api(owner, "rpc/admin_set_access", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_action: "approve", p_months: 12 }) });
+    expect("hostel owners can't approve themselves", notAdminSet.status >= 400);
+    const amAdmin = await api(owner, "rpc/am_platform_admin", { method: "POST", body: "{}" });
+    expect("the demo owner is not a StayOS admin", amAdmin.status === 200 && amAdmin.data === false);
+
+    // the admin side, with the demo owner made an admin for a moment
+    await db.query("insert into public.platform_admins (email) values ('owner@demo.stayos.space') on conflict do nothing");
+    try {
+      const list = await api(owner, "rpc/admin_hostels", { method: "POST", body: "{}" });
+      const row = list.data?.find?.((h) => h.id === LOCKED);
+      expect("an admin sees every hostel, with requests first", list.status === 200 && row && row.active === false && !!row.approval_requested_at && list.data[0].approval_requested_at);
+      const ok = await api(owner, "rpc/admin_set_access", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_action: "approve", p_months: 3 }) });
+      const after = await api(owner, `rooms?select=id&org_id=eq.${LOCKED}`);
+      expect("approving switches the hostel back on, data intact", ok.status === 200 && ok.data?.subscription_status === "active" && after.data?.length === 1);
+      const months = (await db.query("select round(extract(epoch from current_period_end - now()) / 86400) as days, plan, billing_cycle from public.orgs where id = $1", [LOCKED])).rows[0];
+      expect("approval runs for the months picked, on the plan asked for", Number(months.days) >= 88 && Number(months.days) <= 93 && months.plan === "growth" && months.billing_cycle === "yearly");
+      await api(owner, "rpc/admin_set_access", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_action: "suspend" }) });
+      const suspended = await api(owner, `rooms?select=id&org_id=eq.${LOCKED}`);
+      expect("suspending locks it again", suspended.data?.length === 0);
+      await api(owner, "rpc/admin_set_access", { method: "POST", body: JSON.stringify({ p_org: LOCKED, p_action: "extend_trial", p_days: 7 }) });
+      const extended = await api(owner, `rooms?select=id&org_id=eq.${LOCKED}`);
+      expect("extending the trial opens it for those days", extended.data?.length === 1);
+    } finally {
+      await db.query("delete from public.platform_admins where email = 'owner@demo.stayos.space'");
+    }
+    const demo = await api(owner, `rooms?select=id&org_id=eq.${DEMO}&limit=1`);
+    expect("the shared demo never locks", demo.data?.length === 1);
+  } finally {
+    await db.query("delete from public.orgs where id = $1", [LOCKED]);
+    await db.end();
+  }
+}
+
 const bad = await api("not-a-token", "residents?select=id&limit=1");
 expect("requests without a valid token are rejected", bad.status === 401);
 process.exit(failures ? 1 : 0);

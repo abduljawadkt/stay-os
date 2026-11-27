@@ -25,7 +25,11 @@ function Onboarding() {
   const [sample, setSample] = useState(true);
   const [blocks, setBlocks] = useState(2);
   const [floors, setFloors] = useState(3);
+  const [roomsPerFloor, setRoomsPerFloor] = useState(10);
+  // 0 = mixed sizes (singles to six-bed rooms); otherwise every room has this many beds
+  const [bedsPerRoom, setBedsPerRoom] = useState(2);
   const [busy, setBusy] = useState<"create" | "invite" | null>(null);
+  const platformAdmin = useSession((s) => s.isPlatformAdmin);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | undefined>();
   const [code, setCode] = useState("");
@@ -48,7 +52,7 @@ function Onboarding() {
     setNameError(undefined);
     setBusy("create");
     try {
-      const id = await createOrg({ name, city, sample, blocks, floors });
+      const id = await createOrg({ name, city, sample, blocks, floors, rooms: roomsPerFloor, beds: bedsPerRoom });
       await openOrg(id, { force: true });
       router.replace("/dashboard/");
     } catch (err) {
@@ -73,8 +77,10 @@ function Onboarding() {
     }
   }
 
-  const rooms = blocks * floors * 10;
-  const beds = blocks * floors * 25;
+  const rooms = blocks * floors * roomsPerFloor;
+  // the mixed layout repeats 1,1,2,2,2,2,3,3,3,6 beds
+  const mixedBeds = (n: number) => Array.from({ length: n }, (_, i) => [1, 1, 2, 2, 2, 2, 3, 3, 3, 6][i % 10]).reduce((a, b) => a + b, 0);
+  const beds = blocks * floors * (bedsPerRoom ? roomsPerFloor * bedsPerRoom : mixedBeds(roomsPerFloor));
 
   const invite = (
     <section className="rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-6">
@@ -99,6 +105,11 @@ function Onboarding() {
       <div className="max-w-md">
         {adding && memberships && memberships.length > 0 && (
           <Link href="/dashboard/" className="mb-4 inline-block text-small font-medium text-brand-text hover:underline">← {t("back")}</Link>
+        )}
+        {platformAdmin && (
+          <Link href="/admin/" className="mb-4 flex items-center justify-between rounded-xl border border-brand/40 bg-brand-tint/40 px-4 py-3 text-sm font-medium text-brand-tint-fg">
+            StayOS admin: approve hostels <span aria-hidden>→</span>
+          </Link>
         )}
         <h1 className="text-[30px] leading-9 font-bold tracking-[-0.02em] text-fg sm:text-[28px] sm:font-semibold">{t("title")}</h1>
         <p className="mt-1.5 text-base text-fg-2">{t("subtitle")}</p>
@@ -134,8 +145,10 @@ function Onboarding() {
           {!sample && (
             <div className="grid grid-cols-2 gap-3">
               {[
-                { id: "blocks", label: t("blocks"), value: blocks, set: setBlocks, max: 6 },
-                { id: "floors", label: t("floors"), value: floors, set: setFloors, max: 8 },
+                { id: "blocks", label: t("blocks"), value: blocks, set: setBlocks, options: [1, 2, 3, 4, 5, 6] },
+                { id: "floors", label: t("floors"), value: floors, set: setFloors, options: [1, 2, 3, 4, 5, 6, 7, 8] },
+                { id: "rooms", label: t("roomsPerFloor"), value: roomsPerFloor, set: setRoomsPerFloor, options: Array.from({ length: 30 }, (_, i) => i + 1) },
+                { id: "beds", label: t("bedsPerRoom"), value: bedsPerRoom, set: setBedsPerRoom, options: [1, 2, 3, 6, 0] },
               ].map((x) => (
                 <div key={x.id} className="space-y-1.5">
                   <Label htmlFor={x.id}>{x.label}</Label>
@@ -145,7 +158,7 @@ function Onboarding() {
                     onChange={(e) => x.set(Number(e.target.value))}
                     className="h-10 w-full rounded-md border border-input bg-surface px-2.5 text-base focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/20 focus-visible:outline-none md:h-9 md:text-sm"
                   >
-                    {Array.from({ length: x.max }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+                    {x.options.map((n) => <option key={n} value={n}>{x.id === "beds" && n === 0 ? t("bedsMixed") : n}</option>)}
                   </select>
                 </div>
               ))}

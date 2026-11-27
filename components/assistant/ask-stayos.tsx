@@ -10,6 +10,8 @@ import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/common/avatar";
 import { useDemo } from "@/lib/store";
+import { hostel } from "@/data";
+import { brand } from "@/config/brand";
 import { useUI } from "@/components/shell/ui-store";
 import { useLocale } from "@/lib/i18n";
 import { nowISO } from "@/lib/clock";
@@ -179,7 +181,7 @@ export function AskStayOS() {
             <div ref={scroller} className="scrollbar-thin flex-1 space-y-5 overflow-y-auto px-4 py-4" aria-live="polite">
               {turns.length === 0 && (
                 <div>
-                  <p className="text-base font-semibold text-fg">{t("hello")}</p>
+                  <p className="text-base font-semibold text-fg">{t("hello", { hostel: hostel.name || brand.name })}</p>
                   <p className="mt-1 text-sm text-fg-2">{t("intro")}</p>
                   <div className="mt-4 flex flex-col gap-2">
                     {SUGGESTIONS.slice(0, 6).map((s) => (

@@ -10,6 +10,7 @@ import {
   Phone, Plug, Shirt, Soup, Wifi, Wrench, X, CalendarClock, Sparkles, GraduationCap, Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { clockMode } from "@/lib/clock";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -183,12 +184,16 @@ export function ResidentRoom() {
           </li>
         ))}
       </ul>
+      {clockMode() === "demo" && (
+        <>
       <SectionTitle>{t("wifi")}</SectionTitle>
-      <MCard className="flex items-center gap-3">
-        <span className="grid size-10 place-items-center rounded-lg bg-brand-tint text-brand-tint-fg"><Wifi className="size-5" aria-hidden /></span>
-        <div className="flex-1"><p className="font-mono text-sm text-fg">AlNoor-{block}</p><p className="font-mono text-small text-fg-3">alnoor@{room.id.replace("-", "").toLowerCase()}</p></div>
-        <Button variant="secondary" size="sm" onClick={() => { navigator.clipboard?.writeText(`alnoor@${room.id.replace("-", "").toLowerCase()}`); toast(t("copied")); haptic(); }}><Copy /> {t("copy")}</Button>
-      </MCard>
+        <MCard className="flex items-center gap-3">
+          <span className="grid size-10 place-items-center rounded-lg bg-brand-tint text-brand-tint-fg"><Wifi className="size-5" aria-hidden /></span>
+          <div className="flex-1"><p className="font-mono text-sm text-fg">AlNoor-{block}</p><p className="font-mono text-small text-fg-3">alnoor@{room.id.replace("-", "").toLowerCase()}</p></div>
+          <Button variant="secondary" size="sm" onClick={() => { navigator.clipboard?.writeText(`alnoor@${room.id.replace("-", "").toLowerCase()}`); toast(t("copied")); haptic(); }}><Copy /> {t("copy")}</Button>
+        </MCard>
+        </>
+      )}
       <SectionTitle>{t("amenities")}</SectionTitle>
       <div className="mx-4 grid grid-cols-2 gap-2">
         {amenities.map((a) => <div key={a.label} className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-small text-fg"><a.icon className="size-4 text-fg-3" aria-hidden />{a.label}</div>)}

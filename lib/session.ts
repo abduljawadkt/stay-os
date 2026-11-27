@@ -18,6 +18,12 @@ export interface Membership {
   subscriptionStatus: "trialing" | "active" | "past_due" | "canceled";
   trialEndsAt: string | null;
   isDemo: boolean;
+  /** Paid (approved) until this time; null while on the free trial */
+  periodEnd: string | null;
+  approvalRequestedAt: string | null;
+  requestedPlan: Plan | null;
+  /** Whether the hostel can be used right now (trial running, or approved by StayOS); the database enforces it too */
+  active: boolean;
 }
 
 export interface OrgRow {
@@ -50,6 +56,18 @@ export interface OrgRow {
   current_period_end: string | null;
   is_demo: boolean;
   created_at: string;
+  approval_requested_at?: string | null;
+  requested_plan?: Plan | null;
+  requested_cycle?: "monthly" | "yearly" | null;
+  approved_at?: string | null;
+}
+
+/** Same rule as app.org_active in the database: the demo, a running trial, or a StayOS-approved period. */
+export function orgIsActive(o: { is_demo?: boolean; subscription_status: string; trial_ends_at: string | null; current_period_end: string | null }, now = Date.now()) {
+  if (o.is_demo) return true;
+  if (o.subscription_status === "trialing") return !o.trial_ends_at || new Date(o.trial_ends_at).getTime() > now;
+  if (o.subscription_status === "active") return !o.current_period_end || new Date(o.current_period_end).getTime() > now;
+  return false;
 }
 
 export interface SessionUser {
@@ -59,7 +77,7 @@ export interface SessionUser {
 }
 
 type AuthStatus = "loading" | "signed_out" | "signed_in" | "unconfigured";
-type OrgStatus = "none" | "loading" | "ready" | "error";
+type OrgStatus = "none" | "loading" | "ready" | "error" | "locked";
 
 interface SessionState {
   auth: AuthStatus;
@@ -71,6 +89,8 @@ interface SessionState {
   org: OrgRow | null;
   membership: Membership | null;
   saving: "idle" | "saving" | "saved" | "error";
+  /** A StayOS software admin (approves hostels at /admin) */
+  isPlatformAdmin: boolean;
 }
 
 const ORG_KEY = "stayos-org";
@@ -93,6 +113,7 @@ export const useSession = create<SessionState>()(() => ({
   org: null,
   membership: null,
   saving: "idle",
+  isPlatformAdmin: false,
 }));
 
 const set = useSession.setState;
@@ -103,6 +124,8 @@ function mapMembership(r: Record<string, unknown>): Membership {
     orgId: r.org_id as string, role: r.role as MemberRole, residentId: (r.resident_id as string) ?? null, orgName: r.org_name as string,
     city: r.city as string, plan: r.plan as Plan, subscriptionStatus: r.subscription_status as Membership["subscriptionStatus"],
     trialEndsAt: (r.trial_ends_at as string) ?? null, isDemo: !!r.is_demo,
+    periodEnd: (r.current_period_end as string) ?? null, approvalRequestedAt: (r.approval_requested_at as string) ?? null,
+    requestedPlan: (r.requested_plan as Plan) ?? null, active: r.active === undefined ? true : !!r.active,
   };
 }
 
@@ -131,6 +154,8 @@ export function boot(): Promise<void> {
         set({ auth: "signed_in", user: { id: u.id, name: u.name ?? "", email: u.email } });
         try {
           set({ memberships: await fetchMemberships() });
+  void checkPlatformAdmin();
+          void checkPlatformAdmin();
         } catch (e) {
           set({ orgStatus: "error", orgError: errorText(e) });
         }
@@ -238,7 +263,7 @@ export async function signOut() {
     sessionStorage.removeItem("stayos-view");
   } catch {}
   booting = Promise.resolve();
-  set({ auth: "signed_out", user: null, memberships: null, orgStatus: "none", orgId: null, org: null, membership: null });
+  set({ auth: "signed_out", user: null, memberships: null, orgStatus: "none", orgId: null, org: null, membership: null, isPlatformAdmin: false });
 }
 
 /** The hostel to open: the last one used, else the user's own, else the shared demo. */
@@ -259,6 +284,12 @@ export function openOrg(orgId: string, opts: { force?: boolean } = {}): Promise<
   const membership = s.memberships?.find((m) => m.orgId === orgId) ?? null;
   if (!membership) return Promise.reject(new Error("You are not a member of that hostel"));
   stopSync();
+  // a hostel whose trial or approved period has ended: show the lock, don't load anything
+  if (!membership.active) {
+    set({ orgId, membership, orgStatus: "locked", orgError: null, org: null });
+    loadingOrg = null;
+    return Promise.resolve();
+  }
   set({ orgId, membership, orgStatus: "loading", orgError: null });
   loadingOrg = (async () => {
     try {
@@ -272,6 +303,10 @@ export function openOrg(orgId: string, opts: { force?: boolean } = {}): Promise<
     } catch (e) {
       // leaving the page cuts the request off; that isn't a failure worth reporting
       if (leavingPage) return;
+      if (/hostel_locked/.test(errorText(e))) {
+        if (get().orgId === orgId) set({ orgStatus: "locked", orgError: null });
+        return;
+      }
       console.error("[openOrg]", e);
       if (get().orgId === orgId) set({ orgStatus: "error", orgError: errorText(e) });
     }
@@ -279,12 +314,44 @@ export function openOrg(orgId: string, opts: { force?: boolean } = {}): Promise<
   return loadingOrg;
 }
 
+/** Lock the open hostel when its trial or approved period runs out while the app is open. */
+export function lockIfExpired() {
+  const { org, orgStatus } = get();
+  if (orgStatus === "ready" && org && !orgIsActive(org)) {
+    stopSync();
+    set({ orgStatus: "locked", membership: get().membership && { ...get().membership!, active: false } });
+  }
+}
+
+/** Owner: ask StayOS to switch the hostel on, on the plan they want. */
+export async function requestApproval(plan: Plan, cycle: "monthly" | "yearly") {
+  const orgId = get().orgId;
+  if (!orgId) return;
+  const { error } = await neon().rpc("request_approval", { p_org: orgId, p_plan: plan, p_cycle: cycle });
+  if (error) throw new Error(errorText(error));
+  await refreshMemberships();
+  const m = get().memberships?.find((x) => x.orgId === orgId);
+  if (m) set({ membership: m });
+  if (get().org) await refreshOrgRow();
+}
+
+/** Whether the signed-in person is a StayOS software admin. */
+export async function checkPlatformAdmin() {
+  try {
+    const { data } = await neon().rpc("am_platform_admin");
+    set({ isPlatformAdmin: data === true });
+  } catch {
+    set({ isPlatformAdmin: false });
+  }
+}
+
 let leavingPage = false;
 if (typeof window !== "undefined") window.addEventListener("pagehide", () => { leavingPage = true; });
 
-export async function createOrg(input: { name: string; city: string; sample: boolean; blocks?: number; floors?: number }) {
+export async function createOrg(input: { name: string; city: string; sample: boolean; blocks?: number; floors?: number; rooms?: number; beds?: number }) {
   const { data, error } = await neon().rpc("create_org", {
     p_name: input.name, p_city: input.city, p_sample: input.sample, p_blocks: input.blocks ?? 2, p_floors: input.floors ?? 3,
+    p_rooms: input.rooms ?? 10, p_beds: input.beds ?? 0,
   });
   if (error) throw new Error(errorText(error));
   await refreshMemberships();

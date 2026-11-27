@@ -250,9 +250,15 @@ export function rebates(optOuts: MealOptOut[], month: string) {
 
 const NO_ITEM = { en: "Not set", ml: "നിശ്ചയിച്ചിട്ടില്ല", veg: true };
 const EMPTY_DAY = { day: 0, breakfast: NO_ITEM, lunch: NO_ITEM, snacks: NO_ITEM, dinner: NO_ITEM };
+const filled = (x: { en: string; ml: string; veg: boolean } | undefined) => (x && (x.en || x.ml) ? x : NO_ITEM);
+
+/** One day of the weekly menu (0 = Sunday). A new hostel's menu starts empty: unset dishes read "Not set". */
+export function menuForDay(day: number) {
+  const d = messMenu.menu.find((x) => x.day === day);
+  return d ? { ...d, breakfast: filled(d.breakfast), lunch: filled(d.lunch), snacks: filled(d.snacks), dinner: filled(d.dinner) } : { ...EMPTY_DAY, day };
+}
 export function menuFor(date: string) {
-  const day = new Date(`${date}T12:00:00+05:30`).getDay();
-  return messMenu.menu.find((m) => m.day === day) ?? EMPTY_DAY;
+  return menuForDay(new Date(`${date}T12:00:00+05:30`).getDay());
 }
 
 // ---------- complaints ----------

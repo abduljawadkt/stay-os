@@ -5,7 +5,7 @@
   "title": "Ask StayOS",
   "subtitle": "Answers from your hostel's live data, in English or Malayalam",
   "close": "Close",
-  "hello": "Ask me anything about Al Noor Residency",
+  "hello": "Ask me anything about {hostel}",
   "intro": "Type or speak in English or Malayalam. I look up the live numbers and suggest the next step.",
   "listening": "Listening… ask in English or Malayalam",
   "placeholder": "Ask about rent, rooms, mess, complaints…",

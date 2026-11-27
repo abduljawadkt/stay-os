@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { AlertCircle, LogOut, RotateCw } from "lucide-react";
 import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { boot, openOrg, pickOrg, signOut, useSession } from "@/lib/session";
+import { boot, lockIfExpired, openOrg, pickOrg, signOut, useSession } from "@/lib/session";
+import { LockedScreen } from "./locked-screen";
 
 type Area = "dashboard" | "resident" | "parent";
 
@@ -40,6 +41,14 @@ export function AppGate({ area, children }: { area: Area; children: React.ReactN
     }
   }, [auth, memberships, pathname, router]);
 
+  // a trial or approved period can run out while the app is open
+  useEffect(() => {
+    if (orgStatus !== "ready") return;
+    lockIfExpired();
+    const id = setInterval(lockIfExpired, 60000);
+    return () => clearInterval(id);
+  }, [orgStatus]);
+
   // residents and parents only have their own app
   useEffect(() => {
     if (orgStatus !== "ready" || !membership) return;
@@ -48,6 +57,7 @@ export function AppGate({ area, children }: { area: Area; children: React.ReactN
   }, [orgStatus, membership, area, router]);
 
   if (auth === "unconfigured") return <Splash state="unconfigured" />;
+  if (orgStatus === "locked") return <LockedScreen />;
   if (orgStatus === "error") return <Splash state="error" />;
   if (orgStatus !== "ready") return <Splash state="loading" />;
   if (membership?.role === "resident" && area !== "resident") return <Splash state="loading" />;

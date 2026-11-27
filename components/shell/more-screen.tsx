@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import {
   Check, ChevronRight, CloudOff, Download, IndianRupee, KeyRound, LogOut, MessageCircle, Play, Plus, QrCode, RotateCcw, Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -61,6 +62,7 @@ export function MoreScreen() {
   const { locale, setLocale } = useLocale();
   const { theme, setTheme } = useTheme();
   const install = useInstall();
+  const platformAdmin = useSession((s) => s.isPlatformAdmin);
   const canInstall = installAvailable(install);
   const [confirm, setConfirm] = useState(false);
   const [pwOpen, setPwOpen] = useState(false);
@@ -118,6 +120,12 @@ export function MoreScreen() {
           )}
           <Row icon={CloudOff} label={ts("simulateOffline")} onClick={() => setOffline(!offline)} checked={offline} />
           {canReset && <Row icon={RotateCcw} label={ts("resetDemo")} danger onClick={() => setConfirm(true)} />}
+        </Group>
+      )}
+
+      {platformAdmin && (
+        <Group title="StayOS">
+          <Row href="/admin/" icon={ShieldCheck} label="StayOS admin" sub="Approve hostels after their free trial" />
         </Group>
       )}
 

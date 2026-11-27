@@ -8,6 +8,7 @@ import {
 import { nowISO, nowMs, todayISO } from "./clock";
 import { roomById, rebates, daysInMonth, addDays, MEALS } from "./selectors";
 import { demo } from "@/config/demo";
+import { staff as staffList } from "@/data";
 
 export type Role = "owner" | "warden" | "resident" | "parent";
 
@@ -126,7 +127,11 @@ const shortDate = (d: string) => new Date(`${d}T12:00:00+05:30`).toLocaleString(
 const CATEGORY_LABEL: Record<ComplaintCategory, string> = { electrical: "Electrical", plumbing: "Plumbing", wifi: "Wi-Fi", housekeeping: "Housekeeping", mess: "Mess", furniture: "Furniture", other: "Other" };
 const SLA_HOURS: Record<ComplaintCategory, number> = { electrical: 4, plumbing: 6, wifi: 3, housekeeping: 8, mess: 12, furniture: 48, other: 24 };
 const ASSIGNEE: Record<ComplaintCategory, string> = { electrical: "S-20", plumbing: "S-20", wifi: "S-03", housekeeping: "S-10", mess: "S-04", furniture: "S-20", other: "S-01" };
-const ASSIGNEE_NAME: Record<string, string> = { "S-20": "Biju (electrician)", "S-03": "Nisha (office)", "S-10": "Shobha (housekeeping)", "S-04": "Kunhimoideen (head cook)", "S-01": "Ashraf (warden)" };
+/** Who a complaint update names: the hostel's own staff member ("Biju (electrician)"), or "our team". */
+const assigneeName = (id: string) => {
+  const m = staffList.find((x) => x.id === id);
+  return m ? `${m.name.split(" ")[0]} (${m.title.split("·")[0].trim().toLowerCase()})` : "our team";
+};
 
 /** Reads a WhatsApp message the way the StayOS bot would: complaint, meal skip, leave reply, or payment link. */
 export function classifyWhatsApp(text: string): { kind: "complaint"; category: ComplaintCategory; title: string } | { kind: "skip"; meal: Meal } | { kind: "approve" } | { kind: "reject" } | { kind: "pay" } | null {
@@ -377,7 +382,7 @@ export const useDemo = create<DemoState>()(
         if (status !== "new") {
           whatsapp = waAppend(whatsapp, s.residents, c.residentId, "resident", {
             from: "hostel", at, kind: "template", template: status === "resolved" ? "complaint_resolved" : "complaint_update",
-            data: { id, by: ASSIGNEE_NAME[assignee] ?? "our team", title: c.title },
+            data: { id, by: assigneeName(assignee), title: c.title },
           }, 0);
         }
         set({

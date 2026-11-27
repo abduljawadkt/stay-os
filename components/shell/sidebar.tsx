@@ -11,12 +11,14 @@ import { overdueInvoices } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { NAV } from "./nav";
 import { cn } from "@/lib/utils";
+import { ShieldCheck } from "lucide-react";
 import { useOwnerView } from "@/components/common/owner-only";
 
 export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; className?: string }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const ownerView = useOwnerView();
+  const platformAdmin = useSession((s) => s.isPlatformAdmin);
   const hydrated = useDemo((s) => s.hydrated);
   const openComplaints = useDemo((s) => s.complaints.filter((c) => c.status !== "resolved").length);
   const overdue = useDemo((s) => overdueInvoices(s.invoices, todayISO()).length);
@@ -72,6 +74,11 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
             <span className={cn("size-1.5 rounded-full", saving === "saving" ? "animate-pulse bg-warning" : saving === "error" ? "bg-danger" : "bg-success")} aria-hidden />
             {t(`saving.${saving}`)}
           </p>
+        )}
+        {platformAdmin && (
+          <Link href="/admin/" onClick={onNavigate} className="mb-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-fg-2 hover:bg-surface-2 hover:text-fg">
+            <ShieldCheck className="size-4" aria-hidden /> StayOS admin
+          </Link>
         )}
         <AccountMenu onNavigate={onNavigate} />
       </div>

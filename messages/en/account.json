@@ -73,7 +73,10 @@
       "emptyBody": "Rooms and beds only. Add your own residents.",
       "blocks": "Blocks",
       "floors": "Floors per block",
-      "layoutHint": "{rooms} rooms, {beds} beds (10 rooms per floor). Rename or edit rooms later.",
+      "layoutHint": "{rooms} rooms, {beds} beds. You can change rooms, sizes and rents later.",
+      "roomsPerFloor": "Rooms per floor",
+      "bedsPerRoom": "Beds per room",
+      "bedsMixed": "Mixed (1 to 6)",
       "submit": "Create hostel",
       "creating": "Creating your hostel…",
       "errorName": "Enter the hostel name.",
@@ -88,8 +91,10 @@
     },
     "trial": {
       "left": "Free trial of the {plan} plan · {days, plural, one {# day} other {# days}} left",
-      "ended": "Your free trial has ended. Pick a plan to keep using StayOS.",
-      "choose": "Choose a plan"
+      "ended": "Your free trial has ended. Ask StayOS to approve a plan.",
+      "choose": "Ask to approve a plan",
+      "requested": "Approval requested",
+      "planEnds": "Your StayOS plan ends in {days, plural, one {# day} other {# days}}"
     },
     "empty": {
       "noResidentTitle": "No residents yet",
@@ -219,6 +224,25 @@
       "note": "Everyone trying the demo shares this hostel, so don't enter real personal details.",
       "own": "Want your own hostel?",
       "trial": "Start a free trial"
+    },
+    "locked": {
+      "trialTitle": "Your free trial has ended",
+      "periodTitle": "Your StayOS plan has ended",
+      "pausedTitle": "This hostel is paused",
+      "staffTitle": "{hostel} is paused for now",
+      "ownerBody": "{hostel} stopped on {date}. StayOS switches it back on once your plan is approved.",
+      "staffBody": "The hostel's StayOS plan needs renewing. Please ask the hostel owner.",
+      "dataSafe": "All your data is kept safe and comes back as it was.",
+      "pick": "Choose your plan",
+      "cycle": "Billing",
+      "upTo": "Up to {beds} beds",
+      "request": "Ask StayOS to approve",
+      "requestHint": "We'll contact you about payment, then switch the hostel on.",
+      "requested": "Request sent on {date}",
+      "requestedBody": "You asked for the {plan} plan. We'll contact you and switch the hostel on once approved.",
+      "contact": "Questions? {email}",
+      "switch": "Open {hostel}",
+      "signOut": "Sign out"
     }
   }
 }
