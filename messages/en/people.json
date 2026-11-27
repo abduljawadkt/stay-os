@@ -19,22 +19,23 @@
     "inThisRoom": "In this room · {count} of {capacity}", "emptyRoom": "Nobody in this room yet.", "markReady": "Mark ready for check-in", "checkInName": "Check in {name}", "checkInHere": "Check in a resident here"
   },
   "checkin": {
-    "title": "Check in a new resident", "subtitle": "Details, Aadhaar KYC through DigiLocker, a bed and the first invoice, in about a minute.", "progress": "Check-in steps",
+    "title": "Check in a new resident", "subtitle": "Details, Aadhaar KYC through DigiLocker, a bed and the first invoice, in about a minute.", "subtitleReal": "Details, an Aadhaar check, a bed and the first invoice.", "progress": "Check-in steps",
     "steps": { "details": "Details", "kyc": "KYC", "bed": "Bed", "confirm": "Confirm" },
     "prefilled": "Prefilled for the demo. Edit anything.",
-    "fields": { "name": "Full name (as on Aadhaar)", "phone": "Mobile number", "occupation": "Occupation", "student": "Student", "professional": "Working professional", "college": "College and course", "company": "Job and company", "parentName": "Parent or guardian", "parentPhone": "Parent's mobile" },
-    "errors": { "name": "Enter the full name as on Aadhaar.", "phone": "Enter a 10-digit Indian mobile number, like +91 98470 12345.", "required": "This is required." },
+    "fields": { "name": "Full name (as on Aadhaar)", "phone": "Mobile number", "occupation": "Occupation", "student": "Student", "professional": "Working professional", "college": "College and course", "company": "Job and company", "parentName": "Parent or guardian", "parentPhone": "Parent's mobile", "gender": "Gender", "male": "Male", "female": "Female", "dob": "Date of birth", "blood": "Blood group", "hometown": "Home town", "hometownHint": "Town, district", "relation": "Relation", "rel": { "Father": "Father", "Mother": "Mother", "Guardian": "Guardian" } },
+    "errors": { "name": "Enter the full name as on Aadhaar.", "phone": "Enter a 10-digit Indian mobile number, like +91 98470 12345.", "required": "This is required.", "dob": "Check the date of birth." },
     "kyc": {
       "title": "Aadhaar KYC through DigiLocker", "body": "The resident approves on {phone}. No photocopies, no manual typing.", "start": "Verify with DigiLocker",
       "connect": "Connected to DigiLocker", "otp": "OTP sent to the Aadhaar-linked mobile", "consent": "Resident approved sharing", "fetch": "Fetched Aadhaar XXXX XXXX {last4}",
       "verified": "Verified", "name": "Name", "dob": "Date of birth", "aadhaar": "Aadhaar", "address": "Address", "note": "Only the last four digits of the Aadhaar number are stored.", "later": "Verify later"
     },
+    "kycReal": { "title": "Check the original Aadhaar card", "body": "Look at the resident's own Aadhaar card and make sure the name and photo match. StayOS keeps only the last 4 digits.", "last4": "Last 4 digits of Aadhaar", "last4Error": "Enter exactly 4 digits.", "seen": "I have seen {name}'s original Aadhaar card and it matches.", "note": "Not with you now? Choose Verify later. The resident shows as KYC pending until someone checks the card." },
     "bed": { "legend": "Vacant beds in Block {block}, best match first", "best": "Best match", "mates": "{count, plural, =0 {empty room} one {# roommate} other {# roommates}}" },
     "confirm": {
       "from": "from {date}", "rent": "Rent · {days} of {dim} days", "mess": "Mess · {days} of {dim} days", "deposit": "Security deposit (refundable)", "total": "First invoice",
       "monthly": "Monthly from next month", "messPlan": "Mess plan", "messHint": "{fee} a month. Meals can be skipped in the app.",
-      "welcome": "Send welcome message on WhatsApp", "welcomeHint": "With the invoice, UPI link, Wi-Fi details and house rules",
-      "police": "The police verification form is filled in from the KYC data and ready to print."
+      "welcome": "Send welcome message on WhatsApp", "welcomeHint": "With the first invoice and the UPI payment link",
+      "police": "The police verification form is filled in from these details and ready to print."
     },
     "complete": "Complete check-in",
     "done": {
@@ -61,13 +62,13 @@
     "room": "Room {room}", "noRoommates": "No roommates right now.", "complaints": "Complaints", "complaintsMeta": "{count} this year", "noComplaints": "No complaints raised",
     "complaintStatus": { "new": "New", "in_progress": "In progress", "resolved": "Resolved" },
     "kyc": {
-      "title": "Aadhaar KYC", "digilocker": "Verified through DigiLocker", "offline": "Checked offline by the warden", "aadhaar": "Aadhaar", "status": "Status", "on": "Verified on",
-      "matched": "Name, date of birth and address matched the Aadhaar record. Only the last four digits are stored.", "verifyNow": "Verify with DigiLocker"
+      "title": "Aadhaar KYC", "digilocker": "Verified through DigiLocker", "aadhaar": "Aadhaar", "status": "Status", "on": "Verified on",
+      "matched": "Name, date of birth and address matched the Aadhaar record. Only the last four digits are stored.", "verifyNow": "Verify with DigiLocker", "offline": "Original Aadhaar card checked by the hostel", "notChecked": "Not checked yet", "matchedOffline": "The hostel checked the original Aadhaar card. Only the last four digits are stored.", "last4": "Last 4 digits of Aadhaar", "seen": "I have seen the original Aadhaar card and it matches.", "markChecked": "Mark as checked"
     },
     "docs": {
       "title": "Documents", "meta": "Stored securely, shared only with the resident", "view": "View", "missing": "Missing",
       "aadhaar": "Aadhaar (DigiLocker)", "aadhaarMeta": "Fetched {date} · PDF", "id": "College or company ID", "idMeta": "Photo uploaded {date}",
-      "agreement": "Residence agreement", "agreementMeta": "E-signed {date} · PDF", "police": "Police verification form", "policeMeta": "Generated by {brand} · PDF"
+      "agreement": "Residence agreement", "agreementMeta": "E-signed {date} · PDF", "police": "Police verification form", "policeMeta": "Generated by {brand} · PDF", "agreementPrint": "Print for both to sign · PDF"
     },
     "pay": { "paid": "Paid so far", "due": "Due now", "monthly": "Monthly charges", "month": "Month", "invoice": "Invoice", "amount": "Amount", "status": "Status", "paidOn": "Paid", "ref": "UTR / reference", "copy": "Copy UPI link", "copied": "UPI link copied" },
     "gate": { "title": "Gate log", "meta": "QR scans at the main gate", "empty": "No gate scans yet", "in": "Came in", "out": "Went out", "manual": "logged by guard", "late": "Late" },
@@ -75,7 +76,7 @@
     "police": {
       "title": "Kerala Police tenant verification", "body": "Filled in automatically from the DigiLocker KYC. Print, sign and submit at the station, or share the PDF.",
       "station": "Police station", "ref": "Reference number", "submitted": "Submitted on", "autofill": "Filled from", "autofillValue": "Aadhaar KYC + check-in",
-      "preview": "Preview PDF", "markSubmitted": "Mark as submitted"
+      "preview": "Preview PDF", "markSubmitted": "Mark as submitted", "bodyReal": "Filled in from the check-in details. Print, sign and submit it at your police station, then note the reference number they give you.", "refPlaceholder": "Reference number (optional)"
     }
   },
   "docs": {

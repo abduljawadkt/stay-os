@@ -11,14 +11,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUI } from "@/components/shell/ui-store";
 import { useDemo } from "@/lib/store";
+import { useIsSample } from "@/lib/session";
 import { useFormat } from "@/lib/hooks";
 import { roomById, daysInMonth } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
-import { hostel } from "@/data";
+import { hostel, type Resident } from "@/data";
 import { cn } from "@/lib/utils";
 
 type Step = 0 | 1 | 2 | 3 | 4;
@@ -51,9 +53,27 @@ export function CheckInDialog() {
   const checkIn = useDemo((s) => s.checkIn);
 
   const preset = demo.checkIn;
+  // Sample hostels open the form filled with a made-up resident and simulate DigiLocker. A real hostel starts empty
+  // and records only what the office actually checked.
+  const sample = useIsSample();
   const [step, setStep] = useState<Step>(0);
-  type Form = { name: string; phone: string; institution: string; occupation: "student" | "professional"; parentName: string; parentPhone: string; gender: "M" | "F" };
-  const [form, setForm] = useState<Form>({ name: preset.name, phone: preset.phone, institution: preset.institution, occupation: preset.occupation as "student" | "professional", parentName: preset.parent.name, parentPhone: preset.parent.phone, gender: preset.gender as "M" | "F" });
+  type Form = {
+    name: string; phone: string; institution: string; occupation: "student" | "professional"; parentName: string; parentPhone: string;
+    relation: Resident["parent"]["relation"]; gender: "M" | "F"; dob: string; bloodGroup: string; hometown: string; aadhaarLast4: string; aadhaarSeen: boolean;
+  };
+  const blank = (preBed?: (typeof beds)[number] | null): Form => {
+    const gender = (preBed ? blockGender(preBed.block) : undefined) ?? (sample ? (preset.gender as "M" | "F") : hostel.blocks[0]?.gender ?? "M");
+    if (sample) return {
+      name: preBed?.reservation?.name ?? preset.name, phone: preBed?.reservation?.phone ?? preset.phone, institution: preset.institution, occupation: preset.occupation as "student" | "professional",
+      parentName: preset.parent.name, parentPhone: preset.parent.phone, relation: "Father", gender, dob: preset.dob, bloodGroup: preset.bloodGroup, hometown: preset.hometown,
+      aadhaarLast4: preset.aadhaarLast4, aadhaarSeen: false,
+    };
+    return {
+      name: preBed?.reservation?.name ?? "", phone: preBed?.reservation?.phone ?? "", institution: "", occupation: "student", parentName: "", parentPhone: "", relation: "Father",
+      gender, dob: "", bloodGroup: "", hometown: "", aadhaarLast4: "", aadhaarSeen: false,
+    };
+  };
+  const [form, setForm] = useState<Form>(() => blank());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [kyc, setKyc] = useState<number>(-1); // -1 idle, 0..3 running, 4 done
   const [bed, setBed] = useState<string>("");
@@ -66,7 +86,7 @@ export function CheckInDialog() {
     if (!open) return;
     setStep(0); setKyc(-1); setErrors({}); setCreatedId(null);
     const preBed = bedId ? beds.find((b) => b.id === bedId) : null;
-    setForm({ name: preBed?.reservation?.name ?? preset.name, phone: preBed?.reservation?.phone ?? preset.phone, institution: preset.institution, occupation: preset.occupation, parentName: preset.parent.name, parentPhone: preset.parent.phone, gender: preBed ? blockGender(preBed.block) ?? preset.gender : preset.gender });
+    setForm(blank(preBed));
     setBed(bedId ?? "");
     return () => timers.current.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,10 +116,14 @@ export function CheckInDialog() {
     if (!phone) e.phone = t("errors.phone");
     if (!parentPhone) e.parentPhone = t("errors.phone");
     if (!form.institution.trim()) e.institution = t("errors.required");
+    if (form.dob && (form.dob > todayISO() || form.dob < "1930-01-01")) e.dob = t("errors.dob");
     if (phone && parentPhone && (phone !== form.phone || parentPhone !== form.parentPhone)) setForm({ ...form, phone, parentPhone });
     setErrors(e);
     return Object.keys(e).length === 0;
   };
+
+  const last4Ok = /^\d{4}$/.test(form.aadhaarLast4);
+  const kycDone = sample ? kyc === 4 : form.aadhaarSeen && last4Ok;
 
   const room = bed ? roomById[bed.split("-").slice(0, 2).join("-")] : null;
   const today = todayISO();
@@ -111,8 +135,11 @@ export function CheckInDialog() {
   const complete = () => {
     if (!bed) return;
     const id = checkIn({
-      name: form.name.trim(), gender: form.gender, phone: form.phone.trim(), dob: preset.dob, bloodGroup: preset.bloodGroup, hometown: preset.hometown, occupation: form.occupation,
-      institution: form.institution.trim(), parent: { name: form.parentName.trim(), relation: "Father", phone: form.parentPhone.trim() }, aadhaarLast4: preset.aadhaarLast4,
+      name: form.name.trim(), gender: form.gender, phone: form.phone.trim(), dob: form.dob || null, bloodGroup: form.bloodGroup.trim(), hometown: form.hometown.trim(), occupation: form.occupation,
+      institution: form.institution.trim(), parent: { name: form.parentName.trim(), relation: form.relation, phone: form.parentPhone.trim() },
+      kyc: kycDone
+        ? { status: "verified", method: sample ? "digilocker" : "offline", aadhaarLast4: form.aadhaarLast4, verifiedOn: today }
+        : { status: "pending", method: "offline", aadhaarLast4: last4Ok ? form.aadhaarLast4 : "", verifiedOn: null },
       bedId: bed, messPlan: mess, sendWelcome: welcome,
     });
     setCreatedId(id);
@@ -127,7 +154,7 @@ export function CheckInDialog() {
       <DialogContent className="gap-0 p-0 sm:max-w-[620px]" data-tour="checkin-dialog">
         <div className="border-b border-line px-6 pt-5 pb-4">
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="mt-1 text-small text-fg-2">{t("subtitle")}</DialogDescription>
+          <DialogDescription className="mt-1 text-small text-fg-2">{t(sample ? "subtitle" : "subtitleReal")}</DialogDescription>
           {step < 4 && (
             <ol className="mt-4 flex items-center gap-2" aria-label={t("progress")}>
               {steps.map((s, i) => (
@@ -148,9 +175,21 @@ export function CheckInDialog() {
             <motion.div key={step} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}>
               {step === 0 && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Badge variant="brand" className="sm:col-span-2">{t("prefilled")}</Badge>
+                  {sample && <Badge variant="brand" className="sm:col-span-2">{t("prefilled")}</Badge>}
                   <Field id="ci-name" label={t("fields.name")} error={errors.name} className="sm:col-span-2">
                     <Input id="ci-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-invalid={!!errors.name} autoComplete="off" />
+                  </Field>
+                  <Field id="ci-gender" label={t("fields.gender")}>
+                    <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v as "M" | "F" })}>
+                      <SelectTrigger id="ci-gender" className="w-full"><SelectValue>{form.gender === "F" ? t("fields.female") : t("fields.male")}</SelectValue></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">{t("fields.male")}</SelectItem>
+                        <SelectItem value="F">{t("fields.female")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field id="ci-dob" label={t("fields.dob")} error={errors.dob}>
+                    <Input id="ci-dob" type="date" value={form.dob} max={todayISO()} onChange={(e) => setForm({ ...form, dob: e.target.value })} aria-invalid={!!errors.dob} className="tnum" />
                   </Field>
                   <Field id="ci-phone" label={t("fields.phone")} error={errors.phone}>
                     <Input id="ci-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} aria-invalid={!!errors.phone} inputMode="tel" className="tnum" />
@@ -167,8 +206,22 @@ export function CheckInDialog() {
                   <Field id="ci-inst" label={form.occupation === "student" ? t("fields.college") : t("fields.company")} error={errors.institution} className="sm:col-span-2">
                     <Input id="ci-inst" value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} aria-invalid={!!errors.institution} />
                   </Field>
+                  <Field id="ci-blood" label={t("fields.blood")}>
+                    <Input id="ci-blood" value={form.bloodGroup} onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })} placeholder="O+" autoComplete="off" />
+                  </Field>
+                  <Field id="ci-home" label={t("fields.hometown")}>
+                    <Input id="ci-home" value={form.hometown} onChange={(e) => setForm({ ...form, hometown: e.target.value })} placeholder={t("fields.hometownHint")} />
+                  </Field>
                   <Field id="ci-pname" label={t("fields.parentName")}>
-                    <Input id="ci-pname" value={form.parentName} onChange={(e) => setForm({ ...form, parentName: e.target.value })} />
+                    <div className="flex gap-2">
+                      <Input id="ci-pname" value={form.parentName} onChange={(e) => setForm({ ...form, parentName: e.target.value })} className="min-w-0 flex-1" />
+                      <Select value={form.relation} onValueChange={(v) => setForm({ ...form, relation: v as Form["relation"] })}>
+                        <SelectTrigger aria-label={t("fields.relation")} className="w-[118px] shrink-0"><SelectValue>{t(`fields.rel.${form.relation}`)}</SelectValue></SelectTrigger>
+                        <SelectContent>
+                          {(["Father", "Mother", "Guardian"] as const).map((r) => <SelectItem key={r} value={r}>{t(`fields.rel.${r}`)}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </Field>
                   <Field id="ci-pphone" label={t("fields.parentPhone")} error={errors.parentPhone}>
                     <Input id="ci-pphone" value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} aria-invalid={!!errors.parentPhone} inputMode="tel" className="tnum" />
@@ -176,7 +229,30 @@ export function CheckInDialog() {
                 </div>
               )}
 
-              {step === 1 && (
+              {step === 1 && !sample && (
+                <div className="rounded-lg border border-line p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-tint-fg"><Fingerprint className="size-5" aria-hidden /></span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-fg">{t("kycReal.title")}</p>
+                      <p className="mt-0.5 text-small text-fg-2">{t("kycReal.body")}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
+                    <Field id="ci-last4" label={t("kycReal.last4")} error={form.aadhaarLast4 && !last4Ok ? t("kycReal.last4Error") : undefined}>
+                      <Input id="ci-last4" value={form.aadhaarLast4} inputMode="numeric" maxLength={4} autoComplete="off" className="font-mono tnum"
+                        onChange={(e) => setForm({ ...form, aadhaarLast4: e.target.value.replace(/\D/g, "").slice(0, 4) })} aria-invalid={!!form.aadhaarLast4 && !last4Ok} />
+                    </Field>
+                    <label htmlFor="ci-seen" className="flex items-start gap-2.5 self-end pb-2 text-sm text-fg">
+                      <Checkbox id="ci-seen" checked={form.aadhaarSeen} onCheckedChange={(v) => setForm({ ...form, aadhaarSeen: v === true })} className="mt-0.5" />
+                      <span>{t("kycReal.seen", { name: form.name.split(" ")[0] || "—" })}</span>
+                    </label>
+                  </div>
+                  <p className="mt-3 text-xs text-fg-3">{t("kycReal.note")}</p>
+                </div>
+              )}
+
+              {step === 1 && sample && (
                 <div data-tour="digilocker">
                   <div className="rounded-lg border border-line p-4">
                     <div className="flex items-start gap-3">
@@ -293,8 +369,8 @@ export function CheckInDialog() {
               {step === 0 && <Button variant="primary" onClick={() => validate() && setStep(1)} data-tour="checkin-next0">{t("next")}</Button>}
               {step === 1 && (
                 <div className="flex gap-2">
-                  {kyc < 4 && <Button variant="quiet" onClick={() => setStep(2)}>{t("kyc.later")}</Button>}
-                  <Button variant="primary" disabled={kyc !== 4} onClick={() => setStep(2)} data-tour="checkin-next">{t("next")}</Button>
+                  {!kycDone && <Button variant="quiet" onClick={() => setStep(2)}>{t("kyc.later")}</Button>}
+                  <Button variant="primary" disabled={!kycDone} onClick={() => setStep(2)} data-tour="checkin-next">{t("next")}</Button>
                 </div>
               )}
               {step === 2 && <Button variant="primary" disabled={!bed} onClick={() => setStep(3)} data-tour="checkin-next2">{t("next")}</Button>}

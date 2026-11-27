@@ -10,6 +10,7 @@ import { hostel, type Resident } from "@/data";
 import { brand } from "@/config/brand";
 import { initials } from "@/lib/format";
 import { roomById, curfewLabel } from "@/lib/selectors";
+import { useIsSample } from "@/lib/session";
 
 export type DocKind = "police" | "aadhaar" | "agreement" | "id";
 
@@ -67,8 +68,17 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
   );
 }
 
+/** How the identity was checked, in the words a police form needs. */
+function identityLine(r: Resident, date: (d: string) => string) {
+  if (r.kyc.status !== "verified") return "Pending";
+  return `${r.kyc.method === "digilocker" ? "DigiLocker" : "Original Aadhaar card seen"}, ${date(r.kyc.verifiedOn ?? r.checkInDate)}`;
+}
+
 function PoliceForm({ r }: { r: Resident }) {
   const f = useFormat();
+  // sample hostels have a made-up station; a real hostel's form leaves it to be written in
+  const sample = useIsSample();
+  const digilocker = r.kyc.status === "verified" && r.kyc.method === "digilocker";
   const room = roomById[r.bedId.split("-").slice(0, 2).join("-")];
   return (
     <div className="text-[13px] leading-relaxed">
@@ -76,12 +86,12 @@ function PoliceForm({ r }: { r: Resident }) {
         <div>
           <p className="text-[11px] tracking-wide text-[#6b6a64] uppercase">Form · Tenant / paying guest verification</p>
           <h2 className="mt-1 text-[20px] font-semibold">Application for police verification of resident</h2>
-          <p className="mt-1 text-[12px] text-[#4a4944]">To: The Station House Officer, Nadakkavu Police Station, Kozhikode City</p>
+          <p className="mt-1 text-[12px] text-[#4a4944]">To: The Station House Officer, {sample ? "Nadakkavu Police Station, Kozhikode City" : "______________________ Police Station"}</p>
         </div>
         <div className="grid h-[118px] w-[96px] place-items-center border border-[#bdbab2] bg-[#f4f3f0] text-center text-[11px] text-[#6b6a64]">
           <div>
             <p className="text-[26px] font-semibold text-[#3c3b37]">{initials(r.name)}</p>
-            <p className="mt-1 px-1">Photo from DigiLocker</p>
+            <p className="mt-1 px-1">{digilocker ? "Photo from DigiLocker" : "Paste photo"}</p>
           </div>
         </div>
       </div>
@@ -96,12 +106,12 @@ function PoliceForm({ r }: { r: Resident }) {
       <div className="grid grid-cols-2 gap-x-8">
         <Field label="Full name" value={r.name} />
         <Field label="Father's / guardian's name" value={fatherOf(r)} />
-        <Field label="Date of birth" value={f.date(r.dob)} />
+        <Field label="Date of birth" value={r.dob ? f.date(r.dob) : ""} />
         <Field label="Gender" value={r.gender === "F" ? "Female" : "Male"} />
-        <Field label="Permanent address" value={`${r.hometown}, Kerala`} />
+        <Field label="Permanent address" value={sample ? `${r.hometown}, Kerala` : r.hometown} />
         <Field label="Mobile" value={r.phone} />
-        <Field label="Aadhaar (masked)" value={`XXXX XXXX ${r.kyc.aadhaarLast4}`} mono />
-        <Field label="Identity verified" value={r.kyc.status === "verified" ? `DigiLocker, ${f.date(r.kyc.verifiedOn ?? r.checkInDate)}` : "Pending"} />
+        <Field label="Aadhaar (masked)" value={r.kyc.aadhaarLast4 ? `XXXX XXXX ${r.kyc.aadhaarLast4}` : ""} mono />
+        <Field label="Identity verified" value={identityLine(r, f.date)} />
         <Field label="Occupation" value={r.institution} />
         <Field label="Blood group" value={r.bloodGroup} />
       </div>
@@ -114,7 +124,10 @@ function PoliceForm({ r }: { r: Resident }) {
       </div>
       <h3 className="mt-5 text-[12px] font-semibold tracking-wide uppercase">4. Declaration</h3>
       <p className="mt-2 text-[12px] text-[#3c3b37]">
-        I confirm that the details above are true to the best of my knowledge and that the identity of the resident was verified with the original Aadhaar record through DigiLocker before occupancy.
+        I confirm that the details above are true to the best of my knowledge
+        {r.kyc.status !== "verified" ? "." : digilocker
+          ? " and that the identity of the resident was verified with the original Aadhaar record through DigiLocker before occupancy."
+          : " and that I have seen the resident's original Aadhaar card."}
       </p>
       <div className="mt-14 grid grid-cols-2 gap-16 text-[12px]">
         <div className="border-t border-[#1a1a1a] pt-1.5">Signature of owner / warden</div>
@@ -135,7 +148,7 @@ function AadhaarSummary({ r }: { r: Resident }) {
         <div className="grid h-[118px] w-[96px] place-items-center bg-[#f4f3f0] text-[26px] font-semibold text-[#3c3b37]">{initials(r.name)}</div>
         <div className="grid flex-1 grid-cols-2 gap-x-8">
           <Field label="Name" value={r.name} />
-          <Field label="Date of birth" value={f.date(r.dob)} />
+          <Field label="Date of birth" value={r.dob ? f.date(r.dob) : ""} />
           <Field label="Gender" value={r.gender === "F" ? "Female" : "Male"} />
           <Field label="Aadhaar" value={`XXXX XXXX ${r.kyc.aadhaarLast4}`} mono />
           <Field label="Address" value={`${r.hometown}, Kerala`} />
@@ -147,8 +160,12 @@ function AadhaarSummary({ r }: { r: Resident }) {
   );
 }
 
+const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+
 function Agreement({ r }: { r: Resident }) {
   const f = useFormat();
+  // sample hostels show an e-signed copy and the demo's mess rebate; a real one prints a copy to sign
+  const sample = useIsSample();
   const room = roomById[r.bedId.split("-").slice(0, 2).join("-")];
   return (
     <div className="text-[13px] leading-relaxed">
@@ -156,15 +173,15 @@ function Agreement({ r }: { r: Resident }) {
       <p className="mt-6">This agreement is made on {f.date(r.checkInDate)} between <b>{hostel.name}</b>, {hostel.address} (&ldquo;the hostel&rdquo;), and <b>{r.name}</b> (&ldquo;the resident&rdquo;).</p>
       <ol className="mt-4 list-decimal space-y-2 pl-5">
         <li>The resident is allotted bed {r.bedId} in a {room.type === "six" ? "6-bed" : room.type} room at {f.inr(room.rent)} per month{r.messPlan ? `, with mess at ${f.inr(hostel.messFee)} per month` : ""}.</li>
-        <li>Rent is due by the {hostel.dueDay}th of every month. Invoices and UPI payment links are sent on WhatsApp.</li>
+        <li>Rent is due by the {ordinal(hostel.dueDay)} of every month. Invoices and UPI payment links are sent in the StayOS app.</li>
         <li>A refundable deposit of {f.inr(hostel.deposit)} is held and returned within 15 days of check-out, less any dues.</li>
-        <li>Mess meals can be skipped in the app before the cut-off time. A rebate of ₹70 a day applies when away three or more days in a row.</li>
+        <li>Mess meals can be skipped in the app before the cut-off time.{sample ? " A rebate of ₹70 a day applies when away three or more days in a row." : ""}</li>
         <li>The gate closes at {curfewLabel(r.bedId.split("-")[0])}. Late entry needs a gate pass approved by the parent or guardian.</li>
         <li>Either side may end this agreement with 30 days&apos; notice.</li>
       </ol>
       <div className="mt-16 grid grid-cols-2 gap-16 text-[12px]">
         <div className="border-t border-[#1a1a1a] pt-1.5">For {hostel.name}</div>
-        <div className="border-t border-[#1a1a1a] pt-1.5">{r.name} · e-signed {f.date(r.checkInDate)}</div>
+        <div className="border-t border-[#1a1a1a] pt-1.5">{r.name}{sample ? ` · e-signed ${f.date(r.checkInDate)}` : ""}</div>
       </div>
     </div>
   );

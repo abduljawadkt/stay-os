@@ -6,6 +6,10 @@ export type RoomType = "single" | "double" | "triple" | "six";
 export type BedStatus = "occupied" | "vacant" | "reserved" | "maintenance";
 export type Meal = "breakfast" | "lunch" | "snacks" | "dinner";
 export type LunchSpot = "institute" | "hostel";
+/** Meals that can be had away from the hostel's own dining. Snacks are always at the hostel. */
+export type PlaceMeal = "breakfast" | "lunch" | "dinner";
+/** Where a meal is had: the resident's institute, the hostel (their own block's dining) or another block's dining. */
+export type MealPlace = "institute" | "hostel" | `block:${string}`;
 export type ISODate = string; // 2026-11-27
 export type ISODateTime = string; // 2026-11-27T10:24:00+05:30
 
@@ -67,7 +71,7 @@ export interface Resident {
   name: string;
   gender: Gender;
   phone: string;
-  dob: ISODate;
+  dob: ISODate | null;
   bloodGroup: string;
   hometown: string;
   occupation: "student" | "professional";
@@ -210,8 +214,10 @@ export interface MealOptOut {
   meals: Meal[];
   reason: string;
   source: "app" | "whatsapp";
-  /** Where lunch is had that day. Missing means the default, the institute (college or office). */
+  /** Lunch place as older app versions saved it; kept in step with mealAt.lunch by the database. */
   lunchAt?: LunchSpot;
+  /** Where each meal is had that day. Missing meals use the defaults (see mealPlace in lib/selectors). */
+  mealAt?: Partial<Record<PlaceMeal, MealPlace>>;
   createdAt: ISODateTime;
 }
 export interface Mess {

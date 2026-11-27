@@ -47,6 +47,20 @@ for (const [role, email] of [["owner", "owner@demo.stayos.space"], ["warden", "w
     expect(`${role} can record activity about their own resident`, mine.status < 300);
     const other = await api(jwt, "activity", { method: "POST", body: JSON.stringify({ org_id: DEMO, id: `CHECK-${role}-other`, at: "2026-11-27T10:00:00+05:30", kind: "optout", data: { residentId: "R-1001", meals: ["lunch"] } }) });
     expect(`${role} cannot record activity about another resident`, other.status === 403);
+    // where each meal is had (db/migrations/015)
+    if (role === "resident") {
+      const row = (meal_at) => ({ org_id: DEMO, id: "CHECK-MP", resident_id: "R-1042", date: "2026-12-20", meals: [], reason: "", source: "app", meal_at });
+      const save = (body) => api(jwt, "meal_optouts?on_conflict=org_id,id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=representation" }, body: JSON.stringify(body) });
+      const ok = await save(row({ breakfast: "institute", lunch: "block:B", dinner: "hostel" }));
+      expect("resident can choose where each meal is had", ok.status < 300 && ok.data?.[0]?.meal_at?.lunch === "block:B");
+      expect("lunch at a block counts as lunch at the hostel for older apps", ok.data?.[0]?.lunch_at === "hostel");
+      const bad = await save(row({ dinner: "kitchen" }));
+      expect("a made-up meal place is refused", bad.status >= 400);
+      const old = await save({ ...row({}), lunch_at: "institute" });
+      expect("an older app setting lunch keeps both in step", old.status < 300 && old.data?.[0]?.lunch_at === "institute" && !old.data?.[0]?.meal_at?.lunch);
+      // residents can't delete; the office can
+      await api(await login("owner@demo.stayos.space"), `meal_optouts?org_id=eq.${DEMO}&id=eq.CHECK-MP`, { method: "DELETE" });
+    }
   } else {
     expect(`${role} sees the whole hostel`, row.residents > 300 && row.invoices > 1000);
     // expenses are the owner's (db/migrations/008)
@@ -55,6 +69,38 @@ for (const [role, email] of [["owner", "owner@demo.stayos.space"], ["warden", "w
       const exp = await api(jwt, "expenses", { method: "POST", body: JSON.stringify({ org_id: DEMO, id: "CHECK", date: "2026-11-27", category: "food", vendor: "x", amount: 1 }) });
       expect("warden cannot add expenses", exp.status === 403);
     } else expect("owner sees the expenses", row.expenses > 100);
+    // staff pay is the owner's too (db/migrations/014): wardens see staff and attendance, never salary or advance
+    const pay = await api(jwt, `staff_pay?select=salary&org_id=eq.${DEMO}`);
+    const staffRows = await api(jwt, `staff?select=id,salary,advance,attendance&org_id=eq.${DEMO}`);
+    const snap = await api(jwt, "rpc/org_snapshot", { method: "POST", body: JSON.stringify({ p_org: DEMO }) });
+    const snapPaid = (snap.data?.staff ?? []).filter((x) => x.salary > 0).length;
+    expect(`${role}: the staff table itself holds no pay`, staffRows.data?.length > 0 && staffRows.data.every((x) => x.salary === 0 && x.advance === 0));
+    if (role === "warden") {
+      expect("warden can't read staff pay", pay.status === 200 && pay.data.length === 0);
+      expect("warden's hostel data has no salaries", snapPaid === 0 && snap.data?.staff?.length > 0);
+      // the app saves the whole staff row when a warden marks attendance; the pay in it must be ignored
+      const s0 = staffRows.data[0];
+      const owner = await login("owner@demo.stayos.space");
+      const before = (await api(owner, `staff_pay?select=salary,advance&org_id=eq.${DEMO}&staff_id=eq.${s0.id}`)).data?.[0];
+      const up = await api(jwt, "staff?on_conflict=org_id,id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ ...(await api(jwt, `staff?select=*&org_id=eq.${DEMO}&id=eq.${s0.id}`)).data[0], salary: 1, advance: 999 }) });
+      const after = (await api(owner, `staff_pay?select=salary,advance&org_id=eq.${DEMO}&staff_id=eq.${s0.id}`)).data?.[0];
+      const kept = up.status < 300 && before && after && after.salary === before.salary && after.advance === before.advance;
+      expect("a warden saving a staff row can't change pay", kept);
+      if (!kept) console.log("     ", up.status, JSON.stringify(up.data)?.slice(0, 200), JSON.stringify(before), JSON.stringify(after));
+    } else {
+      expect("owner reads staff pay", pay.status === 200 && pay.data.length > 0 && pay.data.every((x) => x.salary > 0));
+      expect("owner's hostel data has the salaries", snapPaid === snap.data?.staff?.length && snapPaid > 0);
+      const s0 = staffRows.data[0];
+      const full = (await api(jwt, `staff?select=*&org_id=eq.${DEMO}&id=eq.${s0.id}`)).data[0];
+      const was = (await api(jwt, `staff_pay?select=salary,advance&org_id=eq.${DEMO}&staff_id=eq.${s0.id}`)).data[0];
+      const save = (body) => api(jwt, "staff?on_conflict=org_id,id", { method: "POST", headers: { prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(body) });
+      await save({ ...full, salary: was.salary + 500, advance: was.advance });
+      const changed = (await api(jwt, `staff_pay?select=salary&org_id=eq.${DEMO}&staff_id=eq.${s0.id}`)).data[0];
+      await save({ ...full, salary: was.salary, advance: was.advance });
+      const back = (await api(jwt, `staff_pay?select=salary&org_id=eq.${DEMO}&staff_id=eq.${s0.id}`)).data[0];
+      expect("owner changes a salary the way the app saves", changed?.salary === was.salary + 500 && back?.salary === was.salary);
+      expect("nobody can write staff pay directly", (await api(jwt, "staff_pay", { method: "POST", body: JSON.stringify({ org_id: DEMO, staff_id: s0.id, salary: 1 }) })).status >= 400);
+    }
     const direct = await api(jwt, `orgs?id=eq.${DEMO}`, { method: "PATCH", body: JSON.stringify({ plan: "scale" }) });
     expect(`${role} cannot set the plan directly`, direct.status === 403);
   }

@@ -2,7 +2,7 @@
 import {
   hostel, rooms, messMenu, staff as staffList,
   type Bed, type Complaint, type Expense, type ExpenseCategory, type GateEvent, type Invoice, type LeaveRequest,
-  type Meal, type MealOptOut, type Resident, type Room, type Staff,
+  type Meal, type MealOptOut, type MealPlace, type PlaceMeal, type Resident, type Room, type Staff,
 } from "@/data";
 
 export const MEALS: Meal[] = ["breakfast", "lunch", "snacks", "dinner"];
@@ -197,16 +197,36 @@ export function headcount(residents: Resident[], optOuts: MealOptOut[], date: st
   return MEALS.map((meal) => ({ meal, enrolled: enrolled.length, skipped: skipped[meal], cooking: enrolled.length - skipped[meal] }));
 }
 
-/** Lunch eaters for a day, split by where they eat: at their institute (the default) or at the hostel. */
-export function lunchSplit(residents: Resident[], optOuts: MealOptOut[], date: string) {
-  const eating = new Set(messEnrolled(residents, date).map((r) => r.id));
-  let hostel = 0;
-  for (const o of optOuts) {
-    if (o.date !== date || !eating.has(o.residentId)) continue;
-    if (o.meals.includes("lunch")) eating.delete(o.residentId);
-    else if (o.lunchAt === "hostel") hostel++;
+export const PLACE_MEALS: PlaceMeal[] = ["breakfast", "lunch", "dinner"];
+export const isPlaceMeal = (m: Meal): m is PlaceMeal => m !== "snacks";
+/** Where a meal is had when the resident hasn't chosen: breakfast and dinner at the hostel, lunch at the institute. */
+export const DEFAULT_PLACE: Record<PlaceMeal, MealPlace> = { breakfast: "hostel", lunch: "institute", dinner: "hostel" };
+/** The resident's choice for that day's meal, or the default. */
+export function mealPlace(o: Pick<MealOptOut, "mealAt" | "lunchAt"> | undefined, meal: PlaceMeal): MealPlace {
+  const p = o?.mealAt?.[meal];
+  if (p) return p;
+  if (meal === "lunch" && o?.lunchAt === "hostel") return "hostel";
+  return DEFAULT_PLACE[meal];
+}
+export const blockOfBed = (bedId: string) => bedId.split("-")[0];
+/** The block whose dining serves this place: the resident's own for "hostel", none for the institute. */
+export const placeBlock = (place: MealPlace, ownBlock: string) => (place === "institute" ? null : place === "hostel" ? ownBlock : place.slice(6));
+
+/** Who has a meal where on a day: at their institute, at the hostel, and the hostel number split by block. */
+export function placeSplit(residents: Resident[], optOuts: MealOptOut[], date: string, meal: PlaceMeal) {
+  const mine = new Map<string, MealOptOut>();
+  for (const o of optOuts) if (o.date === date) mine.set(o.residentId, o);
+  let institute = 0;
+  const byBlock: Record<string, number> = {};
+  for (const r of messEnrolled(residents, date)) {
+    const o = mine.get(r.id);
+    if (o?.meals.includes(meal)) continue;
+    const block = placeBlock(mealPlace(o, meal), blockOfBed(r.bedId));
+    if (block === null) institute++;
+    else byBlock[block] = (byBlock[block] ?? 0) + 1;
   }
-  return { hostel, institute: eating.size - hostel };
+  const hostel = Object.values(byBlock).reduce((a, b) => a + b, 0);
+  return { institute, hostel, byBlock };
 }
 
 export function wasteSaved(optOuts: MealOptOut[], month: string, uptoDate: string) {

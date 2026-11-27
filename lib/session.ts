@@ -63,6 +63,13 @@ export interface OrgRow {
 }
 
 /** Same rule as app.org_active in the database: the demo, a running trial, or a StayOS-approved period. */
+/**
+ * A sample hostel (the shared demo, or one started "with sample data") runs on made-up people and a demo clock, so
+ * StayOS simulates things there (DigiLocker, police reference numbers, WhatsApp replies). A real hostel never does.
+ */
+export const isSampleOrg = (o: { is_demo?: boolean; settings?: { clock?: { mode?: string } } } | null | undefined) =>
+  !o || !!o.is_demo || o.settings?.clock?.mode === "demo";
+
 export function orgIsActive(o: { is_demo?: boolean; subscription_status: string; trial_ends_at: string | null; current_period_end: string | null }, now = Date.now()) {
   if (o.is_demo) return true;
   if (o.subscription_status === "trialing") return !o.trial_ends_at || new Date(o.trial_ends_at).getTime() > now;
@@ -382,3 +389,6 @@ export function allowedViews(role: MemberRole | undefined): MemberRole[] {
 }
 
 export const isStaffRole = (r: MemberRole | undefined) => r === "owner" || r === "warden";
+
+/** True in sample hostels (and before a hostel is open); false in a real hostel. */
+export const useIsSample = () => useSession((s) => isSampleOrg(s.org));

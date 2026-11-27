@@ -3,10 +3,10 @@
 import { create } from "zustand";
 import {
   emptySeed, hostel, type Seed, type Activity, type Bed, type Channel, type Complaint, type ComplaintCategory, type ComplaintStatus,
-  type Expense, type Invoice, type LeaveRequest, type LunchSpot, type Meal, type Resident, type Visitor, type WAMessage, type WAThread,
+  type Expense, type Invoice, type LeaveRequest, type Meal, type MealPlace, type PlaceMeal, type Resident, type Visitor, type WAMessage, type WAThread,
 } from "@/data";
 import { nowISO, nowMs, todayISO } from "./clock";
-import { roomById, rebates, daysInMonth, addDays, MEALS } from "./selectors";
+import { roomById, rebates, daysInMonth, addDays, MEALS, blockOfBed, mealPlace } from "./selectors";
 import { demo } from "@/config/demo";
 import { staff as staffList } from "@/data";
 
@@ -45,13 +45,14 @@ export interface CheckInInput {
   name: string;
   gender: "M" | "F";
   phone: string;
-  dob: string;
+  dob: string | null;
   bloodGroup: string;
   hometown: string;
   occupation: "student" | "professional";
   institution: string;
   parent: Resident["parent"];
-  aadhaarLast4: string;
+  /** what was actually checked: DigiLocker (sample hostels), the original card, or nothing yet */
+  kyc: Resident["kyc"];
   bedId: string;
   messPlan: boolean;
   sendWelcome: boolean;
@@ -70,14 +71,16 @@ interface Actions {
   sendReminders: (invoiceIds: string[]) => number;
   moveResident: (residentId: string, toBedId: string) => void;
   markBedReady: (bedId: string) => void;
-  submitPolice: (residentId: string) => void;
-  verifyKyc: (residentId: string) => void;
+  /** with the reference number the police station gave; sample hostels make one up */
+  submitPolice: (residentId: string, refNo?: string) => void;
+  /** sample hostels: DigiLocker; real hostels: the original Aadhaar card was checked, with its last 4 digits */
+  verifyKyc: (residentId: string, offline?: { aadhaarLast4: string }) => void;
   checkIn: (input: CheckInInput) => string;
   addComplaint: (input: { residentId: string; category: ComplaintCategory; title: string; description: string; channel: Channel; photo?: string; text?: string }) => string;
   setComplaintStatus: (id: string, status: ComplaintStatus) => void;
   toggleOptOut: (residentId: string, date: string, meal: Meal, source?: "app" | "whatsapp") => boolean;
-  /** Where the resident has lunch that day: their institute (the default) or the hostel. */
-  setLunchAt: (residentId: string, date: string, spot: LunchSpot) => void;
+  /** Where the resident has a meal that day: their institute, the hostel (own block) or another block. */
+  setMealAt: (residentId: string, date: string, meal: PlaceMeal, place: MealPlace) => void;
   requestLeave: (residentId: string, input: { from: string; to: string; reason: string; destination: string }) => string;
   decideLeave: (id: string, decision: "approved" | "rejected", via?: "app" | "whatsapp") => void;
   addExpense: (e: Omit<Expense, "id" | "status">) => string;
@@ -297,12 +300,19 @@ export const useDemo = create<DemoState>()(
       markBedReady: (bedId) =>
         set((s) => ({ beds: s.beds.map((b) => (b.id === bedId && b.status === "maintenance" ? { ...b, status: "vacant" as const, maintenanceNote: undefined } : b)) })),
 
-      submitPolice: (residentId) =>
+      submitPolice: (residentId, refNo) =>
         set((s) => ({
-          residents: s.residents.map((r) => (r.id === residentId ? { ...r, police: { status: "submitted" as const, refNo: `KP/KKD/TV/2026/${Math.floor(10000 + Math.random() * 89999)}`, submittedOn: todayISO() } } : r)),
+          residents: s.residents.map((r) => (r.id === residentId ? { ...r, police: { status: "submitted" as const, refNo: refNo?.trim() || (refNo === undefined ? `KP/KKD/TV/2026/${Math.floor(10000 + Math.random() * 89999)}` : null), submittedOn: todayISO() } } : r)),
         })),
-      verifyKyc: (residentId) =>
-        set((s) => ({ residents: s.residents.map((r) => (r.id === residentId ? { ...r, kyc: { ...r.kyc, status: "verified" as const, method: "digilocker" as const, verifiedOn: todayISO() } } : r)) })),
+      verifyKyc: (residentId, offline) =>
+        set((s) => ({
+          residents: s.residents.map((r) => (r.id === residentId ? {
+            ...r,
+            kyc: offline
+              ? { ...r.kyc, status: "verified" as const, method: "offline" as const, aadhaarLast4: offline.aadhaarLast4, verifiedOn: todayISO() }
+              : { ...r.kyc, status: "verified" as const, method: "digilocker" as const, verifiedOn: todayISO() },
+          } : r)),
+        })),
 
       checkIn: (input) => {
         const s = get();
@@ -311,7 +321,7 @@ export const useDemo = create<DemoState>()(
         const r: Resident = {
           id, name: input.name, gender: input.gender, phone: input.phone, dob: input.dob, bloodGroup: input.bloodGroup, hometown: input.hometown,
           occupation: input.occupation, institution: input.institution, parent: input.parent, bedId: input.bedId, checkInDate: today, checkOutDate: null,
-          status: "active", kyc: { status: "verified", method: "digilocker", aadhaarLast4: input.aadhaarLast4, verifiedOn: today },
+          status: "active", kyc: input.kyc,
           police: { status: "pending", refNo: null, submittedOn: null }, messPlan: input.messPlan, deposit: hostel.deposit,
         };
         const room = roomById[s.beds.find((b) => b.id === input.bedId)!.roomId];
@@ -392,14 +402,20 @@ export const useDemo = create<DemoState>()(
         });
       },
 
-      setLunchAt: (residentId, date, spot) => {
+      setMealAt: (residentId, date, meal, place) => {
         const s = get();
+        const r = s.residents.find((x) => x.id === residentId);
+        // choosing your own block is the same as "the hostel"
+        const p: MealPlace = r && place === `block:${blockOfBed(r.bedId)}` ? "hostel" : place;
         const existing = s.optOuts.find((o) => o.residentId === residentId && o.date === date);
-        if ((existing?.lunchAt ?? "institute") === spot) return;
+        if (mealPlace(existing, meal) === p) return;
+        const mealAt = { ...existing?.mealAt, [meal]: p };
+        // older app versions read lunch from lunchAt
+        const lunchAt = meal === "lunch" ? (p === "institute" ? "institute" as const : "hostel" as const) : existing?.lunchAt;
         set({
           optOuts: existing
-            ? s.optOuts.map((o) => (o === existing ? { ...o, lunchAt: spot } : o))
-            : [...s.optOuts, { id: uid("OO"), residentId, date, meals: [], reason: "", source: "app", createdAt: nowISO(), lunchAt: spot }],
+            ? s.optOuts.map((o) => (o === existing ? { ...o, mealAt, lunchAt } : o))
+            : [...s.optOuts, { id: uid("OO"), residentId, date, meals: [], reason: "", source: "app", createdAt: nowISO(), mealAt, lunchAt: lunchAt ?? "institute" }],
         });
       },
       toggleOptOut: (residentId, date, meal, source = "app") => {

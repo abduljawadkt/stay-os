@@ -15,9 +15,12 @@ import { Avatar } from "@/components/common/avatar";
 import { InvoiceChip, KycChip, LeaveChip, PoliceChip } from "@/components/common/chips";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentViewer, type DocKind } from "./documents";
 import { useDemo } from "@/lib/store";
+import { useIsSample } from "@/lib/session";
 import { useUI } from "@/components/shell/ui-store";
 import { useFormat, useScreenState } from "@/lib/hooks";
 import { roomById } from "@/lib/selectors";
@@ -36,6 +39,11 @@ export function ProfileScreen() {
   const id = params.get("id") ?? "";
   const [tab, setTab] = useState(params.get("tab") ?? "overview");
   const [doc, setDoc] = useState<DocKind | null>(null);
+  // real hostels: the office checks the original Aadhaar card and types the police station's reference number
+  const sample = useIsSample();
+  const [last4, setLast4] = useState("");
+  const [seen, setSeen] = useState(false);
+  const [policeRef, setPoliceRef] = useState("");
   const { loading, error, retry } = useScreenState(`profile-${id}`);
   const residents = useDemo((s) => s.residents);
   const invoices = useDemo((s) => s.invoices);
@@ -111,7 +119,7 @@ export function ProfileScreen() {
                   <CardHeader title={t("details")} />
                   <dl className="grid gap-x-8 px-5 pb-5 sm:grid-cols-2">
                     <Item icon={Phone} label={t("phone")} value={r.phone} />
-                    <Item icon={CalendarDays} label={t("dob")} value={f.date(r.dob)} />
+                    <Item icon={CalendarDays} label={t("dob")} value={r.dob ? f.date(r.dob) : "—"} />
                     <Item icon={Droplet} label={t("blood")} value={r.bloodGroup} />
                     <Item icon={Home} label={t("hometown")} value={r.hometown} />
                     <Item icon={GraduationCap} label={t("occupation")} value={r.institution} />
@@ -173,18 +181,34 @@ export function ProfileScreen() {
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-fg">{t("kyc.title")}</p>
-                        <p className="text-xs text-fg-3">{r.kyc.method === "digilocker" ? t("kyc.digilocker") : t("kyc.offline")}</p>
+                        <p className="text-xs text-fg-3">{r.kyc.status !== "verified" ? t("kyc.notChecked") : r.kyc.method === "digilocker" ? t("kyc.digilocker") : t("kyc.offline")}</p>
                       </div>
                     </div>
                     <dl className="mt-4 space-y-3 text-sm">
-                      <div className="flex justify-between"><dt className="text-fg-2">{t("kyc.aadhaar")}</dt><dd className="font-mono text-fg">XXXX XXXX {r.kyc.aadhaarLast4}</dd></div>
+                      <div className="flex justify-between"><dt className="text-fg-2">{t("kyc.aadhaar")}</dt><dd className="font-mono text-fg">{r.kyc.aadhaarLast4 ? `XXXX XXXX ${r.kyc.aadhaarLast4}` : "—"}</dd></div>
                       <div className="flex justify-between"><dt className="text-fg-2">{t("kyc.status")}</dt><dd><KycChip status={r.kyc.status} /></dd></div>
                       {r.kyc.verifiedOn && <div className="flex justify-between"><dt className="text-fg-2">{t("kyc.on")}</dt><dd className="text-fg tnum">{f.date(r.kyc.verifiedOn)}</dd></div>}
                     </dl>
                     {r.kyc.status === "verified" ? (
-                      <p className="mt-4 rounded-md bg-surface-2 p-3 text-xs text-fg-2">{t("kyc.matched")}</p>
-                    ) : (
+                      <p className="mt-4 rounded-md bg-surface-2 p-3 text-xs text-fg-2">{r.kyc.method === "digilocker" ? t("kyc.matched") : t("kyc.matchedOffline")}</p>
+                    ) : sample ? (
                       <Button variant="primary" className="mt-4 w-full" onClick={() => verifyKyc(r.id)}><Fingerprint /> {t("kyc.verifyNow")}</Button>
+                    ) : (
+                      <div className="mt-4 space-y-3 border-t border-line pt-4">
+                        <div>
+                          <label htmlFor="kyc-last4" className="text-xs text-fg-3">{t("kyc.last4")}</label>
+                          <Input id="kyc-last4" value={last4 || r.kyc.aadhaarLast4} inputMode="numeric" maxLength={4} autoComplete="off" className="mt-1 font-mono tnum"
+                            onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} />
+                        </div>
+                        <label htmlFor="kyc-seen" className="flex items-start gap-2.5 text-sm text-fg">
+                          <Checkbox id="kyc-seen" checked={seen} onCheckedChange={(v) => setSeen(v === true)} className="mt-0.5" />
+                          <span>{t("kyc.seen")}</span>
+                        </label>
+                        <Button variant="primary" className="w-full" disabled={!seen || !/^\d{4}$/.test(last4 || r.kyc.aadhaarLast4)}
+                          onClick={() => { verifyKyc(r.id, { aadhaarLast4: last4 || r.kyc.aadhaarLast4 }); setSeen(false); setLast4(""); }}>
+                          <ShieldCheck /> {t("kyc.markChecked")}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </Card>
@@ -196,12 +220,12 @@ export function ProfileScreen() {
                       ["id", IdCard, true],
                       ["agreement", FileText, true],
                       ["police", FileCheck2, true],
-                    ] as [DocKind, React.ElementType, boolean][]).map(([k, Icon, ok]) => (
+                    ] as [DocKind, React.ElementType, boolean][]).filter(([k]) => sample || k === "agreement" || k === "police").map(([k, Icon, ok]) => (
                       <li key={k} className="flex items-center gap-3 px-3 py-3">
                         <span className="grid size-9 place-items-center rounded-md bg-surface-2 text-fg-2"><Icon className="size-4" aria-hidden /></span>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-fg">{t(`docs.${k}`)}</p>
-                          <p className="text-xs text-fg-3">{t(`docs.${k}Meta`, { date: f.date(r.checkInDate), brand: brand.name })}</p>
+                          <p className="text-xs text-fg-3">{t(!sample && k === "agreement" ? "docs.agreementPrint" : `docs.${k}Meta`, { date: f.date(r.checkInDate), brand: brand.name })}</p>
                         </div>
                         {ok ? <Button variant="quiet" size="sm" onClick={() => setDoc(k)}><Eye /> {t("docs.view")}</Button> : <Badge variant="warning">{t("docs.missing")}</Badge>}
                       </li>
@@ -288,16 +312,23 @@ export function ProfileScreen() {
                   <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-2"><FileCheck2 className="size-6" aria-hidden /></span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-fg">{t("police.title")}</p><PoliceChip status={r.police.status} /></div>
-                    <p className="mt-1 text-small text-fg-2">{t("police.body")}</p>
+                    <p className="mt-1 text-small text-fg-2">{sample ? t("police.body") : t("police.bodyReal")}</p>
                     <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                      <div><dt className="text-xs text-fg-3">{t("police.station")}</dt><dd className="text-fg">Nadakkavu PS, Kozhikode City</dd></div>
+                      {sample && <div><dt className="text-xs text-fg-3">{t("police.station")}</dt><dd className="text-fg">Nadakkavu PS, Kozhikode City</dd></div>}
                       <div><dt className="text-xs text-fg-3">{t("police.ref")}</dt><dd className="font-mono text-fg">{r.police.refNo ?? "—"}</dd></div>
                       <div><dt className="text-xs text-fg-3">{t("police.submitted")}</dt><dd className="text-fg tnum">{r.police.submittedOn ? f.date(r.police.submittedOn) : "—"}</dd></div>
                       <div><dt className="text-xs text-fg-3">{t("police.autofill")}</dt><dd className="text-fg">{t("police.autofillValue")}</dd></div>
                     </dl>
                     <div className="mt-5 flex flex-wrap gap-2">
                       <Button variant={r.police.status === "pending" ? "secondary" : "primary"} onClick={() => setDoc("police")} data-tour="police-preview"><Eye /> {t("police.preview")}</Button>
-                      {r.police.status === "pending" && <Button variant="primary" onClick={() => submitPolice(r.id)}>{t("police.markSubmitted")}</Button>}
+                      {r.police.status === "pending" && (sample ? (
+                        <Button variant="primary" onClick={() => submitPolice(r.id)}>{t("police.markSubmitted")}</Button>
+                      ) : (
+                        <form className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto" onSubmit={(e) => { e.preventDefault(); submitPolice(r.id, policeRef); setPoliceRef(""); }}>
+                          <Input value={policeRef} onChange={(e) => setPoliceRef(e.target.value)} placeholder={t("police.refPlaceholder")} aria-label={t("police.ref")} className="min-w-0 flex-1 font-mono" maxLength={60} />
+                          <Button type="submit" variant="primary">{t("police.markSubmitted")}</Button>
+                        </form>
+                      ))}
                     </div>
                   </div>
                 </div>

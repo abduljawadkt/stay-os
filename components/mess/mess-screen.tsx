@@ -17,10 +17,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
-import { MEALS, headcount, lunchSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
+import { MEALS, headcount, isPlaceMeal, placeSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
 import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
-import { messMenu, staff, type Meal, type MenuItem } from "@/data";
+import { hostel, messMenu, staff, type Meal, type MenuItem } from "@/data";
+import { blockName } from "@/components/mobile/meal-place";
 import { neon, errorText } from "@/lib/neon";
 import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -66,7 +67,7 @@ export function MessScreen() {
   };
 
   const hc = useMemo(() => headcount(residents, optOuts, today), [residents, optOuts, today]);
-  const lunch = useMemo(() => lunchSplit(residents, optOuts, today), [residents, optOuts, today]);
+  const places = useMemo(() => ({ breakfast: placeSplit(residents, optOuts, today, "breakfast"), lunch: placeSplit(residents, optOuts, today, "lunch"), dinner: placeSplit(residents, optOuts, today, "dinner") }), [residents, optOuts, today]);
   const waste = useMemo(() => wasteSaved(optOuts, month, today), [optOuts, month, today]);
   const wasteYear = Math.round((waste.amount / Number(today.slice(8))) * 365);
   const rb = useMemo(() => rebates(optOuts, month), [optOuts, month]);
@@ -83,7 +84,7 @@ export function MessScreen() {
       <PageHeader
         title={t("title")}
         description={cook ? t("subtitleCook", { count: enrolled, name: cook.name }) : t("subtitle", { count: enrolled })}
-        actions={<Button variant="primary" onClick={() => toast(cook ? t("sentToKitchen", { name: cook.name.split(" ")[0] }) : t("sentToKitchenAll"), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}${h.meal === "lunch" ? ` (${t("headcount.split", lunch)})` : ""}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
+        actions={<Button variant="primary" onClick={() => toast(cook ? t("sentToKitchen", { name: cook.name.split(" ")[0] }) : t("sentToKitchenAll"), { description: hc.map((h) => `${tm(h.meal)} ${h.cooking}${isPlaceMeal(h.meal) && places[h.meal].institute ? ` (${t("headcount.split", { institute: places[h.meal].institute, hostel: places[h.meal].hostel })})` : ""}`).join(" · ") })}><Send /> {t("sendKitchen")}</Button>}
       />
       {error ? <Card><ErrorState what={t("what")} onRetry={retry} /></Card> : (
         <>
@@ -103,7 +104,7 @@ export function MessScreen() {
                       </div>
                       {loading ? <Sk className="mt-2 h-8 w-16" /> : <p className="mt-1 text-kpi font-semibold tracking-[-0.02em] text-fg tnum"><CountUp id={`hc-${h.meal}`} value={h.cooking} format={(v) => f.num(v)} /></p>}
                       <p className="text-xs text-fg-3 tnum">{t("headcount.of", { enrolled: h.enrolled, skipped: h.skipped })}</p>
-                      {h.meal === "lunch" && !loading && <p className="mt-0.5 text-xs font-medium text-fg-2 tnum">{t("headcount.split", lunch)}</p>}
+                      {isPlaceMeal(h.meal) && !loading && <PlaceLine split={places[h.meal]} className="mt-0.5 text-xs font-medium text-fg-2 tnum" />}
                       <p className="mt-2 truncate text-xs text-fg-2" title={label(menuFor(today)[h.meal])}><VegMark veg={menuFor(today)[h.meal].veg} className="mr-1 align-[-2px]" />{label(menuFor(today)[h.meal])}</p>
                       <p className="text-xs text-fg-3">{messMenu.servingTimes[h.meal]}</p>
                     </div>
@@ -292,6 +293,18 @@ function MonthGrid({ month, today, selected, onSelect, optOuts }: { month: strin
   );
 }
 
+/** "12 at institute · 300 at hostel", and in a hostel with several blocks, how many eat in each block. */
+function PlaceLine({ split, className }: { split: ReturnType<typeof placeSplit>; className?: string }) {
+  const t = useTranslations("mess.headcount");
+  const blocks = Object.keys(split.byBlock).sort();
+  return (
+    <>
+      <p className={className}>{t("split", { institute: split.institute, hostel: split.hostel })}</p>
+      {hostel.blocks.length > 1 && blocks.length > 0 && <p className={cn(className, "font-normal text-fg-3")}>{blocks.map((b) => `${blockName(b)} ${split.byBlock[b]}`).join(" · ")}</p>}
+    </>
+  );
+}
+
 function DayPanel({ date }: { date: string }) {
   const t = useTranslations("mess.cal");
   const tm = useTranslations("meals");
@@ -300,7 +313,7 @@ function DayPanel({ date }: { date: string }) {
   const residents = useDemo((s) => s.residents);
   const optOuts = useDemo((s) => s.optOuts);
   const hc = useMemo(() => headcount(residents, optOuts, date), [residents, optOuts, date]);
-  const lunch = useMemo(() => lunchSplit(residents, optOuts, date), [residents, optOuts, date]);
+  const places = useMemo(() => ({ breakfast: placeSplit(residents, optOuts, date, "breakfast"), lunch: placeSplit(residents, optOuts, date, "lunch"), dinner: placeSplit(residents, optOuts, date, "dinner") }), [residents, optOuts, date]);
   const th = useTranslations("mess.headcount");
   const menu = menuFor(date);
   const sp = messMenu.specials.find((s) => s.date === date);
@@ -312,7 +325,7 @@ function DayPanel({ date }: { date: string }) {
           <li key={h.meal} className="py-2.5">
             <div className="flex items-baseline justify-between text-sm"><span className="font-medium text-fg">{tm(h.meal)}</span><span className="text-fg tnum">{h.cooking}<span className="text-xs text-fg-3"> / {h.enrolled}</span></span></div>
             <p className="mt-0.5 flex items-center gap-1.5 text-xs text-fg-2"><VegMark veg={menu[h.meal].veg} />{locale === "ml" ? menu[h.meal].ml : menu[h.meal].en}</p>
-            {h.meal === "lunch" && <p className="mt-0.5 text-xs text-fg-3 tnum">{th("split", lunch)}</p>}
+            {isPlaceMeal(h.meal) && <PlaceLine split={places[h.meal]} className="mt-0.5 text-xs text-fg-3 tnum" />}
           </li>
         ))}
       </ul>
