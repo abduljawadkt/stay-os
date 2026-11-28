@@ -115,9 +115,12 @@ npm run tutorial:video -- resident      # one part: owner, resident, parent or i
 npm run tutorial:video -- all --dry     # check every step quickly; screenshots in tutorial-videos/.work/
 ```
 
-The demo hostel is shared. The resident part skips a meal and changes a lunch spot on screen; it notes how that day
-was first and puts it back afterwards. For paid ads, use a human voice-over or a licensed voice service instead of
-edge-tts.
+The demo hostel is shared. The resident part skips a meal and changes where lunch is had (institute, hostel, which
+block) on screen; it notes how that day was first and puts it back afterwards. The owner part's second clip checks in a
+resident the way a real hostel does (original Aadhaar seen, police reference number): it films a temporary hostel that
+it creates for the demo owner and deletes afterwards, so it needs `DATABASE_URL` in `.env.local`. It records from the
+live site, so deploy app changes before recording. For paid ads, use a human voice-over or a licensed voice service
+instead of edge-tts.
 
 ## Deploy
 

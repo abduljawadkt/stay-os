@@ -112,6 +112,7 @@
       "day": "ദിവസം",
       "today": "ഇന്ന്",
       "cutoff": "{time} വരെ മാറ്റാം",
+      "cutoffPrev": "തലേന്ന് {time} വരെ മാറ്റാം",
       "cutoffPassed": "കട്ട്-ഓഫ് കഴിഞ്ഞു",
       "eating": "കഴിക്കും",
       "skipping": "ഒഴിവാക്കി",

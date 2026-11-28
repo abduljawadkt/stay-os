@@ -218,6 +218,14 @@
         "done": "Approved by Rajesh"
       }
     },
+    "notFound": {
+      "title": "This page isn't here",
+      "body": "The link may be old or mistyped. Everything in StayOS is a tap away from the home page.",
+      "home": "Go to the home page",
+      "demo": "Try the live demo",
+      "account": "Have an account?",
+      "signIn": "Sign in"
+    },
     "demo": {
       "title": "Try StayOS",
       "body": "Pick who you want to be. You'll use Al Noor Residency, a 300-bed sample hostel shared by everyone trying {brand}.",

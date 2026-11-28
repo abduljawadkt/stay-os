@@ -14,8 +14,11 @@
 // Env: TUTORIAL_BASE (default https://stayos.space), EDGE_TTS (path to edge-tts), TUTORIAL_VOICE
 // (default ml-IN-SobhanaNeural; ml-IN-MidhunNeural is the male voice).
 //
-// The demo hostel is shared. The parts only look around, except the resident part, which skips a meal and changes a
-// lunch spot on screen; it notes how that day was before recording and puts it back afterwards.
+// The demo hostel is shared. The parts only look around, except the resident part, which skips a meal and changes
+// where lunch is had on screen; it notes how that day was before recording and puts it back afterwards.
+// The owner part's second clip checks in a resident the way a real hostel does (Aadhaar seen in person, police
+// reference number). It films a temporary hostel that it creates in the database for the demo owner and deletes
+// afterwards, so it needs DATABASE_URL in .env.local. Other people trying the demo still land in the sample hostel.
 import { webkit, devices } from "playwright";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -134,17 +137,63 @@ async function signIn(p, person, home) {
 
 // The resident part changes these on screen; they are noted before recording and put back after.
 const DEMO_DAY = 6; // the 7th day on the resident's Mess screen
-const residentMeals = (p) => ({
-  dinner: p.getByRole("switch", { name: /അത്താഴം/ }),
-  lunch: p.getByRole("switch", { name: /ഉച്ചഭക്ഷണം/ }),
-  hostel: p.getByRole("radio", { name: "ഹോസ്റ്റലിൽ" }),
-  institute: p.getByRole("radio", { name: "സ്ഥാപനത്തിൽ" }),
-});
+const residentMeals = (p) => {
+  // breakfast, lunch and dinner each have a place picker; the videos use lunch's
+  const place = p.getByRole("radiogroup", { name: /^ഉച്ചഭക്ഷണം എവിടെ/ });
+  return {
+    dinner: p.getByRole("switch", { name: /അത്താഴം/ }),
+    lunch: p.getByRole("switch", { name: /ഉച്ചഭക്ഷണം/ }),
+    hostel: place.getByRole("radio", { name: "ഹോസ്റ്റലിൽ" }),
+    institute: place.getByRole("radio", { name: "സ്ഥാപനത്തിൽ" }),
+    // shown once lunch is at the hostel: the resident's own block first ("· നിങ്ങളുടേത്"), then the others
+    blocks: p.getByRole("radiogroup", { name: /^ഉച്ചഭക്ഷണം ഏത് ബ്ലോക്കിൽ/ }).getByRole("radio"),
+  };
+};
+/** Where lunch is on the demo day: "institute", or the name on the block chip that is on. */
+async function lunchPlace(p) {
+  const m = residentMeals(p);
+  if ((await m.institute.getAttribute("aria-checked")) === "true") return "institute";
+  for (const chip of await m.blocks.all()) if ((await chip.getAttribute("aria-checked")) === "true") return (await chip.innerText()).trim();
+  return "hostel";
+}
+async function setLunchPlace(p, where) {
+  const m = residentMeals(p);
+  if (where === "institute") return setChecked(p, m.institute, true);
+  await setChecked(p, m.hostel, true);
+  await sleep(400);
+  const chip = where === "hostel" ? m.blocks.first() : m.blocks.filter({ hasText: where }).first();
+  if (await chip.count()) await setChecked(p, chip, true);
+}
 async function openDemoDay(p) {
   await p.goto(BASE + "/resident/mess/", { waitUntil: "domcontentloaded" });
   await sleep(3000);
   await p.getByRole("tab").nth(DEMO_DAY).click();
   await sleep(600);
+}
+
+// The owner part's second clip films a real (not sample) hostel: check-in asks for the original Aadhaar card and the
+// police form takes the station's reference number. This makes one for the demo owner, set up like a new sign-up
+// with an empty layout (Block A for men, Block B for women), and deletes it afterwards.
+const REAL_ORG = "00000000-0000-0000-0000-0000007e0201";
+async function realHostel(action) {
+  const { default: pg } = await import("pg");
+  const { default: dotenv } = await import("dotenv");
+  dotenv.config({ path: path.join(ROOT, ".env.local"), quiet: true });
+  if (!process.env.DATABASE_URL) throw new Error("The owner part needs DATABASE_URL in .env.local (it makes a temporary hostel)");
+  const db = new pg.Client({ connectionString: process.env.DATABASE_URL.replace("sslmode=require", "sslmode=verify-full") });
+  await db.connect();
+  try {
+    await db.query("delete from public.orgs where id = $1", [REAL_ORG]);
+    if (action !== "create") return;
+    const { rows: [owner] } = await db.query(`select m.user_id, m.name, m.email from public.members m join public.orgs o on o.id = m.org_id where o.is_demo and m.role = 'owner' limit 1`);
+    await db.query(`insert into public.orgs (id, name, city, owner_name, created_by, settings, trial_ends_at)
+      values ($1, 'Green Valley Hostel', 'Kozhikode', $2, $3, '{"clock": {"mode": "real"}, "blocks": []}', now() + interval '14 days')`, [REAL_ORG, owner.name, owner.user_id]);
+    await db.query(`insert into public.members (org_id, user_id, role, name, email) values ($1, $2, 'owner', $3, $4)`, [REAL_ORG, owner.user_id, owner.name, owner.email]);
+    await db.query("select app.build_layout($1, 2, 2, 4, 0)", [REAL_ORG]);
+    await db.query(`update public.orgs set settings = settings || jsonb_build_object('blocks', jsonb_build_array(
+      jsonb_build_object('id', 'A', 'name', 'Block A', 'gender', 'M', 'floors', 2, 'curfew', '22:00'),
+      jsonb_build_object('id', 'B', 'name', 'Block B', 'gender', 'F', 'floors', 2, 'curfew', '21:30'))) where id = $1`, [REAL_ORG]);
+  } finally { await db.end(); }
 }
 
 // ---------------------------------------------------------------------------
@@ -202,10 +251,77 @@ const VIDEOS = {
           await tap(p, p.getByRole("radio", { name: /^വാർഡൻ/ })); await sleep(1500);
         } },
       { cap: "കൂടുതൽ → മെസ്സ്: ഇന്നത്തെ അടുക്കള എണ്ണം",
-        say: "കൂടുതൽ ടാബിൽ നിന്ന് മെസ്സ് തുറക്കാം. ഓരോ നേരവും എത്ര പേർക്ക് ഭക്ഷണം വേണമെന്ന് ഇവിടെ തത്സമയം കാണാം. ഉച്ചഭക്ഷണം സ്ഥാപനത്തിലാണോ, ഹോസ്റ്റലിലാണോ എന്നും വേർതിരിച്ച് കാണിക്കും.",
+        say: "കൂടുതൽ ടാബിൽ നിന്ന് മെസ്സ് തുറക്കാം. ഓരോ നേരവും എത്ര പേർക്ക് ഭക്ഷണം വേണമെന്ന് ഇവിടെ തത്സമയം കാണാം. ഓരോ നേരവും സ്ഥാപനത്തിൽ എത്ര, ഹോസ്റ്റലിൽ എത്ര, ഓരോ ബ്ലോക്കിലും എത്ര എന്നും വേർതിരിച്ച് കാണിക്കും.",
         act: async (p) => {
           await tap(p, tab(p, "കൂടുതൽ")); await sleep(1800);
           await tap(p, p.getByRole("link", { name: /^മെസ്സ്/ })); await sleep(2500); await scrollBy(p, 330, 10);
+        } },
+    ],
+  }, {
+    // A real hostel: the same check-in an owner does when someone moves in
+    device: "iPhone 15",
+    start: "/dashboard/rooms/",
+    prepare: async (p, state) => {
+      await realHostel("create");
+      await signIn(p, "റഷീദ്", /\/dashboard\//);
+      await p.evaluate((org) => localStorage.setItem("stayos-org", org), REAL_ORG);
+      await p.goto(BASE + "/dashboard/rooms/", { waitUntil: "domcontentloaded" });
+      await p.getByText("Green Valley Hostel").first().waitFor({ timeout: 30000 });
+      state.storage = await p.context().storageState();
+    },
+    cleanup: async () => { await realHostel("delete"); },
+    scenes: [
+      { title: { tag: "StayOS ട്യൂട്ടോറിയൽ · ഭാഗം 1", title: "പുതിയ താമസക്കാരെ ചേർക്കാം", sub: "ആധാർ പരിശോധന, കിടക്ക, ആദ്യ ബില്ല്, പോലീസ് ഫോം" },
+        say: "ഇനി, നിങ്ങളുടെ സ്വന്തം ഹോസ്റ്റലിൽ ഒരു പുതിയ താമസക്കാരിയെ എങ്ങനെ ചേർക്കാമെന്ന് നോക്കാം." },
+      { cap: "മുറികൾ → ‘പുതിയ താമസക്കാരെ ചേർക്കുക’",
+        say: "മുറികൾ ടാബിൽ, പുതിയ താമസക്കാരെ ചേർക്കുക എന്ന ബട്ടൺ ടാപ്പ് ചെയ്യുക.",
+        act: async (p) => { await setTitle(p, null); await sleep(2400); await tap(p, p.locator('[data-tour="checkin-button"]')); } },
+      { cap: "വിവരങ്ങൾ: പേര്, ഫോൺ, ജനന തീയതി, കോളേജ്, രക്ഷിതാവ്",
+        say: "ആധാറിലുള്ളതുപോലെ മുഴുവൻ പേര്, മൊബൈൽ നമ്പർ, ജനന തീയതി, കോളേജ്, രക്ഷിതാവിന്റെ പേരും നമ്പറും നൽകി, തുടരുക ടാപ്പ് ചെയ്യുക. ഈ വിവരങ്ങളിൽ നിന്നാണ് പോലീസ് ഫോമും തയ്യാറാകുന്നത്.",
+        act: async (p) => {
+          const name = p.locator("#ci-name");
+          await name.click(); await name.pressSequentially("Fathima Rahman", { delay: 70 });
+          await tap(p, p.locator("#ci-gender")); await sleep(400);
+          await tap(p, p.getByRole("option", { name: "സ്ത്രീ" })); await sleep(300);
+          await p.locator("#ci-dob").fill("2006-03-14");
+          await p.locator("#ci-phone").fill("9847012345");
+          await p.locator("#ci-inst").scrollIntoViewIfNeeded(); await p.locator("#ci-inst").fill("Farook College · BCom");
+          await p.locator("#ci-blood").fill("B+");
+          await p.locator("#ci-home").fill("Tirur, Malappuram");
+          await p.locator("#ci-pname").scrollIntoViewIfNeeded(); await p.locator("#ci-pname").fill("Abdul Rahman");
+          await p.locator("#ci-pphone").fill("9847054321");
+          await sleep(900);
+          await tap(p, p.locator('[data-tour="checkin-next0"]'));
+        } },
+      { cap: "ആധാർ: ഒറിജിനൽ കാർഡ് നോക്കി, അവസാന 4 അക്കങ്ങൾ",
+        say: "അടുത്തത് ആധാർ പരിശോധന. താമസക്കാരിയുടെ ഒറിജിനൽ ആധാർ കാർഡ് നോക്കി, പേരും ഫോട്ടോയും ഒത്തുനോക്കുക. കാർഡിന്റെ അവസാന നാല് അക്കങ്ങൾ മാത്രം നൽകിയാൽ മതി. കാർഡ് കണ്ടു എന്ന് ടിക്ക് ചെയ്ത് തുടരുക.",
+        act: async (p) => {
+          await sleep(3800);
+          const last4 = p.locator("#ci-last4");
+          await last4.click(); await last4.pressSequentially("4321", { delay: 160 });
+          await sleep(1200); await tap(p, p.locator("#ci-seen")); await sleep(1500);
+          await tap(p, p.locator('[data-tour="checkin-next"]'));
+        } },
+      { cap: "കിടക്ക: ഒഴിവുള്ളവ, അനുയോജ്യമായത് ആദ്യം",
+        say: "ഒഴിവുള്ള കിടക്കകൾ കാണിക്കും. സ്ത്രീകൾക്ക് സ്ത്രീകളുടെ ബ്ലോക്കിലെ കിടക്കകൾ, ഏറ്റവും അനുയോജ്യമായത് ആദ്യം. ഒന്ന് തിരഞ്ഞെടുത്ത് തുടരുക.",
+        act: async (p) => { await sleep(4500); await tap(p, p.locator('[data-tour="checkin-next2"]')); } },
+      { cap: "ആദ്യ ബില്ല് → ‘ചെക്ക്-ഇൻ പൂർത്തിയാക്കുക’",
+        say: "ആദ്യ മാസത്തെ വാടകയും, മെസ്സ് ഫീസും, ഡെപ്പോസിറ്റും ഇവിടെ കാണാം. ചെക്ക്-ഇൻ പൂർത്തിയാക്കുക ടാപ്പ് ചെയ്താൽ, ആദ്യ ബില്ല് തയ്യാറാകും.",
+        act: async (p) => { await sleep(4800); await tap(p, p.locator('[data-tour="checkin-complete"]')); await sleep(1200); } },
+      { cap: "പോലീസ് വെരിഫിക്കേഷൻ: പ്രിന്റ് ചെയ്ത് സ്റ്റേഷനിൽ നൽകുക",
+        say: "പോലീസ് വെരിഫിക്കേഷൻ ഫോം, ചെക്ക്-ഇൻ വിവരങ്ങളിൽ നിന്ന് തനിയെ പൂരിപ്പിക്കും. പ്രിന്റ് ചെയ്ത് ഒപ്പിട്ട്, നിങ്ങളുടെ പോലീസ് സ്റ്റേഷനിൽ നൽകുക.",
+        act: async (p) => {
+          await sleep(2200);
+          await tap(p, p.getByRole("button", { name: "പോലീസ് വെരിഫിക്കേഷൻ ഫോം" }));
+          await p.waitForURL(/tab=police/, { timeout: 30000 }); await sleep(1500);
+        } },
+      { cap: "സ്റ്റേഷനിൽ നിന്നുള്ള റഫറൻസ് നമ്പർ രേഖപ്പെടുത്തുക",
+        say: "ഫോം നൽകിയ ശേഷം, സ്റ്റേഷനിൽ നിന്ന് ലഭിക്കുന്ന റഫറൻസ് നമ്പർ ഇവിടെ നൽകി, സമർപ്പിച്ചു എന്ന് രേഖപ്പെടുത്തുക. ഫോം ബാക്കിയുള്ളവരെ താമസക്കാരുടെ ലിസ്റ്റിൽ വേഗം കണ്ടെത്താം.",
+        act: async (p) => {
+          const ref = p.getByPlaceholder("റഫറൻസ് നമ്പർ (ഐച്ഛികം)");
+          await ref.scrollIntoViewIfNeeded(); await sleep(1200);
+          await ref.click(); await ref.pressSequentially("KZD-2611-0457", { delay: 90 });
+          await sleep(900); await tap(p, p.getByRole("button", { name: "സമർപ്പിച്ചു എന്ന് രേഖപ്പെടുത്തുക" })); await sleep(1800);
         } },
       END("ഈ ഭാഗം ഇവിടെ തീരുന്നു. അടുത്ത ഭാഗത്തിൽ, താമസക്കാർ ഫോണിൽ ആപ്പ് എങ്ങനെ ഉപയോഗിക്കുന്നു എന്ന് നോക്കാം."),
     ],
@@ -224,15 +340,15 @@ const VIDEOS = {
       state.lunch = (await m.lunch.getAttribute("aria-checked")) === "true";
       await setChecked(p, m.lunch, true);
       await setChecked(p, m.dinner, true);
-      state.hostel = (await m.hostel.getAttribute("aria-checked")) === "true";
-      await setChecked(p, m.institute, true);
+      state.lunchPlace = await lunchPlace(p);
+      await setLunchPlace(p, "institute");
       await sleep(3500); // let it save
     },
     cleanup: async (p, state) => {
       await openDemoDay(p);
       const m = residentMeals(p);
       await setChecked(p, m.lunch, true);
-      await setChecked(p, state.hostel ? m.hostel : m.institute, true);
+      await setLunchPlace(p, state.lunchPlace ?? "institute");
       await setChecked(p, m.lunch, state.lunch);
       await setChecked(p, m.dinner, state.dinner);
       await sleep(3500);
@@ -254,12 +370,19 @@ const VIDEOS = {
           const { dinner } = residentMeals(p);
           await setChecked(p, dinner, false); await sleep(2400); await setChecked(p, dinner, true); await sleep(600);
         } },
-      { cap: "ഉച്ചഭക്ഷണം എവിടെ: സ്ഥാപനത്തിൽ / ഹോസ്റ്റലിൽ",
-        say: "ഉച്ചഭക്ഷണം എവിടെ കഴിക്കുമെന്നും തിരഞ്ഞെടുക്കാം. സാധാരണ സ്ഥാപനത്തിൽ ആണ്. അന്ന് ഹോസ്റ്റലിൽ ആണെങ്കിൽ, ഹോസ്റ്റലിൽ എന്നത് ടാപ്പ് ചെയ്യുക.",
+      { cap: "ഓരോ നേരവും എവിടെ: സ്ഥാപനത്തിൽ / ഹോസ്റ്റലിൽ",
+        say: "പ്രഭാതഭക്ഷണം, ഉച്ചഭക്ഷണം, അത്താഴം — ഓരോന്നും എവിടെ കഴിക്കുമെന്ന് തിരഞ്ഞെടുക്കാം. സ്ഥാപനത്തിലോ, ഹോസ്റ്റലിലോ. ഉദാഹരണത്തിന്, ഇന്ന് ഉച്ചഭക്ഷണം ഹോസ്റ്റലിൽ ആണെങ്കിൽ, ഹോസ്റ്റലിൽ എന്നത് ടാപ്പ് ചെയ്യുക.",
         act: async (p) => {
           const { hostel } = residentMeals(p);
-          await hostel.scrollIntoViewIfNeeded(); await scrollBy(p, 120, 4); await sleep(2800);
+          await hostel.scrollIntoViewIfNeeded(); await scrollBy(p, 160, 5); await sleep(3200);
           await setChecked(p, hostel, true); await sleep(1500);
+        } },
+      { cap: "ഏത് ബ്ലോക്കിലെ മെസ്സിൽ: സ്വന്തം ബ്ലോക്ക് ആദ്യം",
+        say: "ഹോസ്റ്റലിൽ ഒന്നിലധികം ബ്ലോക്കുകൾ ഉണ്ടെങ്കിൽ, ഏത് ബ്ലോക്കിലെ മെസ്സിലാണ് കഴിക്കുന്നതെന്നും തിരഞ്ഞെടുക്കാം. സ്വന്തം ബ്ലോക്ക് ആദ്യം കാണിക്കും. ഓരോ ബ്ലോക്കിലെയും അടുക്കളയ്ക്ക് എത്ര പേർ വരുമെന്ന് കൃത്യമായി അറിയാം.",
+        act: async (p) => {
+          const { blocks } = residentMeals(p);
+          await blocks.first().scrollIntoViewIfNeeded().catch(() => {}); await sleep(3800);
+          await setChecked(p, blocks.nth(1), true); await sleep(1800);
         } },
       { cap: "ഗേറ്റ് പാസ്: രക്ഷിതാവ് അംഗീകരിച്ചാൽ QR കോഡ്",
         say: "ഗേറ്റ് പാസ് ടാബിൽ, വീട്ടിൽ പോകാൻ ലീവിന് അപേക്ഷിക്കാം. രക്ഷിതാവ് വാട്സ്ആപ്പിൽ അംഗീകരിച്ചാൽ, ഒരു ക്യു.ആർ. കോഡ് ലഭിക്കും. പുറത്ത് പോകുമ്പോഴും തിരികെ വരുമ്പോഴും ഗേറ്റിൽ ഇത് കാണിച്ചാൽ മതി.",
@@ -346,8 +469,8 @@ function voice(text) {
 // ---------------------------------------------------------------------------
 // Recording: 2x screenshots as frames (WebKit's own recorder can't scale up, so it pads the picture into a corner)
 // ---------------------------------------------------------------------------
-async function newContext(browser, seg) {
-  const ctx = await browser.newContext({ ...devices[seg.device], deviceScaleFactor: 2, timezoneId: "Asia/Kolkata", locale: "ml-IN", colorScheme: "light" });
+async function newContext(browser, seg, storageState) {
+  const ctx = await browser.newContext({ ...devices[seg.device], deviceScaleFactor: 2, timezoneId: "Asia/Kolkata", locale: "ml-IN", colorScheme: "light", storageState });
   await ctx.addInitScript(({ snooze }) => {
     try {
       localStorage.setItem("stayos-locale", "ml");
@@ -368,10 +491,17 @@ async function recordSegment(name, seg, idx) {
   try {
     if (seg.prepare) {
       const ctx = await newContext(browser, seg);
-      await seg.prepare(await ctx.newPage(), state);
-      await ctx.close();
+      try {
+        await seg.prepare(await ctx.newPage(), state);
+      } catch (e) {
+        if (seg.cleanup) await seg.cleanup(await ctx.newPage(), state).catch(() => {});
+        throw e;
+      } finally {
+        await ctx.close();
+      }
     }
-    const ctx = await newContext(browser, seg);
+    // a prepare step can leave the recording signed in (state.storage)
+    const ctx = await newContext(browser, seg, state.storage);
     const p = await ctx.newPage();
     p.on("pageerror", (e) => console.log("  page error:", e.message.split("\n")[0]));
     await p.goto(BASE + seg.start, { waitUntil: "domcontentloaded" });

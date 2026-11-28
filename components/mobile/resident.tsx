@@ -25,7 +25,7 @@ import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useNowISO } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
 import { haptic } from "@/lib/native";
-import { MEALS, invoiceState, isPlaceMeal, mealPlace, menuFor, rebates, roomById, sla, addDays as addDaysSel, curfewLabel } from "@/lib/selectors";
+import { MEALS, cutoffParts, invoiceState, isPlaceMeal, mealPlace, menuFor, rebates, roomById, sla, addDays as addDaysSel, curfewLabel } from "@/lib/selectors";
 import { MealPlacePicker, usePlaceLabel } from "./meal-place";
 import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
@@ -269,7 +269,7 @@ export function ResidentMess() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-fg-3">{tm(m)} · {messMenu.servingTimes[m]}</p>
                   <p className={cn("mt-1 flex items-start gap-1.5 text-base", skipped ? "text-fg-3 line-through" : "text-fg")}><VegMark veg={menu[m].veg} className="mt-1" />{locale === "ml" ? menu[m].ml : menu[m].en}</p>
-                  <p className="mt-1 text-xs text-fg-3">{passed ? t("cutoffPassed") : t("cutoff", { time: messMenu.cutoffs[m] })}</p>
+                  <p className="mt-1 text-xs text-fg-3">{passed ? t("cutoffPassed") : (({ time, dayBefore }) => t(dayBefore ? "cutoffPrev" : "cutoff", { time }))(cutoffParts(messMenu.cutoffs[m]))}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <Switch size="lg" checked={!skipped} disabled={passed} onCheckedChange={() => { toggleOptOut(r.id, day, m); haptic(); }} aria-label={t("eatingAria", { meal: tm(m) })} />

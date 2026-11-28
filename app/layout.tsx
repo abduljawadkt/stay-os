@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(site),
   title: { default: `${brand.name} · Hostel and PG software for Kerala`, template: `%s · ${brand.name}` },
   description: `${brand.name} collects rent by UPI on WhatsApp and runs rooms, mess, complaints and gate passes for hostels and PGs, in English and Malayalam.`,
+  alternates: { canonical: "/" },
   applicationName: brand.name,
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "default" },
   formatDetection: { telephone: false },

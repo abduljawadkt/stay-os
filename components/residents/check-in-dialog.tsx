@@ -15,7 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUI } from "@/components/shell/ui-store";
 import { useDemo } from "@/lib/store";
-import { useIsSample } from "@/lib/session";
+import { useIsSample, useSession } from "@/lib/session";
+import { whatsappSettings } from "@/lib/whatsapp";
 import { useFormat } from "@/lib/hooks";
 import { roomById, daysInMonth } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
@@ -78,7 +79,11 @@ export function CheckInDialog() {
   const [kyc, setKyc] = useState<number>(-1); // -1 idle, 0..3 running, 4 done
   const [bed, setBed] = useState<string>("");
   const [mess, setMess] = useState(true);
-  const [welcome, setWelcome] = useState(true);
+  const [welcomeOn, setWelcome] = useState(true);
+  // a real hostel sends the welcome only if its owner switched WhatsApp on (Settings → WhatsApp); sample hostels show it in StayOS
+  const org = useSession((s) => s.org);
+  const waOn = sample || whatsappSettings(org).enabled;
+  const welcome = welcomeOn && waOn;
   const [createdId, setCreatedId] = useState<string | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -153,12 +158,12 @@ export function CheckInDialog() {
     <Dialog open={open} onOpenChange={(o) => !o && close()}>
       <DialogContent className="gap-0 p-0 sm:max-w-[620px]" data-tour="checkin-dialog">
         <div className="border-b border-line px-6 pt-5 pb-4">
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle className="pr-8">{t("title")}</DialogTitle>
           <DialogDescription className="mt-1 text-small text-fg-2">{t(sample ? "subtitle" : "subtitleReal")}</DialogDescription>
           {step < 4 && (
             <ol className="mt-4 flex items-center gap-2" aria-label={t("progress")}>
               {steps.map((s, i) => (
-                <li key={s} className="flex flex-1 items-center gap-2" aria-current={i === step ? "step" : undefined}>
+                <li key={s} className="flex min-w-0 flex-1 items-center gap-2" aria-current={i === step ? "step" : undefined}>
                   <span className={cn("grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-semibold tnum transition-colors", i < step ? "bg-brand text-white" : i === step ? "bg-brand-tint text-brand-tint-fg ring-1 ring-brand" : "bg-surface-2 text-fg-3")}>
                     {i < step ? <Check className="size-3" aria-hidden /> : i + 1}
                   </span>
@@ -337,7 +342,7 @@ export function CheckInDialog() {
                   </div>
                   <div className="space-y-3">
                     <ToggleRow id="ci-mess" label={t("confirm.messPlan")} hint={t("confirm.messHint", { fee: f.inr(hostel.messFee) })} checked={mess} onChange={setMess} />
-                    <ToggleRow id="ci-wa" label={t("confirm.welcome")} hint={t("confirm.welcomeHint")} checked={welcome} onChange={setWelcome} />
+                    {waOn && <ToggleRow id="ci-wa" label={t("confirm.welcome")} hint={t("confirm.welcomeHint")} checked={welcome} onChange={setWelcome} />}
                   </div>
                   <p className="flex items-start gap-2 rounded-md bg-surface-2 p-3 text-small text-fg-2"><FileText className="mt-0.5 size-4 shrink-0" aria-hidden />{t("confirm.police")}</p>
                 </div>
@@ -357,7 +362,7 @@ export function CheckInDialog() {
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-line bg-surface-2/60 px-6 py-4">
+        <div className={cn("flex items-center justify-between gap-2 border-t border-line bg-surface-2/60 px-6 py-4", step === 4 ? "flex-col-reverse items-stretch sm:flex-row sm:items-center" : "flex-wrap")}>
           {step === 4 ? (
             <>
               <Button variant="quiet" onClick={() => { close(); router.push(`/dashboard/residents/profile/?id=${createdId}&tab=police`); }}>{t("done.police")}</Button>
@@ -368,7 +373,7 @@ export function CheckInDialog() {
               <Button variant="quiet" onClick={() => (step === 0 ? close() : setStep((step - 1) as Step))}>{step === 0 ? t("cancel") : t("back")}</Button>
               {step === 0 && <Button variant="primary" onClick={() => validate() && setStep(1)} data-tour="checkin-next0">{t("next")}</Button>}
               {step === 1 && (
-                <div className="flex gap-2">
+                <div className="ml-auto flex flex-wrap justify-end gap-2">
                   {!kycDone && <Button variant="quiet" onClick={() => setStep(2)}>{t("kyc.later")}</Button>}
                   <Button variant="primary" disabled={!kycDone} onClick={() => setStep(2)} data-tour="checkin-next">{t("next")}</Button>
                 </div>

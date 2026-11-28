@@ -112,6 +112,7 @@
       "day": "Day",
       "today": "Today",
       "cutoff": "Change until {time}",
+      "cutoffPrev": "Change until {time} the day before",
       "cutoffPassed": "Cut-off passed",
       "eating": "Eating",
       "skipping": "Skipping",

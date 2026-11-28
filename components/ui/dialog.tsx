@@ -67,8 +67,10 @@ function DialogContent({
           onInteractOutside?.(e);
         }}
         className={cn(
-          // phones: a sheet that rises from the bottom; larger screens: a centered dialog
-          "fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] w-full gap-4 overflow-y-auto overscroll-contain rounded-t-[20px] border-t border-line bg-popover p-5 pt-7 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-sm text-popover-foreground shadow-lg outline-none duration-300 ease-[cubic-bezier(.2,.8,.2,1)] data-open:animate-in data-open:slide-in-from-bottom data-closed:animate-out data-closed:slide-out-to-bottom",
+          // phones: a sheet that rises from the bottom; larger screens: a centered dialog.
+          // grid-cols-1 keeps the one column as wide as the sheet: an auto column grows to fit unbreakable content
+          // (long Malayalam labels in a row of buttons or steps) and pushes the sheet past the screen's edge.
+          "fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] w-full grid-cols-1 gap-4 overflow-y-auto overscroll-contain rounded-t-[20px] border-t border-line bg-popover p-5 pt-7 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-sm text-popover-foreground shadow-lg outline-none duration-300 ease-[cubic-bezier(.2,.8,.2,1)] data-open:animate-in data-open:slide-in-from-bottom data-closed:animate-out data-closed:slide-out-to-bottom",
           "sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:max-h-[90dvh] sm:max-w-[480px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:pt-5 sm:pb-5 sm:duration-200 sm:data-open:slide-in-from-bottom-0 sm:data-open:fade-in-0 sm:data-open:zoom-in-95 sm:data-closed:slide-out-to-bottom-0 sm:data-closed:fade-out-0 sm:data-closed:zoom-out-95",
           className
         )}

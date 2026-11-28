@@ -197,6 +197,12 @@ export function headcount(residents: Resident[], optOuts: MealOptOut[], date: st
   return MEALS.map((meal) => ({ meal, enrolled: enrolled.length, skipped: skipped[meal], cooking: enrolled.length - skipped[meal] }));
 }
 
+/** A meal's cut-off as stored ("10:00", or "21:00 previous day" for breakfast): its time, and whether it falls the day before. */
+export function cutoffParts(v: string | undefined) {
+  const m = /^(\d{1,2}:\d{2})\s*(previous day)?/i.exec(v ?? "");
+  return { time: m?.[1] ?? v ?? "", dayBefore: !!m?.[2] };
+}
+
 export const PLACE_MEALS: PlaceMeal[] = ["breakfast", "lunch", "dinner"];
 export const isPlaceMeal = (m: Meal): m is PlaceMeal => m !== "snacks";
 /** Where a meal is had when the resident hasn't chosen: breakfast and dinner at the hostel, lunch at the institute. */

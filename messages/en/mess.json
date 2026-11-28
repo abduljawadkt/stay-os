@@ -2,7 +2,7 @@
   "mess": {
     "title": "Mess", "what": "the mess plan", "subtitle": "{count} residents on the mess plan", "subtitleCook": "{count} residents on the mess plan · head cook {name}", "sentToKitchenAll": "Headcount sent to the kitchen on WhatsApp",
     "sendKitchen": "Send today's count to kitchen", "sentToKitchen": "Headcount sent to {name} on WhatsApp",
-    "headcount": { "title": "Kitchen headcount · {date}", "meta": "Updates live as residents skip meals", "locked": "Locked", "open": "Open till {time}", "of": "{enrolled} enrolled · {skipped} skipped", "split": "{institute} at institute · {hostel} at hostel" },
+    "headcount": { "title": "Kitchen headcount · {date}", "meta": "Updates live as residents skip meals", "locked": "Locked", "open": "Open till {time}", "openPrev": "Open till {time} the day before", "of": "{enrolled} enrolled · {skipped} skipped", "split": "{institute} at institute · {hostel} at hostel" },
     "waste": { "title": "Food waste saved in {month}", "meals": "{count} meals not cooked because residents skipped in advance", "year": "≈ {amount} a year at this rate", "how": "Plate cost used: breakfast {b}, lunch {l}, dinner {d}." },
     "tabs": { "week": "Weekly menu", "calendar": "Calendar", "optouts": "Opt-outs", "rebates": "Rebates" },
     "week": { "title": "Weekly menu template", "meta": "Repeats every week. Click a dish to change it.", "today": "today", "edit": "Edit dish", "dish": "Dish", "save": "Save", "cancel": "Cancel", "saved": "Menu template updated" },

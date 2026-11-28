@@ -33,9 +33,10 @@ export function MealPlacePicker({ meal, optOut, bedId, disabled, onChange }: {
   const label = t("mealAt", { meal: tm(meal) });
   return (
     <div className="mt-3 border-t border-line pt-3">
-      <div className="flex items-center gap-3">
-        <span className="text-small text-fg-2">{label}</span>
-        <div role="radiogroup" aria-label={label} className="ml-auto grid grid-cols-2 rounded-[10px] bg-surface-2 p-0.5">
+      {/* the label above, the two choices across the full width: side by side they don't fit a phone in Malayalam */}
+      <div>
+        <p className="text-small text-fg-2" aria-hidden>{label}</p>
+        <div role="radiogroup" aria-label={label} className="mt-2 grid grid-cols-2 rounded-[10px] bg-surface-2 p-0.5">
           {(["institute", "hostel"] as const).map((spot) => {
             const on = spot === "institute" ? at === null : at !== null;
             const Icon = spot === "institute" ? GraduationCap : Home;

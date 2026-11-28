@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
-import { MEALS, headcount, isPlaceMeal, placeSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
+import { MEALS, cutoffParts, headcount, isPlaceMeal, placeSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
 import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { hostel, messMenu, staff, type Meal, type MenuItem } from "@/data";
@@ -99,7 +99,7 @@ export function MessScreen() {
                       <div className="flex items-center justify-between">
                         <p className="text-small font-medium text-fg-2">{tm(h.meal)}</p>
                         <span className={cn("inline-flex items-center gap-1 text-xs", locked ? "text-fg-3" : "text-brand-text")}>
-                          {locked ? <Lock className="size-3" aria-hidden /> : <Unlock className="size-3" aria-hidden />}{locked ? t("headcount.locked") : t("headcount.open", { time: messMenu.cutoffs[h.meal] })}
+                          {locked ? <Lock className="size-3" aria-hidden /> : <Unlock className="size-3" aria-hidden />}{locked ? t("headcount.locked") : (({ time, dayBefore }) => t(dayBefore ? "headcount.openPrev" : "headcount.open", { time }))(cutoffParts(messMenu.cutoffs[h.meal]))}
                         </span>
                       </div>
                       {loading ? <Sk className="mt-2 h-8 w-16" /> : <p className="mt-1 text-kpi font-semibold tracking-[-0.02em] text-fg tnum"><CountUp id={`hc-${h.meal}`} value={h.cooking} format={(v) => f.num(v)} /></p>}

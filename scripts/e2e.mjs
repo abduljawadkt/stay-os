@@ -516,7 +516,8 @@ flow("Language and dark mode stay after reloading", async () => {
       await sleep(600);
     }
     await own.page.reload({ waitUntil: "domcontentloaded" });
-    await sleep(2500);
+    // the page's text appears once the hostel has loaded, which can take a few seconds on a phone
+    await own.page.waitForFunction(() => /കൂടുതൽ/.test(document.body.innerText), null, { timeout: 15000 }).catch(() => {});
     const state = await own.page.evaluate(() => ({ dark: document.documentElement.classList.contains("dark"), ml: /കൂടുതൽ/.test(document.body.innerText) }));
     if (!state.dark || !state.ml) throw new Error(`after reload: dark ${state.dark}, Malayalam ${state.ml}`);
   } finally { await own.close(); }
@@ -561,6 +562,30 @@ flow("WhatsApp inbox opens and sends", async () => {
     await eventually(own.page, () => own.page.getByText(`E2E test message ${STAMP}`).first().isVisible(), "message in the chat", { timeout: 10000, reloadEvery: 1e9 });
     void panel;
   } finally { await own.close(); }
+});
+
+flow("Public pages have their own titles, search files, safe headers and a 404 that leads home", async () => {
+  const titles = new Map();
+  for (const url of SCREENS.public) {
+    const html = await (await fetch(BASE + url)).text();
+    const title = html.match(/<title>([^<]*)/)?.[1] ?? "";
+    if (titles.has(title)) throw new Error(`${url} has the same title as ${titles.get(title)}: "${title}"`);
+    titles.set(title, url);
+  }
+  const robots = await fetch(BASE + "/robots.txt");
+  if (robots.status !== 200 || !(await robots.text()).includes("Disallow: /dashboard/")) throw new Error(`robots.txt: ${robots.status}`);
+  const sitemap = await fetch(BASE + "/sitemap.xml");
+  if (sitemap.status !== 200 || !(await sitemap.text()).includes("/pricing/</loc>")) throw new Error(`sitemap.xml: ${sitemap.status}`);
+  const res = await fetch(BASE + "/dashboard/");
+  for (const h of ["x-frame-options", "x-content-type-options", "referrer-policy", "content-security-policy"]) if (!res.headers.get(h)) throw new Error(`no ${h} header`);
+  const visitor = await as(null, "iphone");
+  try {
+    const r = await visitor.page.goto(BASE + "/no-such-page/", { waitUntil: "domcontentloaded" });
+    if (r?.status() !== 404) throw new Error(`unknown page answered ${r?.status()}`);
+    await visitor.page.getByRole("link", { name: "Go to the home page" }).click();
+    await visitor.page.waitForURL(BASE + "/", { timeout: 15000 });
+  } finally { await visitor.close(); }
+  return `${titles.size} titles, robots, sitemap, headers, 404 → home`;
 });
 
 flow("Payment service is up and only answers StayOS", async () => {
