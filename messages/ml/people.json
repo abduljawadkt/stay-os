@@ -2,7 +2,7 @@
   "rooms": {
     "title": "മുറികളും കിടക്കകളും", "subtitle": "{occupied} താമസം · {vacant} ഒഴിവ് · {reserved} ബുക്ക് ചെയ്തത് · {maintenance} അറ്റകുറ്റപ്പണിയിൽ",
     "checkIn": "പുതിയ താമസക്കാരെ ചേർക്കുക", "blocks": "ബ്ലോക്കുകൾ", "block": "ബ്ലോക്ക് {block}", "floor": "നില", "floorShort": "നില {n}", "legend": "സൂചിക", "what": "ഫ്ലോർ പ്ലാൻ",
-    "floorTitle": "ബ്ലോക്ക് {block} · നില {floor}", "dragHint": "മുറി മാറ്റാൻ താമസക്കാരെ ഒഴിവുള്ള കിടക്കയിലേക്ക് വലിച്ചിടുക", "stairs": "പടികൾ", "corridor": "ഇടനാഴി", "washrooms": "പൊതു ശുചിമുറികൾ",
+    "floorTitle": "{block} · നില {floor}", "dragHint": "മുറി മാറ്റാൻ താമസക്കാരെ ഒഴിവുള്ള കിടക്കയിലേക്ക് വലിച്ചിടുക", "stairs": "പടികൾ", "corridor": "ഇടനാഴി", "washrooms": "പൊതു ശുചിമുറികൾ",
     "type": { "single": "സിംഗിൾ മുറി", "double": "ഡബിൾ മുറി", "triple": "ട്രിപ്പിൾ മുറി", "six": "6 കിടക്ക ഡോർമിറ്ററി" },
     "bed": "കിടക്ക {n}", "bedAria": "{bed}, {status}{name, select, none {} other {, {name}}}{overdue, select, yes {, വാടക കുടിശ്ശിക} other {}}",
     "draggable": "മാറ്റാവുന്ന താമസക്കാർ", "reservedFor": "{name}-ന് ബുക്ക് ചെയ്തു · {date}-ന് എത്തും", "overdue": "വാടക കുടിശ്ശിക",

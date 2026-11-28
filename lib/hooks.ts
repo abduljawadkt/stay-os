@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
+import { hostel } from "@/data";
 import { useDemo } from "./store";
 import { BASE_MS, nowMs, toIST } from "./clock";
 import { useLocale } from "./i18n";
@@ -127,4 +129,13 @@ export function useKeyboardOpen() {
     };
   }, []);
   return open;
+}
+
+/** A block's name: the one the owner gave it ("Ladies block"), or "Block A" in the app's language. */
+export function useBlockName() {
+  const t = useTranslations("blockLabel");
+  return (id: string) => {
+    const name = hostel.blocks.find((b) => b.id === id)?.name?.trim();
+    return !name || name === `Block ${id}` ? t("default", { block: id }) : name;
+  };
 }

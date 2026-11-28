@@ -220,6 +220,88 @@ await api(await login("owner@demo.stayos.space"), `activity?org_id=eq.${DEMO}&id
   }
 }
 
+// ---- hostel setup: rents, blocks, meal cut-offs, rooms (db/migrations/016)
+// A temporary hostel owned by the demo owner, with the demo warden on its staff; removed at the end.
+{
+  const { default: pg } = await import("pg");
+  const db = new pg.Client({ connectionString: process.env.DATABASE_URL?.replace("sslmode=require", "sslmode=verify-full") });
+  await db.connect();
+  const SETUP = "00000000-0000-0000-0000-00000005e7c0";
+  const owner = await login("owner@demo.stayos.space");
+  const warden = await login("warden@demo.stayos.space");
+  const idOf = async (email) => (await db.query(`select id::text from neon_auth."user" where email = $1`, [email])).rows[0].id;
+  const rpc = (jwt, fn, body) => api(jwt, `rpc/${fn}`, { method: "POST", body: JSON.stringify({ p_org: SETUP, ...body }) });
+  const org = async () => (await db.query("select rent_by_type, settings from public.orgs where id = $1", [SETUP])).rows[0];
+  const bedsOf = async (room) => (await db.query("select id from public.beds where org_id = $1 and room_id = $2 order by id", [SETUP, room])).rows.map((r) => r.id);
+  try {
+    await db.query("delete from public.orgs where id = $1", [SETUP]);
+    await db.query(`insert into public.orgs (id, name, city, settings) values ($1, 'Check: setup', 'Kozhikode', '{"clock":{"mode":"real"}}')`, [SETUP]);
+    await db.query(`insert into public.members (org_id, user_id, role, name, email) values ($1, $2, 'owner', 'Check', 'owner@demo.stayos.space'), ($1, $3, 'warden', 'Check', 'warden@demo.stayos.space')`,
+      [SETUP, await idOf("owner@demo.stayos.space"), await idOf("warden@demo.stayos.space")]);
+    await db.query("select app.build_layout($1, 2, 1, 2, 2)", [SETUP]);
+    await db.query(`update public.orgs set settings = settings || '{"blocks":[{"id":"A","name":"Block A","gender":"M","floors":1,"curfew":"22:00","wardenId":"S-01"},{"id":"B","name":"Block B","gender":"M","floors":1,"curfew":"22:00"}]}' where id = $1`, [SETUP]);
+    const rents = { single: 8000, double: 6500, triple: 5500, six: 4000 };
+
+    const demoRents = await api(owner, "rpc/set_rents", { method: "POST", body: JSON.stringify({ p_org: DEMO, p_rents: rents }) });
+    expect("the shared live demo's setup can't be changed", demoRents.status >= 400);
+    const byWarden = await rpc(warden, "set_rents", { p_rents: rents });
+    expect("a warden can't change rents", byWarden.status >= 400 && (await org()).rent_by_type.double === 7000);
+
+    const since = (await db.query("select now() as t")).rows[0].t;
+    const set = await rpc(owner, "set_rents", { p_rents: rents });
+    const roomRents = (await db.query("select distinct rent from public.rooms where org_id = $1 and type = 'double'", [SETUP])).rows.map((r) => r.rent);
+    expect("the owner sets rent per room type, and every room of that type follows", set.status === 200 && (await org()).rent_by_type.double === 6500 && roomRents.join() === "6500");
+    const badRent = await rpc(owner, "set_rents", { p_rents: { ...rents, single: 1e12 } });
+    expect("a rent that isn't a sensible amount is refused", badRent.status >= 400);
+    const ch = await api(owner, "rpc/changes_since", { method: "POST", body: JSON.stringify({ p_org: SETUP, p_since: since }) });
+    expect("other devices are told to load the hostel again", ch.data?.reload === true);
+
+    const blocks = [
+      { id: "A", name: "Boys block", gender: "M", curfew: "22:00" },
+      { id: "B", name: "Ladies block", gender: "F", curfew: "21:30" },
+      { id: "C", name: "Annexe", gender: "F", curfew: "21:30" },
+    ];
+    const setBlocks = await rpc(owner, "set_blocks", { p_blocks: blocks });
+    const saved = (await org()).settings.blocks;
+    expect("the owner names blocks, sets men or women and gate times, and adds a block",
+      setBlocks.status === 200 && saved.length === 3 && saved[1].gender === "F" && saved[1].curfew === "21:30" && saved[0].name === "Boys block" && saved[0].wardenId === "S-01");
+    const dropB = await rpc(owner, "set_blocks", { p_blocks: blocks.filter((b) => b.id !== "B") });
+    expect("a block with rooms can't be removed", dropB.status >= 400 && (await org()).settings.blocks.length === 3);
+    const badTime = await rpc(owner, "set_blocks", { p_blocks: [{ ...blocks[0], curfew: "25:00" }, blocks[1], blocks[2]] });
+    expect("a gate time that isn't a time is refused", badTime.status >= 400);
+
+    const add = await rpc(owner, "add_room", { p_block: "C", p_floor: 2, p_number: "201", p_type: "triple" });
+    const c201 = (await db.query("select rent, capacity from public.rooms where org_id = $1 and id = 'C-201'", [SETUP])).rows[0];
+    expect("the owner adds a room, with its beds and the type's rent", add.status === 200 && c201?.capacity === 3 && c201?.rent === 5500 && (await bedsOf("C-201")).length === 3);
+    expect("the block's floors grow with the room", (await org()).settings.blocks.find((b) => b.id === "C").floors === 2);
+    const again = await rpc(owner, "add_room", { p_block: "C", p_floor: 2, p_number: "201", p_type: "single" });
+    expect("a room number can't be used twice in a block", again.status >= 400);
+    const byWardenRoom = await rpc(warden, "add_room", { p_block: "C", p_floor: 1, p_number: "101", p_type: "single" });
+    expect("a warden can't add rooms", byWardenRoom.status >= 400);
+
+    await db.query("update public.beds set status = 'occupied', resident_id = 'R-CHECK' where org_id = $1 and id = 'C-201-3'", [SETUP]);
+    const shrink = await rpc(owner, "set_room", { p_room: "C-201", p_type: "double" });
+    expect("a room can't lose a bed someone sleeps in", shrink.status >= 400 && (await bedsOf("C-201")).length === 3);
+    const remove = await rpc(owner, "remove_room", { p_room: "C-201" });
+    expect("a room with someone in it can't be removed", remove.status >= 400);
+    await db.query("update public.beds set status = 'vacant', resident_id = null where org_id = $1 and id = 'C-201-3'", [SETUP]);
+    const toDouble = await rpc(owner, "set_room", { p_room: "C-201", p_type: "double" });
+    const toSix = await rpc(owner, "set_room", { p_room: "C-201", p_type: "six" });
+    expect("the owner changes how many share a room; beds follow", toDouble.status < 300 && toSix.status < 300 && (await bedsOf("C-201")).length === 6);
+    const removed = await rpc(owner, "remove_room", { p_room: "C-201" });
+    expect("an empty room can be removed with its beds", removed.status < 300 && (await bedsOf("C-201")).length === 0);
+
+    const cutoffs = { breakfast: "20:30 previous day", lunch: "09:30", snacks: "14:00", dinner: "17:00" };
+    const cut = await rpc(owner, "set_cutoffs", { p_cutoffs: cutoffs });
+    expect("the owner sets meal cut-off times", cut.status === 200 && (await org()).settings.mess.cutoffs.lunch === "09:30");
+    const badCut = await rpc(owner, "set_cutoffs", { p_cutoffs: { ...cutoffs, dinner: "late" } });
+    expect("a cut-off that isn't a time is refused", badCut.status >= 400);
+  } finally {
+    await db.query("delete from public.orgs where id = $1", [SETUP]);
+    await db.end();
+  }
+}
+
 const bad = await api("not-a-token", "residents?select=id&limit=1");
 expect("requests without a valid token are rejected", bad.status === 401);
 process.exit(failures ? 1 : 0);

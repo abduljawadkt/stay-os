@@ -187,11 +187,82 @@
     "subtitle": "{hostel} · only the owner sees this page.",
     "tabs": {
       "hostel": "Hostel",
+      "setup": "Hostel setup",
       "team": "Team & invites",
       "billing": "Plan & billing",
       "data": "Sample data",
       "payments": "Payments",
       "whatsapp": "WhatsApp"
+    },
+    "setup": {
+      "demoNote": "This is the live demo that everyone shares, so its setup can't be changed here. In your own hostel you can change all of this.",
+      "err": {
+        "taken": "Bed {bed} is taken. Move its resident to another bed first.",
+        "exists": "Room {room} is already there.",
+        "blockHasRooms": "Block {block} still has rooms. Remove its rooms first.",
+        "number": "Room numbers are up to 6 letters or digits, like 105.",
+        "demo": "The live demo's setup can't be changed. Your own hostel's can."
+      },
+      "rents": {
+        "title": "Rent by room type",
+        "body": "Monthly rent for each kind of room. Every room of that type follows. Bills already raised stay as they are; the new rent is on the next bill.",
+        "label": "{type} (₹ a month) · {n, plural, =0 {no rooms} one {# room} other {# rooms}}",
+        "invalid": "Enter a whole number of rupees, up to 10,00,000.",
+        "save": "Save rents",
+        "saved": "Rents saved. New bills use them."
+      },
+      "blocks": {
+        "title": "Blocks",
+        "body": "Name each block, say who it is for, and set when its gate closes. Check-in offers men's beds to men and women's beds to women, and late returns are judged by each block's own time.",
+        "legend": "Block {block}",
+        "size": "{rooms, plural, =0 {No rooms yet} one {# room · {beds, plural, one {# bed} other {# beds}}} other {# rooms · {beds, plural, one {# bed} other {# beds}}}}",
+        "name": "Name",
+        "nameMissing": "Give the block a name",
+        "for": "For",
+        "curfew": "Gate closes",
+        "mixed": "{n, plural, one {# resident} other {# residents}} living here now {n, plural, one {is} other {are}} {gender, select, M {men} other {women}}. They keep their beds; only new check-ins follow this.",
+        "remove": "Remove block {block}",
+        "removeShort": "Remove",
+        "add": "Add a block",
+        "save": "Save blocks",
+        "saved": "Blocks saved",
+        "note": "A new block starts empty: add its rooms below. A block can be removed once it has no rooms."
+      },
+      "rooms": {
+        "title": "Rooms and beds",
+        "body": "Add rooms, change how many share a room, or remove an empty room. Beds follow the room.",
+        "block": "Block",
+        "floor": "Floor",
+        "floorN": "Floor {n}",
+        "empty": "No rooms on this floor yet. Add one below.",
+        "typeOf": "Room {room}: how many share it",
+        "bedsN": "{n, plural, one {# bed} other {# beds}}",
+        "usage": "{taken} of {beds} taken",
+        "remove": "Remove room {room}",
+        "removeTaken": "Room {room} has people in it. Move them first to remove it.",
+        "changed": "Room {room} is now {type}",
+        "number": "Room number",
+        "type": "Sharing",
+        "numberHint": "Up to 6 letters or digits, like 105",
+        "exists": "That room is already there",
+        "floorHint": "Floors 1 to 20",
+        "add": "Add room",
+        "added": "Room {room} added",
+        "note": "A room's rent comes from its type, above. A bed someone sleeps in can't be taken away: move the resident first.",
+        "confirmTitle": "Remove room {room}?",
+        "confirmBody": "{beds, plural, one {Its bed goes} other {Its # beds go}} too. Past residents' records stay.",
+        "cancel": "Cancel",
+        "confirm": "Remove room",
+        "removed": "Room {room} removed"
+      },
+      "cutoffs": {
+        "title": "Meal cut-off times",
+        "body": "Until when residents can skip a meal or change where they have it. After that, the kitchen count is final.",
+        "dayBefore": "The day before",
+        "save": "Save cut-off times",
+        "saved": "Cut-off times saved",
+        "note": "Breakfast is usually decided the evening before."
+      }
     },
     "hostel": {
       "title": "Hostel profile",

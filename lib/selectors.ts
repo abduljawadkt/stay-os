@@ -70,6 +70,12 @@ export const curfewLabel = (block: string) => {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 };
 
+/** The floors a block has rooms on, lowest first (floor 1 when it has none yet). */
+export function floorsOf(block: string) {
+  const fl = [...new Set(rooms.filter((r) => r.block === block).map((r) => r.floor))].sort((a, b) => a - b);
+  return fl.length ? fl : [1];
+}
+
 export function occupancyByBlock(beds: Bed[]) {
   return hostel.blocks.map(({ id: block }) => ({ block, ...occupancy(beds.filter((b) => b.block === block)) }));
 }
@@ -202,6 +208,15 @@ export function cutoffParts(v: string | undefined) {
   const m = /^(\d{1,2}:\d{2})\s*(previous day)?/i.exec(v ?? "");
   return { time: m?.[1] ?? v ?? "", dayBefore: !!m?.[2] };
 }
+
+/** When a meal on a day stops taking changes, as "YYYY-MM-DDTHH:MM" in IST: the hostel's cut-off, on the day or the day before. */
+export function cutoffAt(meal: Meal, date: string) {
+  const { time, dayBefore } = cutoffParts(messMenu.cutoffs[meal]);
+  const hm = /^\d{1,2}:\d{2}$/.test(time) ? time.padStart(5, "0") : "00:00";
+  return `${dayBefore ? addDays(date, -1) : date}T${hm}`;
+}
+/** Whether residents can no longer skip that meal on that day, or change where they have it. `now` is an IST ISO time. */
+export const cutoffPassed = (meal: Meal, date: string, now: string) => now.slice(0, 16) >= cutoffAt(meal, date);
 
 export const PLACE_MEALS: PlaceMeal[] = ["breakfast", "lunch", "dinner"];
 export const isPlaceMeal = (m: Meal): m is PlaceMeal => m !== "snacks";

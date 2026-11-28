@@ -17,8 +17,8 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDemo } from "@/lib/store";
 import { useUI } from "@/components/shell/ui-store";
-import { useFormat, useMediaQuery, useScreenState } from "@/lib/hooks";
-import { invoiceState, occupancy, roomById, genderFits, blockIds, blockGender } from "@/lib/selectors";
+import { useBlockName, useFormat, useMediaQuery, useScreenState } from "@/lib/hooks";
+import { invoiceState, occupancy, roomById, genderFits, blockIds, blockGender, floorsOf } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { initials } from "@/lib/format";
 import { rooms, type Bed, type BlockId, type Resident } from "@/data";
@@ -31,8 +31,13 @@ export function RoomsScreen() {
   const tg = useTranslations("blockGender");
   const f = useFormat();
   const params = useSearchParams();
-  const [block, setBlock] = useState<BlockId>((params.get("block") as BlockId) || "A");
-  const [floor, setFloor] = useState<number>(Number(params.get("floor")) || 1);
+  const blockName = useBlockName();
+  const [blockPick, setBlock] = useState<BlockId>((params.get("block") as BlockId) || "A");
+  const [floorPick, setFloor] = useState<number>(Number(params.get("floor")) || 1);
+  // the hostel's own blocks and floors (Settings → Hostel setup); fall back to the first when the pick isn't there
+  const block = blockIds().includes(blockPick) ? blockPick : (blockIds()[0] ?? "A");
+  const floors = floorsOf(block);
+  const floor = floors.includes(floorPick) ? floorPick : floors[0];
   const highlight = params.get("room");
   const { loading, error, retry } = useScreenState("rooms");
   const beds = useDemo((s) => s.beds);
@@ -89,12 +94,12 @@ export function RoomsScreen() {
         <div role="tablist" aria-label={t("blocks")} className="flex gap-1 rounded-md bg-surface-2 p-0.5">
           {(blockIds() as BlockId[]).map((b) => (
             <button key={b} role="tab" aria-selected={block === b} onClick={() => setBlock(b)} className={cn("h-8 rounded-sm px-3 text-sm font-medium transition-colors", block === b ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2 hover:text-fg")}>
-              {t("block", { block: b })} <span className="text-xs font-normal text-fg-3">· {tg(blockGender(b))}</span>
+              {blockName(b)} <span className="text-xs font-normal text-fg-3">· {tg(blockGender(b))}</span>
             </button>
           ))}
         </div>
         <div role="radiogroup" aria-label={t("floor")} className="flex gap-1 rounded-md bg-surface-2 p-0.5">
-          {[1, 2, 3, 4].map((fl) => (
+          {floors.map((fl) => (
             <button key={fl} role="radio" aria-checked={floor === fl} onClick={() => setFloor(fl)} className={cn("h-8 min-w-9 rounded-sm px-2.5 text-sm font-medium transition-colors", floor === fl ? "bg-surface text-fg shadow-sm dark:bg-surface-3" : "text-fg-2 hover:text-fg")}>
               {t("floorShort", { n: fl })}
             </button>
@@ -116,7 +121,7 @@ export function RoomsScreen() {
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
           <Card className="overflow-hidden" data-tour="floorplan">
             <div className="flex items-center justify-between border-b border-line px-5 py-3">
-              <p className="text-sm font-semibold text-fg">{t("floorTitle", { block, floor })}</p>
+              <p className="text-sm font-semibold text-fg">{t("floorTitle", { block: blockName(block), floor })}</p>
               <p className="hidden items-center gap-1.5 text-xs text-fg-3 sm:flex"><Move className="size-3.5" aria-hidden /> {t("dragHint")}</p>
             </div>
             {/* phones: rooms as a two-column grid of cards; the 6-bed room takes a full row */}

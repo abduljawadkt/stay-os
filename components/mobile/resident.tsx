@@ -25,7 +25,7 @@ import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useNowISO } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
 import { haptic } from "@/lib/native";
-import { MEALS, cutoffParts, invoiceState, isPlaceMeal, mealPlace, menuFor, rebates, roomById, sla, addDays as addDaysSel, curfewLabel } from "@/lib/selectors";
+import { MEALS, cutoffParts, cutoffPassed, invoiceState, isPlaceMeal, mealPlace, menuFor, rebates, roomById, sla, addDays as addDaysSel, curfewLabel } from "@/lib/selectors";
 import { MealPlacePicker, usePlaceLabel } from "./meal-place";
 import { todayISO } from "@/lib/clock";
 import { demo } from "@/config/demo";
@@ -59,8 +59,7 @@ export function ResidentHome() {
   const menu = menuFor(today);
   const mine = optOuts.find((o) => o.residentId === r.id && o.date === today);
   const placeLabel = usePlaceLabel();
-  const nowHM = nowIso.slice(11, 16);
-  const locked = (m: Meal) => m === "breakfast" || nowHM >= ({ lunch: "10:00", snacks: "14:00", dinner: "16:00" } as Record<string, string>)[m];
+  const locked = (m: Meal) => cutoffPassed(m, today, nowIso);
   const unreadNotices = notices.filter((n) => n.postedAt.startsWith(today)).length;
 
   return (
@@ -228,12 +227,9 @@ export function ResidentMess() {
   const [day, setDay] = useState(today);
   const menu = menuFor(day);
   const mine = optOuts.find((o) => o.residentId === r.id && o.date === day);
-  const nowHM = useNowISO().slice(11, 16);
-  const cutoffPassed = (m: Meal) => {
-    if (day > addDaysSel(today, 1)) return false;
-    if (day === addDaysSel(today, 1)) return m === "breakfast" && nowHM >= "21:00";
-    return m === "breakfast" || nowHM >= ({ lunch: "10:00", snacks: "14:00", dinner: "16:00" } as Record<string, string>)[m];
-  };
+  const nowIso = useNowISO();
+  // the hostel's own cut-offs (Settings → Hostel setup), on the day or the evening before
+  const mealLocked = (m: Meal) => cutoffPassed(m, day, nowIso);
   const monthSkips = optOuts.filter((o) => o.residentId === r.id && o.date.startsWith(today.slice(0, 7)) && o.date <= today).reduce((a, o) => a + o.meals.length, 0);
   const myRebate = rebates(optOuts, today.slice(0, 7)).find((x) => x.residentId === r.id);
   const sp = messMenu.specials.find((s) => s.date === day);
@@ -262,7 +258,7 @@ export function ResidentMess() {
       <ul className="mx-4 mt-3 space-y-2">
         {MEALS.map((m) => {
           const skipped = !!mine?.meals.includes(m);
-          const passed = cutoffPassed(m);
+          const passed = mealLocked(m);
           return (
             <li key={m} className={cn("rounded-xl border bg-surface p-4 transition-colors", skipped ? "border-line bg-surface-2/60" : "border-line")}>
               <div className="flex items-start gap-3">

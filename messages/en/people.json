@@ -2,7 +2,7 @@
   "rooms": {
     "title": "Rooms & beds", "subtitle": "{occupied} occupied · {vacant} vacant · {reserved} reserved · {maintenance} under maintenance",
     "checkIn": "Check in resident", "blocks": "Blocks", "block": "Block {block}", "floor": "Floor", "floorShort": "Floor {n}", "legend": "Legend", "what": "the floor plan",
-    "floorTitle": "Block {block} · floor {floor}", "dragHint": "Drag a resident onto a vacant bed to move them", "stairs": "Stairs", "corridor": "Corridor", "washrooms": "Common washrooms",
+    "floorTitle": "{block} · floor {floor}", "dragHint": "Drag a resident onto a vacant bed to move them", "stairs": "Stairs", "corridor": "Corridor", "washrooms": "Common washrooms",
     "type": { "single": "Single room", "double": "Double room", "triple": "Triple room", "six": "6-bed dorm" },
     "bed": "bed {n}", "bedAria": "{bed}, {status}{name, select, none {} other {, {name}}}{overdue, select, yes {, rent overdue} other {}}",
     "draggable": "movable resident", "reservedFor": "Reserved for {name} · arriving {date}", "overdue": "rent overdue",

@@ -307,9 +307,11 @@ async function poll() {
   const id = orgId;
   if (!id || polling || (typeof document !== "undefined" && document.visibilityState === "hidden")) return;
   polling = true;
+  const asked = since;
   try {
-    const { data, error } = await neon().rpc("changes_since", { p_org: id, p_since: since });
-    if (error || !data || orgId !== id) return;
+    const { data, error } = await neon().rpc("changes_since", { p_org: id, p_since: asked });
+    // this device loaded the hostel again meanwhile (since moved on): the answer is out of date
+    if (error || !data || orgId !== id || since !== asked) return;
     const ch = data as Changes;
     if (ch.reload) {
       const { useSession, openOrg } = await import("./session");

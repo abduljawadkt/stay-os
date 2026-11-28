@@ -28,6 +28,7 @@
   "meals": { "breakfast": "പ്രഭാതഭക്ഷണം", "lunch": "ഉച്ചഭക്ഷണം", "snacks": "ചായ, പലഹാരം", "dinner": "അത്താഴം" },
   "bedStatus": { "occupied": "താമസമുണ്ട്", "vacant": "ഒഴിവ്", "reserved": "ബുക്ക് ചെയ്തത്", "maintenance": "അറ്റകുറ്റപ്പണി" },
   "blockGender": { "M": "പുരുഷന്മാർ", "F": "സ്ത്രീകൾ" },
+  "blockLabel": { "default": "ബ്ലോക്ക് {block}" },
   "category": { "electrical": "ഇലക്ട്രിക്കൽ", "plumbing": "പ്ലംബിംഗ്", "wifi": "വൈ-ഫൈ", "housekeeping": "ശുചീകരണം", "mess": "മെസ്സ്", "furniture": "ഫർണിച്ചർ", "other": "മറ്റുള്ളവ" },
   "expenseCategory": { "food": "ഭക്ഷണം, പലവ്യഞ്ജനം", "electricity": "വൈദ്യുതി", "water": "വെള്ളം", "salaries": "ശമ്പളം", "maintenance": "അറ്റകുറ്റപ്പണി", "internet": "ഇന്റർനെറ്റ്" },
   "method": { "upi": "UPI", "bank": "ബാങ്ക് ട്രാൻസ്ഫർ", "cash": "കാഷ്" },

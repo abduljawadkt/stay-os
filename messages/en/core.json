@@ -28,6 +28,7 @@
   "meals": { "breakfast": "Breakfast", "lunch": "Lunch", "snacks": "Snacks", "dinner": "Dinner" },
   "bedStatus": { "occupied": "Occupied", "vacant": "Vacant", "reserved": "Reserved", "maintenance": "Maintenance" },
   "blockGender": { "M": "Men", "F": "Women" },
+  "blockLabel": { "default": "Block {block}" },
   "category": { "electrical": "Electrical", "plumbing": "Plumbing", "wifi": "Wi-Fi", "housekeeping": "Housekeeping", "mess": "Mess", "furniture": "Furniture", "other": "Other" },
   "expenseCategory": { "food": "Food & groceries", "electricity": "Electricity", "water": "Water", "salaries": "Salaries", "maintenance": "Maintenance", "internet": "Internet" },
   "method": { "upi": "UPI", "bank": "Bank transfer", "cash": "Cash" },

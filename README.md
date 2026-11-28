@@ -73,6 +73,15 @@ All hostels send from one StayOS WhatsApp number through Meta's WhatsApp Cloud A
   (environment: `NEON_AUTH_URL`, `APP_URL`, `ALLOWED_ORIGINS`, `WA_VERIFY_TOKEN`, `WA_LANG`, and from Meta `WA_TOKEN`,
   `WA_PHONE_ID`, `WA_APP_SECRET`).
 
+## Hostel setup
+
+Owners change what was fixed when the hostel was created in **Settings → Hostel setup**: rent for each room type (every
+room of that type follows; bills already raised don't change), blocks (name, men or women, gate time, adding blocks),
+rooms and beds (add a room, change how many share it, remove an empty one), and the meal cut-off times residents see.
+Each change goes through an owner-only database function (`db/migrations/016`) that refuses anything unsafe, such as
+taking away a bed someone sleeps in, and tells every open device to load the hostel again. The shared live demo shows
+it read-only. `npm run db:check` tests it on a temporary hostel.
+
 ## Database changes
 
 Schema changes after the first setup live in `db/migrations/` and are applied with `npm run db:migrate -- <file>`.

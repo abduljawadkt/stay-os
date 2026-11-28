@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useDemo } from "@/lib/store";
 import { useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { useLocale } from "@/lib/i18n";
-import { MEALS, cutoffParts, headcount, isPlaceMeal, placeSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
+import { MEALS, cutoffParts, cutoffPassed, headcount, isPlaceMeal, placeSplit, menuFor, menuForDay, messEnrolled, rebates, wasteSaved, daysInMonth, prevMonth } from "@/lib/selectors";
 import { todayISO, toIST } from "@/lib/clock";
 import { demo } from "@/config/demo";
 import { hostel, messMenu, staff, type Meal, type MenuItem } from "@/data";
@@ -73,8 +73,8 @@ export function MessScreen() {
   const rb = useMemo(() => rebates(optOuts, month), [optOuts, month]);
   const enrolled = messEnrolled(residents, today).length;
   const resById = useMemo(() => Object.fromEntries(residents.map((r) => [r.id, r])), [residents]);
-  const nowHM = toIST(now).slice(11, 16);
-  const cutoffPassed = (m: Meal) => m === "breakfast" || nowHM >= ({ lunch: "10:00", snacks: "14:00", dinner: "16:00" } as Record<string, string>)[m];
+  const nowIso = toIST(now);
+  const mealLocked = (m: Meal) => cutoffPassed(m, today, nowIso);
   const decRaised = invoices.some((i) => i.month === demo.nextMonth);
 
   const label = (item: MenuItem) => (locale === "ml" ? item.ml : item.en);
@@ -93,7 +93,7 @@ export function MessScreen() {
               <CardHeader title={t("headcount.title", { date: f.weekday(today) })} meta={t("headcount.meta")} />
               <div className="grid grid-cols-2 gap-px overflow-hidden border-t border-line bg-line md:grid-cols-4">
                 {hc.map((h) => {
-                  const locked = cutoffPassed(h.meal);
+                  const locked = mealLocked(h.meal);
                   return (
                     <div key={h.meal} className="bg-surface p-4">
                       <div className="flex items-center justify-between">

@@ -321,6 +321,19 @@ export function openOrg(orgId: string, opts: { force?: boolean } = {}): Promise<
   return loadingOrg;
 }
 
+/** Load the open hostel again in place, without the loading screen (after the owner changes its setup). */
+export async function reloadOrg() {
+  const { orgId, membership } = get();
+  if (!orgId || !membership) return;
+  stopSync();
+  try {
+    const org = await loadOrg(orgId, membership);
+    if (get().orgId === orgId) set({ org });
+  } finally {
+    if (get().orgId === orgId) startSync(orgId);
+  }
+}
+
 /** Lock the open hostel when its trial or approved period runs out while the app is open. */
 export function lockIfExpired() {
   const { org, orgStatus } = get();

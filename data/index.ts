@@ -12,7 +12,7 @@ const EMPTY_MESS: Mess = {
   plateCost: { breakfast: 0, lunch: 0, snacks: 0, dinner: 0 },
   rebatePerDay: 0,
   rebateMinDays: 3,
-  cutoffs: { breakfast: "21:00", lunch: "09:00", snacks: "13:00", dinner: "15:00" },
+  cutoffs: { breakfast: "21:00 previous day", lunch: "10:00", snacks: "14:00", dinner: "16:00" },
   servingTimes: { breakfast: "07:30–09:00", lunch: "12:30–14:00", snacks: "16:30–17:30", dinner: "19:30–21:00" },
   specials: [],
   optOuts: [],

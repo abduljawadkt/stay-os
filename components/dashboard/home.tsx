@@ -18,7 +18,7 @@ import { ChartTooltip, LegendItem, axisProps } from "./chart-bits";
 import { useDemo } from "@/lib/store";
 import { useSession } from "@/lib/session";
 import { useUI } from "@/components/shell/ui-store";
-import { useFormat, useNow, useScreenState } from "@/lib/hooks";
+import { useBlockName, useFormat, useNow, useScreenState } from "@/lib/hooks";
 import { aging, collectionTrend, headcount, monthSummary, occupancy, occupancyByBlock, occupancyTrend, overdueInvoices, pnl, presence, prevMonth, sla, blockGender } from "@/lib/selectors";
 import { hostel, staff } from "@/data";
 import { demo } from "@/config/demo";
@@ -349,6 +349,7 @@ function BlockOccupancy({ loading }: { loading: boolean }) {
   const t = useTranslations("home.blocks");
   const tb = useTranslations("bedStatus");
   const tg = useTranslations("blockGender");
+  const blockName = useBlockName();
   const beds = useDemo((s) => s.beds);
   const rows = useMemo(() => occupancyByBlock(beds), [beds]);
   const seg = [
@@ -364,7 +365,7 @@ function BlockOccupancy({ loading }: { loading: boolean }) {
         {rows.map((r) => (
           <div key={r.block}>
             <div className="mb-1.5 flex items-baseline justify-between text-sm">
-              <span className="font-medium text-fg">{t("block", { block: r.block })} <span className="text-xs font-normal text-fg-3">· {tg(blockGender(r.block))}</span></span>
+              <span className="font-medium text-fg">{blockName(r.block)} <span className="text-xs font-normal text-fg-3">· {tg(blockGender(r.block))}</span></span>
               <span className="text-fg-2 tnum">{loading ? "—" : `${Math.round(r.rate * 100)}% · ${r.occupied}/${r.total}`}</span>
             </div>
             {loading ? <Sk className="h-2.5" /> : (

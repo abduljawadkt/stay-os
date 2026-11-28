@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDemo } from "@/lib/store";
 import { useUI } from "@/components/shell/ui-store";
-import { useFormat, useScreenState } from "@/lib/hooks";
+import { useBlockName, useFormat, useScreenState } from "@/lib/hooks";
 import { invoiceState, blockIds } from "@/lib/selectors";
 import { todayISO } from "@/lib/clock";
 import { downloadCsv } from "@/lib/export";
@@ -36,6 +36,7 @@ export function ResidentsScreen() {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>((params.get("filter") as Filter) || "all");
   const [block, setBlock] = useState("all");
+  const blockName = useBlockName();
   const [page, setPage] = useState(0);
   const today = todayISO();
 
@@ -72,7 +73,7 @@ export function ResidentsScreen() {
       .filter((r) => filter !== "kyc" || r.kyc.status === "pending")
       .filter((r) => filter !== "police" || r.police.status === "pending")
       .filter((r) => filter !== "notice" || r.status === "notice")
-      .filter((r) => block === "all" || r.bedId.startsWith(block))
+      .filter((r) => block === "all" || r.bedId.split("-")[0] === block)
       .filter((r) => !s || r.name.toLowerCase().includes(s) || r.bedId.toLowerCase().includes(s) || r.phone.replace(/\s/g, "").includes(s.replace(/\s/g, "")) || r.institution.toLowerCase().includes(s))
       .sort((a, b) => (filter === "checked_out" ? (b.checkOutDate ?? "").localeCompare(a.checkOutDate ?? "") : a.bedId.localeCompare(b.bedId, undefined, { numeric: true })));
   }, [residents, q, filter, block, overdueIds]);
@@ -116,10 +117,10 @@ export function ResidentsScreen() {
             ))}
           </div>
           <Select value={block} onValueChange={setBlock}>
-            <SelectTrigger className="w-36 shrink-0 lg:ml-auto" aria-label={t("block")}><SelectValue>{block === "all" ? t("allBlocks") : t("blockN", { block })}</SelectValue></SelectTrigger>
+            <SelectTrigger className="w-36 shrink-0 lg:ml-auto" aria-label={t("block")}><SelectValue>{block === "all" ? t("allBlocks") : blockName(block)}</SelectValue></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allBlocks")}</SelectItem>
-              {blockIds().map((b) => <SelectItem key={b} value={b}>{t("blockN", { block: b })}</SelectItem>)}
+              {blockIds().map((b) => <SelectItem key={b} value={b}>{blockName(b)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

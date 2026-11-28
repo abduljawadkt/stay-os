@@ -11,6 +11,7 @@ import {
 import { Card, CardHeader, PageHeader } from "@/components/common/card";
 import { Avatar } from "@/components/common/avatar";
 import { OwnerOnly, useOwnerView } from "@/components/common/owner-only";
+import { HostelSetup } from "@/components/settings/hostel-setup";
 import { Field, FormError } from "@/components/auth/auth-shell";
 import { connectRazorpay, disconnectRazorpay, getConnection, paymentsAvailable, type Connection } from "@/lib/payments";
 import { recentOutbox, setWhatsApp, whatsappSettings, whatsappStatus, type OutboxRow } from "@/lib/whatsapp";
@@ -31,7 +32,7 @@ import { brand } from "@/config/brand";
 import { hostel } from "@/data";
 import { cn } from "@/lib/utils";
 
-type Tab = "hostel" | "team" | "payments" | "whatsapp" | "billing" | "data";
+type Tab = "hostel" | "setup" | "team" | "payments" | "whatsapp" | "billing" | "data";
 
 export function SettingsScreen() {
   const ownerView = useOwnerView();
@@ -48,11 +49,12 @@ function Settings() {
       <PageHeader title={t("title")} description={t("subtitle", { hostel: hostel.name })} />
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList className="no-scrollbar mb-5 max-w-full justify-start overflow-x-auto">
-          {(["hostel", "team", "payments", "whatsapp", "billing", "data"] as const).map((k) => (
+          {(["hostel", "setup", "team", "payments", "whatsapp", "billing", "data"] as const).map((k) => (
             <TabsTrigger key={k} value={k}>{t(`tabs.${k}`)}</TabsTrigger>
           ))}
         </TabsList>
         <TabsContent value="hostel"><HostelProfile /></TabsContent>
+        <TabsContent value="setup"><HostelSetup /></TabsContent>
         <TabsContent value="team"><Team /></TabsContent>
         <TabsContent value="payments"><Payments /></TabsContent>
         <TabsContent value="whatsapp"><WhatsAppTab /></TabsContent>
