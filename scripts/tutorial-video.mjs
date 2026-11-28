@@ -266,7 +266,9 @@ const VIDEOS = {
       await signIn(p, "റഷീദ്", /\/dashboard\//);
       await p.evaluate((org) => localStorage.setItem("stayos-org", org), REAL_ORG);
       await p.goto(BASE + "/dashboard/rooms/", { waitUntil: "domcontentloaded" });
-      await p.getByText("Green Valley Hostel").first().waitFor({ timeout: 30000 });
+      // the hostel's name is in the sidebar, which a phone hides: wait for it to load, then for the check-in button
+      await p.getByText("Green Valley Hostel").first().waitFor({ state: "attached", timeout: 30000 });
+      await p.locator('[data-tour="checkin-button"]').waitFor({ timeout: 30000 });
       state.storage = await p.context().storageState();
     },
     cleanup: async () => { await realHostel("delete"); },
